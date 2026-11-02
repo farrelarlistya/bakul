@@ -128,15 +128,18 @@ alur pembeli disetujui.
 Urutan dari atas ke bawah (mobile):
 
 1. Header: merek `bakul`, lonceng, keranjang, kolom cari.
-2. Hero mint: judul "Belanja dari pedagang sekitar", subjudul "Uang aman sampai
-   barang tiba", tombol "Mulai belanja", ilustrasi bakul.
+2. Hero mint: judul "Dukung UMKM sekitarmu", subjudul "Uang aman sampai barang tiba",
+   tombol "Mulai belanja", foto produk UMKM (tas anyaman).
 3. Baris kepercayaan: "Uang ditahan aman" dan "Bantuan komplain".
 4. Kategori: kartu krem, gulir horizontal.
-5. Sedang laris: grid 2 kolom, harga tanpa coretan, tombol "Tambah".
+5. Sedang laris: grid 2 kolom, foto asli, harga tanpa coretan, kota + rating,
+   tombol "Tambah".
 6. Navigasi bawah: Beranda, Pesanan, Keranjang, Akun.
 
-Desktop menambahkan: menu atas, empat kategori sejajar, empat produk sejajar, dan
-blok ajakan "Punya dagangan? Buka toko gratis".
+Desktop menambahkan: menu atas, empat kategori sejajar, empat produk sejajar
+(kota, rating, jumlah terjual), blok ajakan "Punya dagangan? Buka toko gratis",
+dan footer hitam berisi tautan, metode pembayaran simulasi, serta keterangan
+"tidak ada uang nyata yang berpindah".
 
 ---
 
@@ -156,10 +159,21 @@ blok ajakan "Punya dagangan? Buka toko gratis".
 
 ## 9. Catatan aset
 
-Pembuatan foto otomatis gagal karena saldo image generator tidak mencukupi. Untuk D1
-dipakai **ilustrasi vektor** (bakul, jar, kain, tas) agar desain tetap utuh, lokal,
-dan bebas lisensi. Foto asli dapat ditukar nanti tanpa mengubah tata letak: setiap
-area gambar sudah disiapkan sebagai frame berukuran tetap.
+Foto yang dipakai adalah **foto asli dari Wikimedia Commons**, bukan ilustrasi.
+Tujuannya agar mockup terasa seperti etalase sungguhan: penjual memang memakai foto
+dengan latar dan kualitas yang berbeda-beda.
+
+| Kebutuhan | Berkas | Lisensi |
+| :--- | :--- | :--- |
+| Hero | `hero-tas-anyaman.jpg` | CC0 |
+| Nastar | `produk-nastar.jpg` | CC0 |
+| Keripik | `produk-keripik.jpg` | CC BY-SA 4.0 |
+| Kopi | `produk-kopi.jpg` | CC BY 4.0 |
+| Batik | `produk-batik.jpg` | CC BY-SA 3.0 nl |
+
+Atribusi lengkap ada di `docs/desain/gambar/CREDITS.md`. Foto diperkecil (maksimal
+1200 px) agar berkas desain tidak terlalu besar, lalu dipotong di dalam frame.
+Pada produksi, foto diganti dengan unggahan penjual.
 
 ---
 
@@ -179,15 +193,14 @@ area gambar sudah disiapkan sebagai frame berukuran tetap.
 | :--- | :--- |
 | `docs/desain/ekspor/f-fondasi.png` | 1133×1640 |
 | `docs/desain/ekspor/b1-beranda-mobile.png` | 780×1688 (2×) |
-| `docs/desain/ekspor/b1-beranda-desktop.png` | 1440×1320 |
+| `docs/desain/ekspor/b1-beranda-desktop.png` | 1440×1508 |
 
 **Yang perlu diputuskan saat review**
 
-1. Palet mint–teal–krem: sudah terasa seperti Bakul, atau terlalu "toko sayur"?
-2. Nada judul hero "Dari pedagang sekitarmu" — cukup jelas untuk Ibu Sri?
-3. Kerapatan kartu produk: informasi (nama, harga, rating) sudah cukup?
-4. Ilustrasi vektor: dipertahankan, atau tunggu foto asli?
-5. Desktop: perlu footer seperti referensi, atau cukup sampai ajakan buka toko?
+1. Foto asli: apakah campuran latar (piring, mangkuk, kain) sudah terasa wajar?
+2. Footer: kolom dan metode pembayaran sudah sesuai, atau perlu alamat/kontak?
+3. Nada judul "Dukung UMKM lokal, sampai ke rumahmu" — sudah tepat?
+4. Kartu produk: kota + rating + jumlah terjual sudah cukup informatif?
 
 **Keterbatasan D1 yang disadari**
 
@@ -196,3 +209,7 @@ area gambar sudah disiapkan sebagai frame berukuran tetap.
 - Warna belum di-bind ke variabel `Core` di setiap lapisan. Variabel sudah ada dan
   siap diekspor ke Tailwind; binding menyeluruh dilakukan saat implementasi agar
   tidak ada nilai lepas.
+- Foto berasal dari Wikimedia Commons (lihat `CREDITS.md`) dan harus diganti dengan
+  foto penjual saat produksi.
+- Berkas `bakul.figcraft` berukuran ± 7,7 MB karena menyimpan riwayat gambar.
+  Jika tumbuh melebihi 50 MB, pindahkan ke Git LFS.
