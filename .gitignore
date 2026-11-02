@@ -1,0 +1,49 @@
+# Dependensi
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+.next/
+out/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Lingkungan & rahasia
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Data lokal
+storage/
+*.sqlite
+*.sqlite-journal
+
+# Log & cache
+*.log
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.cache/
+.turbo/
+
+# Pengujian
+playwright-report/
+test-results/
+blob-report/
+
+# Editor & OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# FigCraft: simpan file desain, abaikan berkas sementara
+*.figcraft~
+.figcraft-cache/
