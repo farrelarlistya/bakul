@@ -1,0 +1,6 @@
+{
+  "name": "@bakul/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Konfigurasi TypeScript dan gaya kode bersama."
+}

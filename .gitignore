@@ -11,6 +11,9 @@ build/
 coverage/
 *.tsbuildinfo
 
+# Prisma client (dibuat ulang oleh npm install)
+apps/api/src/generated/
+
 # Lingkungan & rahasia
 .env
 .env.*

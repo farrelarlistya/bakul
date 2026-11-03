@@ -1,0 +1,32 @@
+{
+  "name": "bakul",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pasar daring untuk pedagang kecil Indonesia. Logika transaksi asli, uang simulasi.",
+  "packageManager": "npm@11.11.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run build --workspace @bakul/shared && concurrently --kill-others-on-fail --names api,web --prefix-colors blue,green \"npm run dev --workspace @bakul/api\" \"npm run dev --workspace @bakul/web\"",
+    "build": "npm run build --workspace @bakul/shared && npm run build --workspace @bakul/api && npm run build --workspace @bakul/web",
+    "test": "npm run test --workspaces --if-present",
+    "db:generate": "npm run db:generate --workspace @bakul/api",
+    "db:migrate": "npm run db:migrate --workspace @bakul/api",
+    "db:deploy": "npm run db:deploy --workspace @bakul/api",
+    "db:seed": "npm run db:seed --workspace @bakul/api",
+    "db:studio": "npm run db:studio --workspace @bakul/api",
+    "db:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-start.ps1",
+    "db:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-stop.ps1",
+    "postinstall": "npm run db:generate"
+  },
+  "devDependencies": {
+    "concurrently": "10.0.6",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3"
+  }
+}
