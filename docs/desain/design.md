@@ -335,4 +335,27 @@ Aturan kontras tetap berlaku di kode: teks putih hanya di atas `teal-aksi`
 (`#0F6E66`), bukan di atas `teal` (`#198B81`). Teks minimum 16 px dan target sentuh
 minimum 44 px.
 
+---
+
+## 15. Implementasi M1
+
+Layar onboarding S1–S4 sudah diimplementasikan di web:
+
+| Layar desain | Route | Catatan implementasi |
+| :--- | :--- | :--- |
+| S1 Nomor HP | `/masuk`, `/jualan` | Input nomor HP, tanpa email |
+| S2 Kode 6 angka | `/masuk`, `/jualan` | Enam kotak, kode demo `123456` tampil |
+| S3 Nama toko | `/jualan` | Nama + kota + cerita toko |
+| S4 Produk pertama | `/jualan` | Foto, 3 tips, nama, harga, berat |
+
+Tambahan di luar S1–S4:
+
+- `/akun` — profil, alamat, dan kartu toko.
+- `/inbox` — daftar pesan dan kode masuk.
+- Header bersama dengan tautan Buka toko, Inbox, dan nama pengguna.
+
+Perbedaan kecil dari mockup: pilihan kota memakai lima wilayah seed; foto produk
+disimpan lokal (bukan kamera langsung) dan bersifat opsional. Semua tetap memakai
+token warna, radius, dan aturan teks yang sama.
+
 

@@ -4,7 +4,7 @@
 | :--- | :--- |
 | Versi dokumen | 1.0 |
 | Tanggal | 3 November 2026 |
-| Status | Sprint 0–3 selesai · Sprint 4 berikutnya |
+| Status | Sprint 0–4 selesai · Sprint 5 berikutnya |
 | Sumber kebenaran produk | `docs/prd/bakul-v0.2.md` |
 | Sumber kebenaran visual | `docs/desain/design.md` + `docs/desain/referensi/referensiStyleDesign.jpg` |
 | Berkas lokal (tidak di Git) | `AGENTS.md`, `bakul.figcraft` |
@@ -61,8 +61,8 @@ Aturan kerja:
 | 1 | Desain alur pembeli inti (D2) | **Selesai** | `desain-d2` |
 | 2 | Desain pesanan, onboarding penjual, inbox (D3) | **Selesai** | `desain-v1` |
 | 3 | Fondasi teknis / M0 | **Selesai** | `m0-selesai` |
-| 4 | Akun & onboarding / M1 | Berikutnya | `m1-selesai` |
-| 5 | Katalog & toko / M2 | Belum | `m2-selesai` |
+| 4 | Akun & onboarding / M1 | **Selesai** | `m1-selesai` |
+| 5 | Katalog & toko / M2 | Berikutnya | `m2-selesai` |
 | 6 | Keranjang & checkout / M3 | Belum | `m3-selesai` |
 | 7 | Pembayaran, escrow, ledger / M4 | Belum | `m4-selesai` |
 | 8 | Pemenuhan & pengiriman / M5 | Belum | `m5-selesai` |
@@ -236,7 +236,7 @@ Tailwind 4.x, TypeScript **5.9.x**. Jangan Prisma 8 RC atau TypeScript 7.
 
 ## Sprint 4 — Akun & onboarding (M1)
 
-**Status:** belum · **Estimasi:** ± 1,5 minggu · **Tag:** `m1-selesai`
+**Status:** selesai · **Tag:** `m1-selesai`
 
 - Registrasi/login nomor HP + OTP mock (kode tampil di Inbox pada `DEMO_MODE`).
 - Refresh token di cookie `httpOnly`; access token di memori.
@@ -244,6 +244,34 @@ Tailwind 4.x, TypeScript **5.9.x**. Jangan Prisma 8 RC atau TypeScript 7.
 - Buka toko 3 langkah, status langsung `ACTIVE` (tanpa KTP).
 - Unggah produk pertama + panduan foto.
 - Uji: T-13 (onboarding < 5 menit tanpa email), T-12 (akses lintas peran ditolak).
+
+**Hasil**
+
+- Tabel baru: `otp_codes`, `sessions`, `notifications`, `product_images`.
+- OTP 6 angka, masa berlaku 10 menit, 3 permintaan/10 menit, 5 percobaan/kode.
+  Pada `DEMO_MODE`, kode selalu `123456` dan tampil di UI serta Inbox.
+- Sesi: access token 15 menit hanya di memori; refresh token 7 hari di cookie
+  `httpOnly`, disimpan sebagai hash, dan dirotasi setiap refresh. Peran dibaca ulang
+  dari database pada setiap request terlindungi.
+- Halaman: `/masuk`, `/jualan`, `/akun`, `/inbox`.
+- Endpoint: auth lengkap, `GET/PATCH /me`, CRUD `/me/addresses`,
+  `POST /onboarding/shop`, `POST /onboarding/first-product`, `GET /seller/shop`,
+  `GET /admin/ping`, notifikasi, dan penyajian foto lokal.
+- Unggah foto produk: JPG/PNG/WebP, maksimal 2 MB, disimpan di `storage/products`
+  (gitignored), disajikan lewat `/api/v1/files/products/:filename`.
+- Bukti: `docs/bukti/m1-auth.txt` — T-12 dan T-13 lulus; onboarding 0 detik
+  (jauh di bawah batas 5 menit) tanpa email.
+
+**Definisi selesai**
+
+- [x] Registrasi/login nomor HP + OTP mock berjalan tanpa email.
+- [x] Access token di memori; refresh token `httpOnly` dan rotasi sesi.
+- [x] Profil dan banyak alamat dengan kode wilayah.
+- [x] Buka toko 3 langkah, status langsung `ACTIVE`.
+- [x] Produk pertama + foto tersimpan dan bisa ditampilkan.
+- [x] T-13 dan T-12 lulus.
+- [x] `npm run build` dan `npm test` lulus.
+- [x] Papan status diperbarui, commit, push, tag `m1-selesai`.
 
 ---
 
@@ -403,3 +431,4 @@ git push
 | 3 Nov 2026 | Sprint 2 selesai (8 frame); desain tahap pertama selesai; tag `desain-v1` |
 | 3 Nov 2026 | Sprint 3 selesai: PostgreSQL 17.11, monorepo, health API, Prisma + seed, token Tailwind; tag `m0-selesai` |
 | 3 Nov 2026 | Perbaikan pasca-M0: hidrasi dev di `127.0.0.1`, timeout health check, ikon aplikasi |
+| 3 Nov 2026 | Sprint 4 selesai: OTP, sesi aman, profil/alamat, buka toko, produk pertama + foto; tag `m1-selesai` |
