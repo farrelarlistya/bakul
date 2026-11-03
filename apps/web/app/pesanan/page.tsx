@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatRupiah, type OrderInvoiceView } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
-import { CatalogHeader } from "@/components/catalog-header";
+import { AppHeader } from "@/components/app-header";
 import { OrderStatusBadge } from "@/components/order-status";
 import { SiteFooter } from "@/components/site-footer";
 import { cardClass, errorBoxClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui";
@@ -76,7 +76,7 @@ export default function PesananPage() {
 
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
-      <CatalogHeader />
+      <AppHeader />
 
       <div className="mx-auto max-w-5xl px-4 py-6">
         <p className="text-base font-semibold text-teal-aksi">Belanjaanku</p>
@@ -101,6 +101,7 @@ export default function PesananPage() {
                 <button
                   key={item.key}
                   type="button"
+                  aria-pressed={filter === item.key}
                   onClick={() => setFilter(item.key)}
                   className={`inline-flex min-h-11 shrink-0 items-center rounded-pil px-4 text-base font-semibold ${
                     filter === item.key

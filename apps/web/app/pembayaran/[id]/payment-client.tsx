@@ -9,7 +9,7 @@ import {
   type PaymentView,
 } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
-import { CatalogHeader } from "@/components/catalog-header";
+import { AppHeader } from "@/components/app-header";
 import { OrderStatusBadge } from "@/components/order-status";
 import { SiteFooter } from "@/components/site-footer";
 import {
@@ -119,7 +119,7 @@ export function PaymentClient({ paymentId }: { paymentId: string }) {
 
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
-      <CatalogHeader />
+      <AppHeader />
 
       <div className="mx-auto max-w-3xl px-4 py-6">
         <p className="text-base font-semibold text-teal-aksi">Pembayaran</p>
@@ -216,7 +216,7 @@ export function PaymentClient({ paymentId }: { paymentId: string }) {
               <ol className="mt-5 space-y-2">
                 {instruction.steps.map((step, index) => (
                   <li key={step} className="flex gap-3 text-base text-tinta">
-                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-pil bg-mint text-teal-aksi">
+                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-pil bg-mint text-teal-tua">
                       {index + 1}
                     </span>
                     {step}

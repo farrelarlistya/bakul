@@ -9,7 +9,7 @@ import {
   type AdminProductRow,
   type AdminShopRow,
 } from "@bakul/shared";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import {
   cardClass,
   dangerButtonClass,
@@ -93,7 +93,7 @@ export default function AdminShopsPage() {
 
   return (
     <main className="min-h-screen bg-krem pb-10">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -149,7 +149,7 @@ export default function AdminShopsPage() {
                   <span
                     className={`rounded-pil px-3 py-1 text-base font-semibold ${
                       shop.status === "ACTIVE"
-                        ? "bg-mint text-teal-aksi"
+                        ? "bg-mint text-teal-tua"
                         : "bg-[#fbeae8] text-bahaya"
                     }`}
                   >

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { COURIERS, SHOP_STATUS_LABEL } from "@bakul/shared";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import {
   cardClass,
   errorBoxClass,
@@ -131,7 +131,7 @@ export default function SellerShopPage() {
 
   return (
     <main className="min-h-screen bg-krem pb-10">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-3xl px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -176,7 +176,7 @@ export default function SellerShopPage() {
                     bakul/{shop.slug} · {shop.cityName}
                   </p>
                 </div>
-                <span className="rounded-pil bg-mint px-3 py-1 text-base font-semibold text-teal-aksi">
+                <span className="rounded-pil bg-mint px-3 py-1 text-base font-semibold text-teal-tua">
                   {SHOP_STATUS_LABEL[shop.status] ?? shop.status}
                 </span>
               </div>
@@ -263,7 +263,7 @@ export default function SellerShopPage() {
                   >
                     <input
                       type="checkbox"
-                      className="h-5 w-5"
+                      className="h-6 w-6 shrink-0"
                       checked={couriers.includes(courier.code)}
                       onChange={() => toggleCourier(courier.code)}
                     />

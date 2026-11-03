@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { TrackingEvent } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
-import { CatalogHeader } from "@/components/catalog-header";
+import { AppHeader } from "@/components/app-header";
 import { SiteFooter } from "@/components/site-footer";
 import { cardClass, errorBoxClass, primaryButtonClass } from "@/components/ui";
 
@@ -67,7 +67,7 @@ export function TrackingClient({ awb }: { awb: string }) {
 
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
-      <CatalogHeader />
+      <AppHeader />
 
       <div className="mx-auto max-w-2xl px-4 py-6">
         <Link href="/pesanan" className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi">
@@ -95,7 +95,7 @@ export function TrackingClient({ awb }: { awb: string }) {
                     {tracking.shopName} → {tracking.destinationCity}
                   </p>
                 </div>
-                <span className="rounded-pil bg-mint px-3 py-1 text-base font-semibold text-teal-aksi">
+                <span className="rounded-pil bg-mint px-3 py-1 text-base font-semibold text-teal-tua">
                   {tracking.status === "DELIVERED" ? "Sudah sampai" : "Dalam perjalanan"}
                 </span>
               </div>

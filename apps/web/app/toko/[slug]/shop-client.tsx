@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { slugify, type ProductCard as ProductCardData, type ShopDetail } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
-import { CatalogHeader } from "@/components/catalog-header";
+import { AppHeader } from "@/components/app-header";
 import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
 import { errorBoxClass } from "@/components/ui";
@@ -55,7 +55,7 @@ export function ShopClient({ slug }: { slug: string }) {
 
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
-      <CatalogHeader />
+      <AppHeader />
 
       <div className="mx-auto max-w-5xl px-4 py-6">
         <Link

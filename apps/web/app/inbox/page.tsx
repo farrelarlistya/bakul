@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { NotificationItem } from "@bakul/shared";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
+import { BottomNav } from "@/components/bottom-nav";
 import { cardClass, errorBoxClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui";
+import { refreshBadges } from "@/lib/badges";
 import { useAuth } from "@/lib/auth";
 
 const TEMPLATE_LABEL: Record<string, string> = {
@@ -73,14 +75,15 @@ export default function InboxPage() {
       setItems((current) =>
         current.map((row) => (row.id === item.id ? { ...row, isRead: true } : row)),
       );
+      refreshBadges();
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Pesan belum bisa ditandai.");
     }
   }
 
   return (
-    <main className="min-h-screen bg-krem">
-      <SiteHeader />
+    <main className="min-h-screen bg-krem pb-24 md:pb-0">
+      <AppHeader />
       <div className="mx-auto max-w-2xl px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -153,7 +156,10 @@ export default function InboxPage() {
                     <div className="text-right">
                       <p className="text-base text-tinta-lembut">{waktu(item.createdAt)}</p>
                       {!item.isRead ? (
-                        <span className="mt-1 inline-block h-2 w-2 rounded-pil bg-teal-aksi" aria-label="Belum dibaca" />
+                        <>
+                          <span className="mt-1 inline-block h-2 w-2 rounded-pil bg-teal-aksi" aria-hidden="true" />
+                          <span className="sr-only">Belum dibaca</span>
+                        </>
                       ) : null}
                     </div>
                   </div>
@@ -181,6 +187,7 @@ export default function InboxPage() {
           </div>
         ) : null}
       </div>
+      <BottomNav />
     </main>
   );
 }

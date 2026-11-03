@@ -34,7 +34,7 @@ export function HomeProductCard({ product }: { product: ProductCardData }) {
             Stok habis
           </span>
         ) : stokTipis ? (
-          <span className="absolute left-2 top-2 inline-flex min-h-7 items-center rounded-tombol bg-krem px-2 text-sm font-semibold text-perhatian">
+          <span className="absolute left-2 top-2 inline-flex min-h-8 items-center rounded-tombol bg-krem px-2 text-base font-semibold text-perhatian-tua">
             Tersisa {product.stock}
           </span>
         ) : null}

@@ -10,7 +10,7 @@ import {
   type OrderInvoiceView,
 } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
-import { CatalogHeader } from "@/components/catalog-header";
+import { AppHeader } from "@/components/app-header";
 import { OrderStatusBadge } from "@/components/order-status";
 import { SiteFooter } from "@/components/site-footer";
 import {
@@ -171,7 +171,7 @@ export function ComplaintClient({ invoiceId }: { invoiceId: string }) {
 
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
-      <CatalogHeader />
+      <AppHeader />
 
       <div className="mx-auto max-w-3xl px-4 py-6">
         <Link href={`/pesanan/${invoiceId}`} className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi">
@@ -234,7 +234,7 @@ export function ComplaintClient({ invoiceId }: { invoiceId: string }) {
                         value={item}
                         checked={solution === item}
                         onChange={() => setSolution(item)}
-                        className="h-5 w-5"
+                        className="h-6 w-6 shrink-0"
                       />
                       <span className="text-base font-semibold text-tinta">
                         {DISPUTE_SOLUTION_LABEL[item]}

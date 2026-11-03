@@ -14,8 +14,9 @@ import {
   type PaymentMethodValue,
 } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
-import { CatalogHeader } from "@/components/catalog-header";
+import { AppHeader } from "@/components/app-header";
 import { SiteFooter } from "@/components/site-footer";
+import { refreshBadges } from "@/lib/badges";
 import {
   cardClass,
   errorBoxClass,
@@ -157,6 +158,7 @@ export default function BayarPage() {
           notes: notes.trim() || undefined,
         }),
       });
+      refreshBadges();
       router.push(`/pembayaran/${result.paymentId}`);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Tagihan belum bisa dibuat.");
@@ -173,7 +175,7 @@ export default function BayarPage() {
 
   return (
     <main className="min-h-screen bg-putih pb-24 md:pb-0">
-      <CatalogHeader />
+      <AppHeader />
 
       <div className="mx-auto max-w-5xl px-4 py-6">
         <Link href="/keranjang" className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi">
@@ -231,7 +233,7 @@ export default function BayarPage() {
                           <input
                             type="radio"
                             name="address"
-                            className="mt-1 h-5 w-5"
+                            className="mt-1 h-6 w-6 shrink-0"
                             checked={addressId === address.id}
                             onChange={() => setAddressId(address.id)}
                           />
@@ -351,7 +353,7 @@ export default function BayarPage() {
                             value={item.value}
                             checked={method === item.value}
                             onChange={() => setMethod(item.value)}
-                            className="h-5 w-5"
+                            className="h-6 w-6 shrink-0"
                           />
                           <span className="text-base font-semibold text-tinta">{item.label}</span>
                         </label>

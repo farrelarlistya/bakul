@@ -7,7 +7,7 @@ import {
   formatRupiah,
   type WithdrawalView,
 } from "@bakul/shared";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import {
   cardClass,
   dangerButtonClass,
@@ -83,7 +83,7 @@ export default function AdminWithdrawalsPage() {
 
   return (
     <main className="min-h-screen bg-krem pb-10">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-4xl px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>

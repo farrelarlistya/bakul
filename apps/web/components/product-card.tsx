@@ -5,7 +5,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <Link
       href={`/p/${product.slug}`}
-      className="group block overflow-hidden rounded-kartu border border-garis bg-abu-kartu"
+      className="group block overflow-hidden rounded-kartu border border-garis bg-abu-kartu transition-colors hover:border-teal-aksi focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-aksi focus-visible:ring-offset-2"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-mint-muda">
         {product.imageUrl ? (
@@ -31,7 +31,10 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         </p>
         <p className="mt-1 text-lg font-bold text-tinta">{formatRupiah(product.price)}</p>
         <p className="mt-1 text-base text-tinta-lembut">
-          {product.city} · ★ {product.rating.toFixed(1).replace(".", ",")}
+          {product.city} ·{" "}
+          <span aria-hidden="true">★</span>
+          <span className="sr-only">Rating </span>
+          {product.rating.toFixed(1).replace(".", ",")}
         </p>
         <p className="mt-1 line-clamp-1 text-base text-teal-aksi">{product.shopName}</p>
       </div>

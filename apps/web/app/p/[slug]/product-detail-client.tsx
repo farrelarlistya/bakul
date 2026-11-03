@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatRupiah, type ProductDetail } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
-import { CatalogHeader } from "@/components/catalog-header";
+import { AppHeader } from "@/components/app-header";
 import { SiteFooter } from "@/components/site-footer";
 import { errorBoxClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui";
+import { refreshBadges } from "@/lib/badges";
 import { useAuth } from "@/lib/auth";
 
 function tanggal(value: string): string {
@@ -85,6 +86,7 @@ export function ProductDetailClient({ slug }: { slug: string }) {
         body: JSON.stringify({ variantId: variant.id, quantity }),
       });
       setCartMessage(`${quantity} ${detail?.name ?? "barang"} masuk keranjang.`);
+      refreshBadges();
     } catch (caught: unknown) {
       setCartMessage(caught instanceof Error ? caught.message : "Belum bisa masuk keranjang.");
     } finally {
@@ -94,7 +96,7 @@ export function ProductDetailClient({ slug }: { slug: string }) {
 
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
-      <CatalogHeader />
+      <AppHeader />
 
       <div className="mx-auto max-w-5xl px-4 py-6">
         <Link
@@ -139,6 +141,7 @@ export function ProductDetailClient({ slug }: { slug: string }) {
                       key={url}
                       type="button"
                       onClick={() => setActiveImage(index)}
+                      aria-pressed={index === activeImage}
                       className={`h-20 w-20 shrink-0 overflow-hidden rounded-tombol border-2 ${
                         index === activeImage ? "border-teal-aksi" : "border-garis"
                       }`}
@@ -188,6 +191,7 @@ export function ProductDetailClient({ slug }: { slug: string }) {
                           setSelectedVariantId(item.id);
                           setQuantity(1);
                         }}
+                        aria-pressed={item.id === variant?.id}
                         className={`min-h-11 rounded-tombol border px-4 text-base font-semibold ${
                           item.id === variant?.id
                             ? "border-teal-aksi bg-mint-muda text-teal-aksi"
@@ -206,8 +210,9 @@ export function ProductDetailClient({ slug }: { slug: string }) {
                 <div className="mt-2 flex items-center gap-3">
                   <button
                     type="button"
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-tombol border border-garis text-xl text-tinta"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-tombol border border-garis text-xl text-tinta disabled:opacity-50"
                     onClick={() => setQuantity((value) => Math.max(1, value - 1))}
+                    disabled={quantity <= 1}
                     aria-label="Kurangi jumlah"
                   >
                     −
@@ -231,12 +236,13 @@ export function ProductDetailClient({ slug }: { slug: string }) {
                 type="button"
                 className={`${primaryButtonClass} mt-6 w-full`}
                 disabled={stock <= 0 || cartBusy}
+                aria-busy={cartBusy}
                 onClick={() => void tambahKeKeranjang()}
               >
                 {stock <= 0 ? "Stok habis" : cartBusy ? "Memasukkan…" : "Tambah ke keranjang"}
               </button>
               {cartMessage ? (
-                <p className="mt-2 rounded-kartu bg-mint-muda p-3 text-base text-teal-aksi">
+                <p className="mt-2 rounded-kartu bg-mint-muda p-3 text-base text-teal-aksi" role="status">
                   {cartMessage}{" "}
                   <Link href="/keranjang" className="font-semibold underline">
                     Lihat keranjang
@@ -302,8 +308,9 @@ export function ProductDetailClient({ slug }: { slug: string }) {
                       <p className="text-base font-semibold text-tinta">
                         {review.buyerName}
                       </p>
-                      <p className="text-base text-perhatian" aria-label={`${review.rating} bintang`}>
-                        {"★".repeat(review.rating)}
+                      <p className="text-base text-perhatian">
+                        <span aria-hidden="true">{"★".repeat(review.rating)}</span>
+                        <span className="sr-only">{review.rating} bintang</span>
                       </p>
                       {review.comment ? (
                         <p className="mt-1 text-base text-tinta">{review.comment}</p>

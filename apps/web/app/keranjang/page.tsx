@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { formatRupiah, type CartItemView, type CartView } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
-import { CatalogHeader } from "@/components/catalog-header";
+import { AppHeader } from "@/components/app-header";
 import { SiteFooter } from "@/components/site-footer";
 import {
   cardClass,
@@ -13,6 +13,7 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/ui";
+import { refreshBadges } from "@/lib/badges";
 import { useAuth } from "@/lib/auth";
 
 export default function KeranjangPage() {
@@ -26,6 +27,7 @@ export default function KeranjangPage() {
     setLoading(true);
     try {
       setCart(await request<CartView>("/api/v1/cart"));
+      refreshBadges();
       setError(null);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Keranjang belum bisa dimuat.");
@@ -49,6 +51,7 @@ export default function KeranjangPage() {
           body: JSON.stringify(patch),
         }),
       );
+      refreshBadges();
       setError(null);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Keranjang belum bisa diubah.");
@@ -61,6 +64,7 @@ export default function KeranjangPage() {
     setBusyId(item.id);
     try {
       setCart(await request<CartView>(`/api/v1/cart/items/${item.id}`, { method: "DELETE" }));
+      refreshBadges();
       setError(null);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Barang belum bisa dibuang.");
@@ -87,7 +91,7 @@ export default function KeranjangPage() {
 
   return (
     <main className="min-h-screen bg-putih pb-28 md:pb-0">
-      <CatalogHeader />
+      <AppHeader />
 
       <div className="mx-auto max-w-5xl px-4 py-6">
         <p className="text-base font-semibold text-teal-aksi">Belanja</p>
@@ -140,7 +144,7 @@ export default function KeranjangPage() {
                       <label className="flex min-h-11 min-w-11 items-center justify-center">
                         <input
                           type="checkbox"
-                          className="h-5 w-5"
+                          className="h-6 w-6 shrink-0"
                           checked={item.isSelected}
                           disabled={busyId === item.id}
                           onChange={(event) =>

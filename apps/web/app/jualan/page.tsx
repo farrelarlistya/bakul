@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { formatRupiah, findWilayah, WILAYAH } from "@bakul/shared";
 import { PhoneOtpForm } from "@/components/phone-otp-form";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import {
   cardClass,
   errorBoxClass,
@@ -169,7 +169,7 @@ export default function JualanPage() {
 
   return (
     <main className="min-h-screen bg-krem">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-xl px-4 py-8">
         <div className="mb-6">
           <p className="text-base font-semibold text-teal-aksi">Buka toko gratis</p>

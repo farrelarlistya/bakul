@@ -6,7 +6,7 @@ import {
   formatRupiah,
   type CategorySummary,
 } from "@bakul/shared";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import {
   cardClass,
   dangerButtonClass,
@@ -467,7 +467,7 @@ export default function SellerProductsPage() {
 
   return (
     <main className="min-h-screen bg-krem pb-10">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -568,7 +568,7 @@ export default function SellerProductsPage() {
                             <span
                               className={`rounded-pil px-2 text-base font-semibold ${
                                 product.status === "ACTIVE"
-                                  ? "bg-mint text-teal-aksi"
+                                  ? "bg-mint text-teal-tua"
                                   : "bg-krem text-tinta-lembut"
                               }`}
                             >

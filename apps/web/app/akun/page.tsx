@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { findWilayah, WILAYAH, type Address } from "@bakul/shared";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
+import { BottomNav } from "@/components/bottom-nav";
 import {
   cardClass,
   dangerButtonClass,
@@ -257,8 +258,8 @@ export default function AkunPage() {
   }
 
   return (
-    <main className="min-h-screen bg-krem">
-      <SiteHeader />
+    <main className="min-h-screen bg-krem pb-24 md:pb-0">
+      <AppHeader />
       <div className="mx-auto max-w-5xl px-4 py-8">
         <h1 className="font-display text-3xl font-bold text-tinta">Akun</h1>
         <p className="mt-2 text-base text-tinta-lembut">
@@ -431,7 +432,7 @@ export default function AkunPage() {
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-lg font-semibold text-tinta">{address.label}</p>
                       {address.isDefault ? (
-                        <span className="inline-flex min-h-8 items-center rounded-pil bg-mint px-3 text-base font-semibold text-teal-aksi">
+                        <span className="inline-flex min-h-8 items-center rounded-pil bg-mint px-3 text-base font-semibold text-teal-tua">
                           Utama
                         </span>
                       ) : null}
@@ -592,7 +593,7 @@ export default function AkunPage() {
                   <label className="flex min-h-11 items-center gap-3 text-base text-tinta">
                     <input
                       type="checkbox"
-                      className="h-5 w-5 accent-[#0F6E66]"
+                      className="h-6 w-6 shrink-0 accent-[#0F6E66]"
                       checked={form.isDefault}
                       onChange={(event) =>
                         setForm((current) => ({
@@ -640,6 +641,7 @@ export default function AkunPage() {
           </div>
         ) : null}
       </div>
+      <BottomNav />
     </main>
   );
 }

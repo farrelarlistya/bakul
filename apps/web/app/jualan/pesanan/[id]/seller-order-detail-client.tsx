@@ -10,7 +10,7 @@ import {
   type OrderInvoiceView,
 } from "@bakul/shared";
 import { OrderStatusBadge } from "@/components/order-status";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import {
   cardClass,
   dangerButtonClass,
@@ -134,7 +134,7 @@ export function SellerOrderDetailClient({ invoiceId }: { invoiceId: string }) {
 
   return (
     <main className="min-h-screen bg-krem pb-10">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-4xl px-4 py-8">
         <Link href="/jualan/pesanan" className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi">
           ← Kembali ke pesanan masuk

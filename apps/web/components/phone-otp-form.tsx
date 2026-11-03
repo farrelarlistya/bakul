@@ -147,21 +147,25 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
           </label>
           <input
             id="phone"
+            name="phone"
             type="tel"
             inputMode="tel"
             autoComplete="tel"
+            aria-describedby="phone-hint"
+            aria-invalid={Boolean(error)}
             className={inputClass}
             placeholder="0812-3456-7890"
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
           />
-          <p className="mt-2 text-base text-tinta-lembut">
+          <p id="phone-hint" className="mt-2 text-base text-tinta-lembut">
             Kami kirim kode 6 angka lewat SMS. Tidak perlu email.
           </p>
           <button
             type="button"
             className={`${primaryButtonClass} mt-4 w-full`}
             disabled={busy || phone.trim().length < 8}
+            aria-busy={busy}
             onClick={() => void sendCode()}
           >
             {busy ? "Mengirim…" : "Kirim kode"}
@@ -196,7 +200,13 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
             </p>
           ) : null}
 
-          <div className="mt-4 flex justify-between gap-2" onPaste={handlePaste}>
+          <div
+            className="mt-4 flex justify-between gap-2"
+            role="group"
+            aria-label="Kode 6 angka"
+            aria-describedby={error ? "otp-error" : undefined}
+            onPaste={handlePaste}
+          >
             {code.map((digit, index) => (
               <input
                 key={index}
@@ -207,6 +217,7 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 aria-label={`Angka ke-${index + 1}`}
+                aria-invalid={Boolean(error)}
                 maxLength={1}
                 value={digit}
                 onChange={(event) => updateDigit(index, event.target.value)}
@@ -220,6 +231,7 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
             type="button"
             className={`${primaryButtonClass} mt-4 w-full`}
             disabled={busy}
+            aria-busy={busy}
             onClick={() => void verifyCode()}
           >
             {busy ? "Memeriksa…" : "Masuk"}
@@ -237,7 +249,7 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
       )}
 
       {error ? (
-        <div className={errorBoxClass} role="alert">
+        <div id="otp-error" className={errorBoxClass} role="alert">
           {error}
         </div>
       ) : null}

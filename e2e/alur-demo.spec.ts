@@ -21,11 +21,17 @@ test("beranda: app bar ikon, kategori, produk, dan bottom nav", async ({ page })
 
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Halo, Sobat Bakul" })).toBeVisible();
+  await expect(page).toHaveTitle("Beranda · Bakul");
   const header = page.locator("header");
   await expect(header.getByRole("link", { name: "Cari barang" })).toBeVisible();
   await expect(header.getByRole("link", { name: "Buka inbox" })).toBeVisible();
   await expect(header.getByRole("link", { name: "Buka keranjang" })).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Navigasi bawah" })).toBeVisible();
+  const bottomNav = page.getByRole("navigation", { name: "Navigasi bawah" });
+  await expect(bottomNav).toBeVisible();
+  await expect(bottomNav.locator('[aria-current="page"]')).toContainText("Beranda");
+
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Lewati ke konten" })).toBeVisible();
 
   expect(await page.locator('a[href^="/cari?category="]').count()).toBe(8);
   expect(await page.locator('a[href^="/p/"]').count()).toBe(4);

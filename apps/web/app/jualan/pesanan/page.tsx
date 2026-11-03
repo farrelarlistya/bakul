@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatRupiah, type OrderInvoiceView } from "@bakul/shared";
 import { OrderStatusBadge } from "@/components/order-status";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import {
   cardClass,
   dangerButtonClass,
@@ -130,7 +130,7 @@ export default function SellerOrdersPage() {
 
   return (
     <main className="min-h-screen bg-krem pb-10">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>

@@ -10,7 +10,7 @@ import {
   type WalletSummary,
   type WithdrawalView,
 } from "@bakul/shared";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import {
   cardClass,
   errorBoxClass,
@@ -125,7 +125,7 @@ export default function SellerWalletPage() {
 
   return (
     <main className="min-h-screen bg-krem pb-10">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-4xl px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -167,16 +167,16 @@ export default function SellerWalletPage() {
           <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_1fr]">
             <div className="space-y-4">
               <section className={`${cardClass} bg-teal-aksi text-putih`}>
-                <p className="text-base text-mint">Saldo siap ditarik</p>
+                <p className="text-base text-putih">Saldo siap ditarik</p>
                 <p className="mt-1 font-display text-4xl font-bold">
                   {formatRupiah(wallet.balanceAvailable)}
                 </p>
                 {wallet.balanceWithheld > 0 ? (
-                  <p className="mt-2 text-base text-mint">
+                  <p className="mt-2 text-base text-mint-muda">
                     Sedang diproses: {formatRupiah(wallet.balanceWithheld)}
                   </p>
                 ) : null}
-                <p className="mt-3 text-base text-mint">
+                <p className="mt-3 text-base text-mint-muda">
                   Minimum tarik {formatRupiah(MIN_WITHDRAWAL)}.
                 </p>
               </section>
@@ -283,10 +283,10 @@ export default function SellerWalletPage() {
             </div>
 
             <section className={cardClass}>
-              <h2 className="font-display text-2xl font-bold text-tinta">Mutasi saldo</h2>
+              <h2 className="font-display text-2xl font-bold text-tinta">Riwayat saldo</h2>
               {mutations.length === 0 ? (
                 <p className="mt-2 text-base text-tinta-lembut">
-                  Belum ada mutasi. Saldo bertambah setelah pesanan selesai.
+                  Belum ada riwayat saldo. Saldo bertambah setelah pesanan selesai.
                 </p>
               ) : (
                 <ul className="mt-3 divide-y divide-garis">

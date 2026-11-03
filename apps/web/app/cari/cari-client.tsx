@@ -10,7 +10,8 @@ import {
   type ProductSort,
 } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
-import { CatalogHeader } from "@/components/catalog-header";
+import { AppHeader } from "@/components/app-header";
+import { Icon } from "@/components/icon";
 import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
 import { errorBoxClass, inputClass, labelClass, secondaryButtonClass } from "@/components/ui";
@@ -39,6 +40,7 @@ export function CariClient() {
   const [data, setData] = useState<CatalogPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     setQuery(searchParams.get("q") ?? "");
@@ -116,11 +118,15 @@ export function CariClient() {
     setRating("");
     setSort("terbaru");
     setPage(1);
+    setFiltersOpen(false);
   }
+
+  const advancedFilterCount =
+    [city, maxPrice, rating].filter(Boolean).length + (sort !== "terbaru" ? 1 : 0);
 
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
-      <CatalogHeader defaultQuery={query} />
+      <AppHeader defaultQuery={query} />
 
       <div className="mx-auto max-w-5xl space-y-6 px-4 py-6">
         <div>
@@ -128,20 +134,25 @@ export function CariClient() {
           <h1 className="mt-1 font-display text-3xl font-bold text-tinta">
             {query.trim() ? `Hasil untuk “${query.trim()}”` : "Cari barang"}
           </h1>
-          <p className="mt-2 text-base text-tinta-lembut">
+          <p className="mt-2 text-base text-tinta-lembut" role="status">
             {data ? `${data.meta.total} barang ditemukan` : "Menyiapkan daftar barang…"}
           </p>
         </div>
 
         <section className="rounded-kartu border border-garis bg-putih p-4">
-          <div className="flex flex-wrap gap-2">
+          <div
+            role="group"
+            aria-label="Pilih kategori"
+            className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
+          >
             <button
               type="button"
+              aria-pressed={category === ""}
               onClick={() => {
                 setCategory("");
                 setPage(1);
               }}
-              className={`inline-flex min-h-11 items-center rounded-pil px-4 text-base font-semibold ${
+              className={`inline-flex min-h-11 shrink-0 items-center rounded-pil px-4 text-base font-semibold ${
                 category === "" ? "bg-teal-aksi text-putih" : "bg-abu-kartu text-tinta"
               }`}
             >
@@ -151,11 +162,12 @@ export function CariClient() {
               <button
                 key={item.id}
                 type="button"
+                aria-pressed={category === item.slug}
                 onClick={() => {
                   setCategory(item.slug);
                   setPage(1);
                 }}
-                className={`inline-flex min-h-11 items-center rounded-pil px-4 text-base font-semibold ${
+                className={`inline-flex min-h-11 shrink-0 items-center rounded-pil px-4 text-base font-semibold ${
                   category === item.slug
                     ? "bg-teal-aksi text-putih"
                     : "bg-abu-kartu text-tinta"
@@ -166,94 +178,114 @@ export function CariClient() {
             ))}
           </div>
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <label className={labelClass} htmlFor="filter-city">
-                Kota
-              </label>
-              <select
-                id="filter-city"
-                className={inputClass}
-                value={city}
-                onChange={(event) => {
-                  setCity(event.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">Semua kota</option>
-                {WILAYAH.map((item) => (
-                  <option key={item.cityId} value={item.cityName}>
-                    {item.cityName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className={labelClass} htmlFor="filter-price">
-                Harga maksimal
-              </label>
-              <select
-                id="filter-price"
-                className={inputClass}
-                value={maxPrice}
-                onChange={(event) => {
-                  setMaxPrice(event.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">Semua harga</option>
-                <option value="25000">Rp 25.000</option>
-                <option value="50000">Rp 50.000</option>
-                <option value="100000">Rp 100.000</option>
-                <option value="200000">Rp 200.000</option>
-              </select>
-            </div>
-
-            <div>
-              <label className={labelClass} htmlFor="filter-rating">
-                Rating
-              </label>
-              <select
-                id="filter-rating"
-                className={inputClass}
-                value={rating}
-                onChange={(event) => {
-                  setRating(event.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">Semua rating</option>
-                <option value="4.5">4,5 ke atas</option>
-                <option value="4.8">4,8 ke atas</option>
-              </select>
-            </div>
-
-            <div>
-              <label className={labelClass} htmlFor="filter-sort">
-                Urutkan
-              </label>
-              <select
-                id="filter-sort"
-                className={inputClass}
-                value={sort}
-                onChange={(event) => {
-                  setSort(event.target.value as ProductSort);
-                  setPage(1);
-                }}
-              >
-                {PRODUCT_SORTS.map((value) => (
-                  <option key={value} value={value}>
-                    {SORT_LABEL[value]}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <button type="button" className={`${secondaryButtonClass} mt-4`} onClick={reset}>
-            Hapus filter
+          <button
+            type="button"
+            aria-expanded={filtersOpen}
+            aria-controls="filter-lainnya"
+            onClick={() => setFiltersOpen((value) => !value)}
+            className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-tombol border border-garis bg-putih px-4 text-base font-semibold text-tinta md:hidden"
+          >
+            <Icon name="sliders" size={18} />
+            {filtersOpen
+              ? "Tutup filter"
+              : advancedFilterCount > 0
+                ? `Filter lainnya (${advancedFilterCount})`
+                : "Filter lainnya"}
           </button>
+
+          <div
+            id="filter-lainnya"
+            className={`${filtersOpen ? "block" : "hidden"} md:block`}
+          >
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label className={labelClass} htmlFor="filter-city">
+                  Kota
+                </label>
+                <select
+                  id="filter-city"
+                  className={inputClass}
+                  value={city}
+                  onChange={(event) => {
+                    setCity(event.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="">Semua kota</option>
+                  {WILAYAH.map((item) => (
+                    <option key={item.cityId} value={item.cityName}>
+                      {item.cityName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass} htmlFor="filter-price">
+                  Harga maksimal
+                </label>
+                <select
+                  id="filter-price"
+                  className={inputClass}
+                  value={maxPrice}
+                  onChange={(event) => {
+                    setMaxPrice(event.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="">Semua harga</option>
+                  <option value="25000">Rp 25.000</option>
+                  <option value="50000">Rp 50.000</option>
+                  <option value="100000">Rp 100.000</option>
+                  <option value="200000">Rp 200.000</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass} htmlFor="filter-rating">
+                  Rating
+                </label>
+                <select
+                  id="filter-rating"
+                  className={inputClass}
+                  value={rating}
+                  onChange={(event) => {
+                    setRating(event.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="">Semua rating</option>
+                  <option value="4.5">4,5 ke atas</option>
+                  <option value="4.8">4,8 ke atas</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass} htmlFor="filter-sort">
+                  Urutkan
+                </label>
+                <select
+                  id="filter-sort"
+                  className={inputClass}
+                  value={sort}
+                  onChange={(event) => {
+                    setSort(event.target.value as ProductSort);
+                    setPage(1);
+                  }}
+                >
+                  {PRODUCT_SORTS.map((value) => (
+                    <option key={value} value={value}>
+                      {SORT_LABEL[value]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <button type="button" className={`${secondaryButtonClass} mt-4`} onClick={reset}>
+              Hapus filter
+            </button>
+          </div>
         </section>
 
         {error ? (
@@ -285,21 +317,21 @@ export function CariClient() {
         ) : null}
 
         {data && data.meta.totalPages > 1 ? (
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="button"
-              className={secondaryButtonClass}
+              className={`${secondaryButtonClass} order-2 w-full sm:order-1 sm:w-auto`}
               disabled={page <= 1}
               onClick={() => setPage((value) => Math.max(1, value - 1))}
             >
               Sebelumnya
             </button>
-            <p className="text-base text-tinta-lembut">
+            <p className="order-1 text-center text-base text-tinta-lembut sm:order-2">
               Halaman {data.meta.page} dari {data.meta.totalPages}
             </p>
             <button
               type="button"
-              className={secondaryButtonClass}
+              className={`${secondaryButtonClass} order-3 w-full sm:w-auto`}
               disabled={page >= data.meta.totalPages}
               onClick={() => setPage((value) => value + 1)}
             >

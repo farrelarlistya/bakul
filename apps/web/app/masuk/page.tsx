@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PhoneOtpForm } from "@/components/phone-otp-form";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import { cardClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
 
@@ -13,7 +13,7 @@ export default function MasukPage() {
 
   return (
     <main className="min-h-screen bg-krem">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-md px-4 py-10">
         <div className={cardClass}>
           <p className="text-base font-semibold text-teal-aksi">Selamat datang kembali</p>

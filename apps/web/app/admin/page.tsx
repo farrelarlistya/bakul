@@ -7,7 +7,7 @@ import {
   formatRupiah,
   type AdminMetrics,
 } from "@bakul/shared";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import { cardClass, errorBoxClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
 
@@ -41,7 +41,7 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-krem pb-10">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -86,7 +86,7 @@ export default function AdminPage() {
           <>
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { label: "Nilai transaksi (GMV)", value: formatRupiah(metrics.gmv) },
+                { label: "Nilai transaksi", value: formatRupiah(metrics.gmv) },
                 { label: "Uang ditahan aman", value: formatRupiah(metrics.escrowHeld) },
                 { label: "Pendapatan platform", value: formatRupiah(metrics.revenue) },
                 { label: "Pesanan selesai", value: `${metrics.completedOrders} dari ${metrics.orderCount}` },

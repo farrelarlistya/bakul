@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { CatalogPage, CategorySummary } from "@bakul/shared";
+import { AppHeader } from "@/components/app-header";
 import { BottomNav } from "@/components/bottom-nav";
-import { HomeHeader } from "@/components/home-header";
+import { HomeGreeting } from "@/components/home-greeting";
 import { HomeProductCard } from "@/components/home-product-card";
 import { Icon, categoryIcon } from "@/components/icon";
 import { SiteFooter } from "@/components/site-footer";
@@ -43,6 +44,7 @@ function SectionHeading({
       </div>
       <Link
         href={href}
+        aria-label={`Lihat semua ${title.toLowerCase()}`}
         className="inline-flex min-h-11 items-center gap-1 text-base font-semibold text-teal-aksi"
       >
         Lihat semua
@@ -71,7 +73,7 @@ export default async function Page() {
 
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
-      <HomeHeader />
+      <AppHeader />
 
       <div className="bg-tinta text-mint">
         <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-2">
@@ -85,12 +87,7 @@ export default async function Page() {
           <div className="flex items-end justify-between gap-3">
             <div>
               <p className="text-base font-semibold text-teal-aksi">Pasar untuk UMKM</p>
-              <h1
-                id="sapaan"
-                className="mt-1 font-display text-2xl font-bold leading-8 text-tinta"
-              >
-                Halo, Sobat Bakul
-              </h1>
+              <HomeGreeting />
               <p className="mt-1 text-base leading-6 text-tinta-lembut">
                 Mau belanja apa hari ini?
               </p>
@@ -100,7 +97,7 @@ export default async function Page() {
             </span>
           </div>
 
-          <form action="/cari" method="get" className="mt-3 flex gap-2 md:hidden">
+          <form action="/cari" method="get" role="search" aria-label="Cari barang" className="mt-3 flex gap-2 md:hidden">
             <div className="flex min-h-12 flex-1 items-center gap-2 rounded-tombol border border-garis bg-abu-kartu px-3">
               <Icon name="search" size={20} className="shrink-0 text-tinta-lembut" />
               <label htmlFor="home-search" className="sr-only">
@@ -111,7 +108,7 @@ export default async function Page() {
                 name="q"
                 type="search"
                 placeholder="Cari nastar, kopi, batik..."
-                className="min-h-10 w-full bg-transparent text-base text-tinta outline-none placeholder:text-tinta-lembut"
+                className="min-h-11 w-full bg-transparent text-base text-tinta outline-none placeholder:text-tinta-lembut"
               />
               <button type="submit" className="sr-only">
                 Cari
@@ -134,7 +131,7 @@ export default async function Page() {
           <div className="flex h-[200px] items-stretch md:h-[300px]">
             <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between p-4 md:p-8">
               <div className="max-w-[13rem] md:max-w-xl">
-                <p className="text-base font-semibold text-teal-aksi">Pedagang lokal</p>
+                <p className="text-base font-semibold text-teal-tua">Pedagang lokal</p>
                 <h2
                   id="hero-title"
                   className="mt-1 font-display text-[18px] font-bold leading-6 text-tinta md:text-4xl md:leading-tight"
@@ -149,7 +146,7 @@ export default async function Page() {
                 href="#kategori"
                 className="mt-3 inline-flex min-h-11 w-fit items-center gap-2 rounded-tombol bg-teal-aksi px-3 text-base font-semibold text-putih"
               >
-                Jelajahi
+                Jelajahi kategori
                 <Icon name="chevronRight" size={16} />
               </a>
             </div>
@@ -161,6 +158,7 @@ export default async function Page() {
                 width={600}
                 height={450}
                 loading="eager"
+                fetchPriority="high"
                 className="h-full w-full object-cover"
               />
             </div>
@@ -243,8 +241,7 @@ export default async function Page() {
           ) : (
             <div className="mt-3 rounded-kartu border border-garis bg-abu-kartu p-5">
               <p className="text-base text-tinta-lembut">
-                Katalog belum bisa dimuat. Pastikan API dan PostgreSQL hidup, lalu muat
-                ulang halaman ini.
+                Katalog belum bisa dimuat. Coba muat ulang halaman ini.
               </p>
             </div>
           )}

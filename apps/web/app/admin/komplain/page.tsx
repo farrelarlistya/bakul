@@ -12,7 +12,7 @@ import {
   type OrderInvoiceView,
 } from "@bakul/shared";
 import { OrderStatusBadge } from "@/components/order-status";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import {
   cardClass,
   errorBoxClass,
@@ -170,7 +170,7 @@ export default function AdminDisputesPage() {
 
   return (
     <main className="min-h-screen bg-krem pb-10">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -337,7 +337,7 @@ export default function AdminDisputesPage() {
                         name="decision"
                         checked={decision === item}
                         onChange={() => setDecision(item)}
-                        className="h-5 w-5"
+                        className="h-6 w-6 shrink-0"
                       />
                       <span className="text-base font-semibold text-tinta">
                         {DECISION_LABEL[item]}

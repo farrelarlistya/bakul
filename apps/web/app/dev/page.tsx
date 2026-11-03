@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { formatRupiah, type DemoStatus, type ResetResult } from "@bakul/shared";
-import { SiteHeader } from "@/components/site-header";
+import { AppHeader } from "@/components/app-header";
 import {
   cardClass,
   dangerButtonClass,
@@ -171,7 +171,7 @@ export default function DemoConsolePage() {
 
   return (
     <main className="min-h-screen bg-krem pb-10">
-      <SiteHeader />
+      <AppHeader />
       <div className="mx-auto max-w-4xl px-4 py-8">
         <p className="text-base font-semibold text-teal-aksi">Mode demo</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-tinta">Demo console</h1>

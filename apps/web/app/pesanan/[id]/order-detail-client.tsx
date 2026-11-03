@@ -10,7 +10,7 @@ import {
   type OrderInvoiceView,
 } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
-import { CatalogHeader } from "@/components/catalog-header";
+import { AppHeader } from "@/components/app-header";
 import { OrderStatusBadge } from "@/components/order-status";
 import { SiteFooter } from "@/components/site-footer";
 import {
@@ -129,7 +129,7 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
 
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
-      <CatalogHeader />
+      <AppHeader />
 
       <div className="mx-auto max-w-4xl px-4 py-6">
         <Link href="/pesanan" className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi">
@@ -360,6 +360,7 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
                       key={value}
                       type="button"
                       onClick={() => setRating(value)}
+                      aria-pressed={rating >= value}
                       className={`inline-flex h-11 w-11 items-center justify-center rounded-tombol border text-xl ${
                         rating >= value
                           ? "border-perhatian bg-[#fff7e6] text-perhatian"
