@@ -79,8 +79,19 @@ export function ShopClient({ slug }: { slug: string }) {
               <div className="bg-putih px-5 pb-5">
                 <div className="-mt-8 flex flex-wrap items-end justify-between gap-3">
                   <div className="flex items-end gap-3">
-                    <span className="inline-flex h-16 w-16 items-center justify-center rounded-pil border-4 border-putih bg-mint-muda text-xl font-bold text-teal-aksi">
-                      {shop.name.slice(0, 2).toUpperCase()}
+                    <span className="inline-flex h-16 w-16 items-center justify-center overflow-hidden rounded-pil border-4 border-putih bg-mint-muda text-xl font-bold text-teal-aksi">
+                      {shop.logoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={shop.logoUrl}
+                          alt={`Logo ${shop.name}`}
+                          width={64}
+                          height={64}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        shop.name.slice(0, 2).toUpperCase()
+                      )}
                     </span>
                     <div>
                       <h1 className="font-display text-2xl font-bold text-tinta">

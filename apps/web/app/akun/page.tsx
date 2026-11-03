@@ -353,6 +353,15 @@ export default function AkunPage() {
                     <Link href="/jualan/barang" className={`${primaryButtonClass} mt-4 w-full`}>
                       Kelola barang
                     </Link>
+                    <Link href="/jualan/pesanan" className={`${secondaryButtonClass} mt-2 w-full`}>
+                      Pesanan masuk
+                    </Link>
+                    <Link href="/jualan/dompet" className={`${secondaryButtonClass} mt-2 w-full`}>
+                      Dompet toko
+                    </Link>
+                    <Link href="/jualan/toko" className={`${secondaryButtonClass} mt-2 w-full`}>
+                      Pengaturan toko
+                    </Link>
                     <Link href={`/toko/${user.shop.slug}`} className={`${secondaryButtonClass} mt-2 w-full`}>
                       Lihat halaman toko
                     </Link>
@@ -368,6 +377,23 @@ export default function AkunPage() {
                   </>
                 )}
               </section>
+
+              {user.role === "ADMIN" || user.role === "OPERATOR_DEMO" ? (
+                <section className={cardClass}>
+                  <h2 className="font-display text-2xl font-bold text-tinta">Tim internal</h2>
+                  <p className="mt-2 text-base text-tinta-lembut">
+                    Dashboard admin dan simulator demo.
+                  </p>
+                  {user.role === "ADMIN" ? (
+                    <Link href="/admin" className={`${primaryButtonClass} mt-4 w-full`}>
+                      Dashboard admin
+                    </Link>
+                  ) : null}
+                  <Link href="/dev" className={`${secondaryButtonClass} mt-2 w-full`}>
+                    Demo console
+                  </Link>
+                </section>
+              ) : null}
 
               <section className={cardClass}>
                 <h2 className="font-display text-2xl font-bold text-tinta">Sesi</h2>

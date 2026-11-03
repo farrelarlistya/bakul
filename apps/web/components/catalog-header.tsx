@@ -25,10 +25,16 @@ export function CatalogHeader({ defaultQuery = "" }: { defaultQuery?: string }) 
               Cari
             </Link>
             <Link
-              href="/jualan"
+              href="/keranjang"
               className="inline-flex min-h-11 items-center rounded-tombol px-2 text-base font-semibold text-teal-aksi"
             >
-              Buka toko
+              Keranjang
+            </Link>
+            <Link
+              href="/pesanan"
+              className="inline-flex min-h-11 items-center rounded-tombol px-2 text-base font-semibold text-teal-aksi"
+            >
+              Pesanan
             </Link>
             <Link
               href="/inbox"

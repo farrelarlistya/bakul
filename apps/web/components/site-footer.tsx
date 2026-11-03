@@ -27,6 +27,16 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/keranjang" className="inline-flex min-h-11 items-center">
+                  Keranjang
+                </Link>
+              </li>
+              <li>
+                <Link href="/pesanan" className="inline-flex min-h-11 items-center">
+                  Pesanan
+                </Link>
+              </li>
+              <li>
                 <Link href="/inbox" className="inline-flex min-h-11 items-center">
                   Inbox
                 </Link>
@@ -40,6 +50,16 @@ export function SiteFooter() {
               <li>
                 <Link href="/jualan" className="inline-flex min-h-11 items-center">
                   Buka toko gratis
+                </Link>
+              </li>
+              <li>
+                <Link href="/jualan/pesanan" className="inline-flex min-h-11 items-center">
+                  Pesanan masuk
+                </Link>
+              </li>
+              <li>
+                <Link href="/jualan/dompet" className="inline-flex min-h-11 items-center">
+                  Dompet toko
                 </Link>
               </li>
               <li>

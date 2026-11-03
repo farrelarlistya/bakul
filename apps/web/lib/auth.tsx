@@ -23,6 +23,7 @@ type AuthContextValue = {
   logout: () => Promise<void>;
   refreshUser: () => Promise<AuthUser | null>;
   request: RequestFn;
+  download: (path: string, filename: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -184,9 +185,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [request]);
 
+  const download = useCallback(
+    async (path: string, filename: string): Promise<void> => {
+      const doFetch = (token: string | null) =>
+        fetch(path, {
+          credentials: "same-origin",
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+
+      let response = await doFetch(tokenRef.current);
+      if (response.status === 401) {
+        const refreshed = await refreshInternal();
+        if (refreshed) {
+          response = await doFetch(tokenRef.current);
+        }
+      }
+
+      if (!response.ok) {
+        throw await toApiError(response);
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    },
+    [refreshInternal],
+  );
+
   const value = useMemo(
-    () => ({ status, user, login, logout, refreshUser, request }),
-    [status, user, login, logout, refreshUser, request],
+    () => ({ status, user, login, logout, refreshUser, request, download }),
+    [status, user, login, logout, refreshUser, request, download],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

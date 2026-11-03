@@ -18,10 +18,22 @@ export function SiteHeader() {
 
         <nav className="flex flex-wrap items-center gap-0.5" aria-label="Navigasi utama">
           <Link
-            href="/jualan"
+            href="/"
             className="inline-flex min-h-11 items-center rounded-tombol px-2 text-base font-semibold text-teal-aksi"
           >
-            Buka toko
+            Beranda
+          </Link>
+          <Link
+            href="/keranjang"
+            className="inline-flex min-h-11 items-center rounded-tombol px-2 text-base font-semibold text-teal-aksi"
+          >
+            Keranjang
+          </Link>
+          <Link
+            href="/pesanan"
+            className="inline-flex min-h-11 items-center rounded-tombol px-2 text-base font-semibold text-teal-aksi"
+          >
+            Pesanan
           </Link>
           <Link
             href="/inbox"
@@ -29,6 +41,31 @@ export function SiteHeader() {
           >
             Inbox
           </Link>
+          {status === "masuk" && user?.shop ? (
+            <Link
+              href="/jualan/pesanan"
+              className="inline-flex min-h-11 items-center rounded-tombol bg-mint-muda px-2 text-base font-semibold text-teal-aksi"
+            >
+              Jualan
+            </Link>
+          ) : null}
+          {status === "masuk" && user?.role === "ADMIN" ? (
+            <Link
+              href="/admin"
+              className="inline-flex min-h-11 items-center rounded-tombol bg-krem px-2 text-base font-semibold text-tinta"
+            >
+              Admin
+            </Link>
+          ) : null}
+          {(status === "masuk" && user?.role === "ADMIN") ||
+          (status === "masuk" && user?.role === "OPERATOR_DEMO") ? (
+            <Link
+              href="/dev"
+              className="inline-flex min-h-11 items-center rounded-tombol bg-krem px-2 text-base font-semibold text-tinta"
+            >
+              Demo
+            </Link>
+          ) : null}
           {status === "masuk" && user ? (
             <Link
               href="/akun"

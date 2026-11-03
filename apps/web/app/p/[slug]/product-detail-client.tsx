@@ -7,6 +7,7 @@ import { BottomNav } from "@/components/bottom-nav";
 import { CatalogHeader } from "@/components/catalog-header";
 import { SiteFooter } from "@/components/site-footer";
 import { errorBoxClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui";
+import { useAuth } from "@/lib/auth";
 
 function tanggal(value: string): string {
   return new Intl.DateTimeFormat("id-ID", {
@@ -17,12 +18,15 @@ function tanggal(value: string): string {
 }
 
 export function ProductDetailClient({ slug }: { slug: string }) {
+  const { status, request } = useAuth();
   const [detail, setDetail] = useState<ProductDetail | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cartBusy, setCartBusy] = useState(false);
+  const [cartMessage, setCartMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -63,6 +67,30 @@ export function ProductDetailClient({ slug }: { slug: string }) {
   const stock = variant?.stockAvailable ?? detail?.stock ?? 0;
   const price = variant?.price ?? detail?.price ?? 0;
   const image = detail?.images[activeImage] ?? detail?.imageUrl ?? null;
+
+  async function tambahKeKeranjang(): Promise<void> {
+    if (!variant) {
+      return;
+    }
+    if (status !== "masuk") {
+      window.location.href = "/masuk";
+      return;
+    }
+
+    setCartBusy(true);
+    setCartMessage(null);
+    try {
+      await request("/api/v1/cart/items", {
+        method: "POST",
+        body: JSON.stringify({ variantId: variant.id, quantity }),
+      });
+      setCartMessage(`${quantity} ${detail?.name ?? "barang"} masuk keranjang.`);
+    } catch (caught: unknown) {
+      setCartMessage(caught instanceof Error ? caught.message : "Belum bisa masuk keranjang.");
+    } finally {
+      setCartBusy(false);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
@@ -202,20 +230,41 @@ export function ProductDetailClient({ slug }: { slug: string }) {
               <button
                 type="button"
                 className={`${primaryButtonClass} mt-6 w-full`}
-                disabled={stock <= 0}
+                disabled={stock <= 0 || cartBusy}
+                onClick={() => void tambahKeKeranjang()}
               >
-                {stock > 0 ? "Tambah ke keranjang" : "Stok habis"}
+                {stock <= 0 ? "Stok habis" : cartBusy ? "Memasukkan…" : "Tambah ke keranjang"}
               </button>
-              <p className="mt-2 text-base text-tinta-lembut">
-                Keranjang dan pembayaran aktif di Sprint 6.
-              </p>
+              {cartMessage ? (
+                <p className="mt-2 rounded-kartu bg-mint-muda p-3 text-base text-teal-aksi">
+                  {cartMessage}{" "}
+                  <Link href="/keranjang" className="font-semibold underline">
+                    Lihat keranjang
+                  </Link>
+                </p>
+              ) : (
+                <p className="mt-2 text-base text-tinta-lembut">
+                  Uang ditahan aman sampai barang diterima.
+                </p>
+              )}
 
               <Link
                 href={`/toko/${detail.shop.slug}`}
                 className="mt-5 flex min-h-16 items-center gap-3 rounded-kartu border border-garis bg-putih p-3"
               >
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-pil bg-mint-muda text-base font-bold text-teal-aksi">
-                  {detail.shop.name.slice(0, 2).toUpperCase()}
+                <span className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-pil bg-mint-muda text-base font-bold text-teal-aksi">
+                  {detail.shop.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={detail.shop.logoUrl}
+                      alt={`Logo ${detail.shop.name}`}
+                      width={44}
+                      height={44}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    detail.shop.name.slice(0, 2).toUpperCase()
+                  )}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-lg font-semibold text-tinta">
@@ -258,6 +307,16 @@ export function ProductDetailClient({ slug }: { slug: string }) {
                       </p>
                       {review.comment ? (
                         <p className="mt-1 text-base text-tinta">{review.comment}</p>
+                      ) : null}
+                      {review.mediaUrls.length > 0 ? (
+                        <ul className="mt-2 flex flex-wrap gap-2">
+                          {review.mediaUrls.map((url) => (
+                            <li key={url} className="h-16 w-16 overflow-hidden rounded-tombol border border-garis">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={url} alt="Foto ulasan" width={64} height={64} className="h-full w-full object-cover" />
+                            </li>
+                          ))}
+                        </ul>
                       ) : null}
                       <p className="mt-1 text-base text-tinta-lembut">
                         {tanggal(review.createdAt)}
