@@ -1,10 +1,17 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import type { NotificationItem } from "@bakul/shared";
+import { ClockService } from "../common/clock/clock.service";
+import { Prisma } from "../generated/prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(NotificationsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly clock: ClockService,
+  ) {}
 
   async list(userId: string): Promise<NotificationItem[]> {
     const rows = await this.prisma.notification.findMany({
@@ -39,5 +46,24 @@ export class NotificationsService {
     }
 
     return { ok: true };
+  }
+
+  async send(
+    userId: string,
+    template: string,
+    message: string,
+    extra: Record<string, unknown> = {},
+    tx?: Prisma.TransactionClient,
+  ): Promise<void> {
+    const client = tx ?? this.prisma;
+    await client.notification.create({
+      data: {
+        userId,
+        template,
+        payload: { message, ...extra },
+        createdAt: this.clock.now(),
+      },
+    });
+    this.logger.log(`[NOTIF] IN_APP ${userId} ${template}`);
   }
 }

@@ -25,4 +25,28 @@ export class FilesController {
       disposition: `inline; filename="${filename}"`,
     });
   }
+
+  @Get("evidence/:filename")
+  @Header("Cache-Control", "private, max-age=86400")
+  @ApiOperation({ summary: "Ambil bukti komplain dari penyimpanan lokal" })
+  evidence(@Param("filename") filename: string): StreamableFile {
+    const file = this.storage.evidenceFile(filename);
+
+    return new StreamableFile(createReadStream(file.path), {
+      type: file.mime,
+      disposition: `inline; filename="${filename}"`,
+    });
+  }
+
+  @Get("shops/:filename")
+  @Header("Cache-Control", "public, max-age=86400")
+  @ApiOperation({ summary: "Ambil logo toko dari penyimpanan lokal" })
+  shopLogo(@Param("filename") filename: string): StreamableFile {
+    const file = this.storage.shopLogo(filename);
+
+    return new StreamableFile(createReadStream(file.path), {
+      type: file.mime,
+      disposition: `inline; filename="${filename}"`,
+    });
+  }
 }

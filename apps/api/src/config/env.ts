@@ -1,4 +1,4 @@
-const REQUIRED = ["DATABASE_URL", "AUTH_JWT_ACCESS_SECRET", "OTP_PEPPER"];
+const REQUIRED = ["DATABASE_URL", "AUTH_JWT_ACCESS_SECRET", "OTP_PEPPER", "MOCK_PG_SECRET"];
 
 export function validateEnv(config: Record<string, unknown>): Record<string, unknown> {
   for (const key of REQUIRED) {

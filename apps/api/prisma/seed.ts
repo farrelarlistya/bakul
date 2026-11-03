@@ -6,6 +6,7 @@ import sharp from "sharp";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { ProductStatus, ShopStatus, UserRole } from "../src/generated/prisma/enums";
 import { productPhotoDir } from "../src/common/storage/storage.paths";
+import { seedHistory } from "./seed-history";
 
 config({ path: "../../.env", quiet: true });
 config({ quiet: true });
@@ -943,10 +944,15 @@ async function seed(): Promise<void> {
     prisma.review.count(),
   ]);
 
+  const historyCount = await seedHistory(prisma);
+  const orderCount = await prisma.orderInvoice.count();
+  const ledgerCount = await prisma.ledgerJournal.count();
+
   console.log(
     `Seed selesai: ${userCount} pengguna, ${shopCount} toko, ${categoryCount} kategori, ` +
       `${productCount} produk, ${variantCount} varian, ${addressCount} alamat, ` +
-      `${etalaseCount} etalase, ${imageCount} foto, ${reviewCount} ulasan.`,
+      `${etalaseCount} etalase, ${imageCount} foto, ${reviewCount} ulasan, ` +
+      `${orderCount} pesanan (${historyCount} riwayat baru), ${ledgerCount} jurnal.`,
   );
 
   if (
@@ -955,9 +961,10 @@ async function seed(): Promise<void> {
     categoryCount !== 8 ||
     etalaseCount !== 10 ||
     imageCount !== 100 ||
-    reviewCount !== 200
+    reviewCount < 200 ||
+    orderCount < 30
   ) {
-    throw new Error("Jumlah data seed tidak sesuai target M2.");
+    throw new Error("Jumlah data seed tidak sesuai target M8.");
   }
 }
 

@@ -13,11 +13,10 @@ import { PrismaService } from "../prisma/prisma.service";
 const productCardInclude = {
   variants: { select: { price: true, stockAvailable: true } },
   images: { select: { url: true }, orderBy: { position: "asc" } },
-  shop: { select: { id: true, name: true, slug: true, cityName: true } },
+  shop: { select: { id: true, name: true, slug: true, cityName: true, logoUrl: true } },
   category: { select: { id: true, name: true, slug: true } },
   etalase: { select: { name: true } },
 } satisfies Prisma.ProductInclude;
-
 const productDetailInclude = {
   ...productCardInclude,
   variants: {
@@ -175,6 +174,9 @@ export class CatalogService {
         buyerName: review.buyer.name,
         rating: review.rating,
         comment: review.comment,
+        mediaUrls: Array.isArray(review.mediaUrls)
+          ? review.mediaUrls.filter((url): url is string => typeof url === "string")
+          : [],
         createdAt: review.createdAt.toISOString(),
       })),
       shop: {
@@ -182,6 +184,7 @@ export class CatalogService {
         name: product.shop.name,
         slug: product.shop.slug,
         cityName: product.shop.cityName,
+        logoUrl: product.shop.logoUrl,
       },
     };
   }
@@ -216,6 +219,7 @@ export class CatalogService {
       name: shop.name,
       slug: shop.slug,
       description: shop.description,
+      logoUrl: shop.logoUrl,
       cityName: shop.cityName,
       productCount: products.length,
       rating: Number(rating.toFixed(2)),

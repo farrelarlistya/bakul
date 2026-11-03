@@ -36,6 +36,85 @@ enum OtpPurpose {
   LOGIN
 }
 
+enum PaymentMethod {
+  VA_BCA
+  VA_MANDIRI
+  VA_BNI
+  VA_BRI
+  QRIS
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  EXPIRED
+  FAILED
+  REFUNDED
+}
+
+enum OrderStatus {
+  WAITING_PAYMENT
+  WAITING_SELLER_CONFIRMATION
+  PROCESSING
+  READY_TO_SHIP
+  SHIPPED
+  IN_TRANSIT
+  DELIVERED
+  COMPLETED
+  DISPUTED
+  REFUNDED
+  RETURNING
+  RETURNED
+  CANCELLED_UNPAID
+  CANCELLED_BY_SELLER
+}
+
+enum EscrowStatus {
+  PENDING
+  HELD
+  FROZEN
+  RELEASED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  CANCELLED
+}
+
+enum ShipmentStatus {
+  PENDING
+  AWB_CREATED
+  PICKED_UP
+  IN_TRANSIT
+  ARRIVED_AT_DESTINATION
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED_DELIVERY
+  RETURNED_TO_SENDER
+}
+
+enum DisputeStatus {
+  OPEN
+  WAITING_SELLER
+  ESCALATED_TO_ADMIN
+  RESOLVED_BUYER
+  RESOLVED_SELLER
+  CLOSED
+  CANCELLED_BY_BUYER
+  AUTO_CLOSED_NO_RESPONSE
+}
+
+enum WithdrawalStatus {
+  REQUESTED
+  APPROVED
+  PROCESSING
+  COMPLETED
+  REJECTED
+}
+
+enum LedgerDirection {
+  DEBIT
+  CREDIT
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   phone        String   @unique @db.VarChar(20)
@@ -52,6 +131,12 @@ model User {
   sessions      Session[]
   notifications Notification[]
   reviews       Review[]
+  cart          Cart?
+  payments      Payment[]
+  invoices      OrderInvoice[]
+  disputes      Dispute[]
+  disputeMessages DisputeMessage[]
+  processedWithdrawals Withdrawal[] @relation("WithdrawalProcessor")
 
   @@map("users")
 }
@@ -83,6 +168,7 @@ model Shop {
   name               String     @db.VarChar(120)
   slug               String     @unique @db.VarChar(140)
   description        String?    @db.Text
+  logoUrl            String?    @map("logo_url") @db.Text
   status             ShopStatus @default(ACTIVE)
   cityId             String     @map("city_id") @db.VarChar(10)
   cityName           String     @map("city_name") @db.VarChar(80)
@@ -96,6 +182,11 @@ model Shop {
   owner    User          @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
   products Product[]
   etalases ShopEtalase[]
+  wallet   ShopWallet?
+  invoices OrderInvoice[]
+  disputes Dispute[]
+  withdrawals Withdrawal[]
+  ledgerEntries LedgerEntry[]
 
   @@index([cityId])
   @@index([status])
@@ -136,6 +227,7 @@ model Product {
   variants ProductVariant[]
   images   ProductImage[]
   reviews  Review[]
+  orderItems OrderItem[]
 
   @@index([shopId, status])
   @@index([categoryId])
@@ -161,17 +253,19 @@ model ShopEtalase {
 }
 
 model Review {
-  id        String   @id @default(uuid()) @db.Uuid
-  productId String   @map("product_id") @db.Uuid
-  buyerId   String   @map("buyer_id") @db.Uuid
-  rating    Int
-  comment   String?  @db.Text
-  createdAt DateTime @default(now()) @map("created_at")
+  id          String   @id @default(uuid()) @db.Uuid
+  orderItemId String?  @unique @map("order_item_id") @db.Uuid
+  productId   String   @map("product_id") @db.Uuid
+  buyerId     String   @map("buyer_id") @db.Uuid
+  rating      Int
+  comment     String?  @db.Text
+  mediaUrls   Json     @default("[]") @map("media_urls")
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  buyer   User    @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  buyer     User       @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
 
-  @@unique([productId, buyerId])
   @@index([productId, createdAt])
   @@map("reviews")
 }
@@ -188,6 +282,9 @@ model ProductVariant {
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  cartItems CartItem[]
+  orderItems OrderItem[]
 
   @@index([productId])
   @@map("product_variants")
@@ -248,4 +345,281 @@ model Notification {
 
   @@index([userId, createdAt])
   @@map("notifications")
+}
+
+model Cart {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id         String   @id @default(uuid()) @db.Uuid
+  cartId     String   @map("cart_id") @db.Uuid
+  variantId  String   @map("variant_id") @db.Uuid
+  quantity   Int      @default(1)
+  isSelected Boolean  @default(true) @map("is_selected")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  cart    Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, variantId])
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+model Payment {
+  id             String        @id @default(uuid()) @db.Uuid
+  buyerId        String        @map("buyer_id") @db.Uuid
+  idempotencyKey String        @unique @map("idempotency_key") @db.VarChar(100)
+  paymentCode    String        @unique @map("payment_code") @db.VarChar(40)
+  method         PaymentMethod
+  providerRef    String        @unique @map("provider_ref") @db.VarChar(60)
+  totalAmount    Int           @map("total_amount")
+  status         PaymentStatus @default(PENDING)
+  expiresAt      DateTime      @map("expires_at")
+  paidAt         DateTime?     @map("paid_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  buyer    User           @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+  invoices OrderInvoice[]
+
+  @@index([buyerId, createdAt])
+  @@index([status, expiresAt])
+  @@map("payments")
+}
+
+model OrderInvoice {
+  id              String       @id @default(uuid()) @db.Uuid
+  paymentId       String       @map("payment_id") @db.Uuid
+  invoiceNumber   String       @unique @map("invoice_number") @db.VarChar(30)
+  buyerId         String       @map("buyer_id") @db.Uuid
+  shopId          String       @map("shop_id") @db.Uuid
+  recipientName   String       @map("recipient_name") @db.VarChar(120)
+  recipientPhone  String       @map("recipient_phone") @db.VarChar(20)
+  cityId          String       @map("city_id") @db.VarChar(10)
+  cityName        String       @map("city_name") @db.VarChar(80)
+  districtName    String?      @map("district_name") @db.VarChar(80)
+  postalCode      String       @map("postal_code") @db.VarChar(10)
+  fullAddress     String       @map("full_address") @db.Text
+  notes           String?      @db.Text
+  subtotal        Int
+  shippingCost    Int          @map("shipping_cost")
+  serviceFee      Int          @map("service_fee")
+  platformFee     Int          @map("platform_fee")
+  netSellerAmount Int          @map("net_seller_amount")
+  totalAmount     Int          @map("total_amount")
+  courierCode     String       @map("courier_code") @db.VarChar(20)
+  courierName     String       @map("courier_name") @db.VarChar(40)
+  courierService  String       @map("courier_service") @db.VarChar(10)
+  weightGram      Int          @map("weight_gram")
+  escrowStatus    EscrowStatus @default(PENDING) @map("escrow_status")
+  orderStatus     OrderStatus  @default(WAITING_PAYMENT) @map("order_status")
+  sellerConfirmDeadline DateTime @map("seller_confirm_deadline")
+  paidAt          DateTime?    @map("paid_at")
+  acceptedAt      DateTime?    @map("accepted_at")
+  shippedAt       DateTime?    @map("shipped_at")
+  deliveredAt     DateTime?    @map("delivered_at")
+  autoCompleteAt  DateTime?    @map("auto_complete_at")
+  completedAt     DateTime?    @map("completed_at")
+  cancelledAt     DateTime?    @map("cancelled_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  payment  Payment     @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  buyer    User        @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+  shop     Shop        @relation(fields: [shopId], references: [id], onDelete: Restrict)
+  items    OrderItem[]
+  shipment Shipment?
+  dispute  Dispute?
+
+  @@index([buyerId, createdAt])
+  @@index([shopId, orderStatus])
+  @@index([orderStatus, sellerConfirmDeadline])
+  @@map("order_invoices")
+}
+
+model OrderItem {
+  id              String  @id @default(uuid()) @db.Uuid
+  orderInvoiceId  String  @map("order_invoice_id") @db.Uuid
+  productId       String? @map("product_id") @db.Uuid
+  variantId       String? @map("variant_id") @db.Uuid
+  nameSnapshot    String  @map("name_snapshot") @db.VarChar(140)
+  variantSnapshot String  @map("variant_snapshot") @db.VarChar(80)
+  priceSnapshot   Int     @map("price_snapshot")
+  weightSnapshot  Int     @map("weight_snapshot")
+  quantity        Int
+  imageUrl        String? @map("image_url") @db.Text
+
+  orderInvoice OrderInvoice    @relation(fields: [orderInvoiceId], references: [id], onDelete: Cascade)
+  product      Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variant      ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  review       Review?
+
+  @@index([orderInvoiceId])
+  @@map("order_items")
+}
+
+model Shipment {
+  id              String         @id @default(uuid()) @db.Uuid
+  orderInvoiceId  String         @unique @map("order_invoice_id") @db.Uuid
+  courierCode     String         @map("courier_code") @db.VarChar(20)
+  courierName     String         @map("courier_name") @db.VarChar(40)
+  serviceType     String         @map("service_type") @db.VarChar(10)
+  awb             String         @unique @db.VarChar(30)
+  labelUrl        String?        @map("label_url") @db.Text
+  shippingStatus  ShipmentStatus @default(PENDING) @map("shipping_status")
+  trackingHistory Json           @default("[]") @map("tracking_history")
+  shippedAt       DateTime?      @map("shipped_at")
+  deliveredAt     DateTime?      @map("delivered_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  orderInvoice OrderInvoice @relation(fields: [orderInvoiceId], references: [id], onDelete: Cascade)
+
+  @@index([shippingStatus])
+  @@map("shipments")
+}
+
+model Dispute {
+  id                String        @id @default(uuid()) @db.Uuid
+  orderInvoiceId    String        @unique @map("order_invoice_id") @db.Uuid
+  buyerId           String        @map("buyer_id") @db.Uuid
+  shopId            String        @map("shop_id") @db.Uuid
+  reason            String        @db.Text
+  requestedSolution String        @map("requested_solution") @db.VarChar(40)
+  evidenceUrls      Json          @default("[]") @map("evidence_urls")
+  status            DisputeStatus @default(OPEN)
+  decisionNote      String?       @map("decision_note") @db.Text
+  resolvedBy        String?       @map("resolved_by") @db.Uuid
+  resolvedAt        DateTime?     @map("resolved_at")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  orderInvoice OrderInvoice     @relation(fields: [orderInvoiceId], references: [id], onDelete: Cascade)
+  buyer        User             @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+  shop         Shop             @relation(fields: [shopId], references: [id], onDelete: Restrict)
+  messages     DisputeMessage[]
+
+  @@index([status, createdAt])
+  @@map("disputes")
+}
+
+model DisputeMessage {
+  id         String   @id @default(uuid()) @db.Uuid
+  disputeId  String   @map("dispute_id") @db.Uuid
+  senderId   String   @map("sender_id") @db.Uuid
+  senderRole UserRole @map("sender_role")
+  body       String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  dispute Dispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  sender  User    @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([disputeId, createdAt])
+  @@map("dispute_messages")
+}
+
+model ShopWallet {
+  id               String   @id @default(uuid()) @db.Uuid
+  shopId           String   @unique @map("shop_id") @db.Uuid
+  balanceAvailable Int      @default(0) @map("balance_available")
+  balanceWithheld  Int      @default(0) @map("balance_withheld")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  shop        Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  withdrawals Withdrawal[]
+
+  @@map("shop_wallets")
+}
+
+model Withdrawal {
+  id                 String           @id @default(uuid()) @db.Uuid
+  shopWalletId       String           @map("shop_wallet_id") @db.Uuid
+  shopId             String           @map("shop_id") @db.Uuid
+  idempotencyKey     String           @unique @map("idempotency_key") @db.VarChar(100)
+  amount             Int
+  bankName           String           @map("bank_name") @db.VarChar(60)
+  bankAccountNumber  String           @map("bank_account_number") @db.VarChar(40)
+  bankAccountHolder  String           @map("bank_account_holder") @db.VarChar(120)
+  status             WithdrawalStatus @default(REQUESTED)
+  note               String?          @db.Text
+  transferProofUrl   String?          @map("transfer_proof_url") @db.Text
+  requestedAt        DateTime         @default(now()) @map("requested_at")
+  processedAt        DateTime?        @map("processed_at")
+  processedBy        String?          @map("processed_by") @db.Uuid
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  shopWallet ShopWallet @relation(fields: [shopWalletId], references: [id], onDelete: Restrict)
+  shop       Shop       @relation(fields: [shopId], references: [id], onDelete: Restrict)
+  processed  User? @relation("WithdrawalProcessor", fields: [processedBy], references: [id], onDelete: SetNull)
+
+  @@index([shopId, createdAt])
+  @@index([status])
+  @@map("withdrawals")
+}
+
+model LedgerJournal {
+  id          String   @id @default(uuid()) @db.Uuid
+  refType     String   @map("ref_type") @db.VarChar(40)
+  refId       String   @map("ref_id") @db.VarChar(100)
+  description String   @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  entries LedgerEntry[]
+
+  @@index([refType, refId])
+  @@map("ledger_journals")
+}
+
+model LedgerEntry {
+  id          String         @id @default(uuid()) @db.Uuid
+  journalId   String         @map("journal_id") @db.Uuid
+  accountCode String         @map("account_code") @db.VarChar(60)
+  direction   LedgerDirection
+  amount      Int
+  shopId      String?        @map("shop_id") @db.Uuid
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  journal LedgerJournal @relation(fields: [journalId], references: [id], onDelete: Restrict)
+  shop    Shop?         @relation(fields: [shopId], references: [id], onDelete: SetNull)
+
+  @@index([journalId])
+  @@index([accountCode])
+  @@index([shopId])
+  @@map("ledger_entries")
+}
+
+model WebhookEvent {
+  id          String    @id @default(uuid()) @db.Uuid
+  provider    String    @db.VarChar(40)
+  eventId     String    @unique @map("event_id") @db.VarChar(100)
+  payload     Json
+  signature   String    @db.Text
+  status      String    @default("RECEIVED") @db.VarChar(20)
+  error       String?   @db.Text
+  receivedAt  DateTime  @default(now()) @map("received_at")
+  processedAt DateTime? @map("processed_at")
+
+  @@index([status, receivedAt])
+  @@map("webhook_events")
+}
+
+model AppSetting {
+  key       String   @id @db.VarChar(60)
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
 }
