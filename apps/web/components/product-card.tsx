@@ -1,0 +1,40 @@
+import Link from "next/link";
+import { formatRupiah, type ProductCard as ProductCardData } from "@bakul/shared";
+
+export function ProductCard({ product }: { product: ProductCardData }) {
+  return (
+    <Link
+      href={`/p/${product.slug}`}
+      className="group block overflow-hidden rounded-kartu border border-garis bg-abu-kartu"
+    >
+      <div className="relative aspect-[4/3] overflow-hidden bg-mint-muda">
+        {product.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            width={400}
+            height={300}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-4xl font-bold text-teal-aksi">
+            {product.name.slice(0, 1)}
+          </div>
+        )}
+      </div>
+      <div className="p-3">
+        <p className="line-clamp-2 min-h-10 text-base font-semibold leading-5 text-tinta">
+          {product.name}
+        </p>
+        <p className="mt-1 text-lg font-bold text-tinta">{formatRupiah(product.price)}</p>
+        <p className="mt-1 text-base text-tinta-lembut">
+          {product.city} · ★ {product.rating.toFixed(1).replace(".", ",")}
+        </p>
+        <p className="mt-1 line-clamp-1 text-base text-teal-aksi">{product.shopName}</p>
+      </div>
+    </Link>
+  );
+}

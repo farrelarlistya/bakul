@@ -441,7 +441,10 @@ export default function JualanPage() {
             )}
 
             <div className="mt-5 space-y-3">
-              <Link href="/akun" className={`${primaryButtonClass} w-full`}>
+              <Link href="/jualan/barang" className={`${primaryButtonClass} w-full`}>
+                Kelola barang
+              </Link>
+              <Link href="/akun" className={`${secondaryButtonClass} w-full`}>
                 Lihat akun dan alamat
               </Link>
               <Link href="/inbox" className={`${secondaryButtonClass} w-full`}>

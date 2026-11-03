@@ -350,8 +350,11 @@ export default function AkunPage() {
                   <>
                     <p className="mt-2 text-lg font-semibold text-tinta">{user.shop.name}</p>
                     <p className="text-base text-tinta-lembut">{user.shop.cityName}</p>
-                    <Link href="/jualan" className={`${secondaryButtonClass} mt-4 w-full`}>
-                      Lihat toko
+                    <Link href="/jualan/barang" className={`${primaryButtonClass} mt-4 w-full`}>
+                      Kelola barang
+                    </Link>
+                    <Link href={`/toko/${user.shop.slug}`} className={`${secondaryButtonClass} mt-2 w-full`}>
+                      Lihat halaman toko
                     </Link>
                   </>
                 ) : (
