@@ -8,6 +8,12 @@ import {
   type WithdrawalView,
 } from "@bakul/shared";
 import { AppHeader } from "@/components/app-header";
+import { EmptyState } from "@/components/empty-state";
+import { Icon } from "@/components/icon";
+import { PromptDialog } from "@/components/prompt-dialog";
+import { Skeleton } from "@/components/skeleton";
+import { StatusBanner } from "@/components/status-banner";
+import { useToast } from "@/components/toast";
 import {
   cardClass,
   dangerButtonClass,
@@ -30,12 +36,20 @@ function tanggal(value: string | null): string {
   }).format(new Date(value));
 }
 
+type DialogState = {
+  item: WithdrawalView;
+  action: "approve" | "reject";
+} | null;
+
 export default function AdminWithdrawalsPage() {
   const { status, user, request, download } = useAuth();
+  const { notify } = useToast();
   const [items, setItems] = useState<WithdrawalView[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<DialogState>(null);
 
   const load = useCallback(async () => {
     try {
@@ -43,6 +57,8 @@ export default function AdminWithdrawalsPage() {
       setError(null);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Pencairan belum bisa dimuat.");
+    } finally {
+      setLoading(false);
     }
   }, [request]);
 
@@ -52,15 +68,8 @@ export default function AdminWithdrawalsPage() {
     }
   }, [status, user?.role, load]);
 
-  async function proses(item: WithdrawalView, action: "approve" | "reject"): Promise<void> {
-    const note = window.prompt(
-      action === "approve" ? "Catatan transfer (opsional)" : "Alasan menolak?",
-      action === "approve" ? "Transfer simulasi berhasil." : "Rekening belum lengkap.",
-    );
-    if (note === null) {
-      return;
-    }
-
+  async function proses(item: WithdrawalView, action: "approve" | "reject", note: string) {
+    setDialog(null);
     setBusy(item.id);
     setError(null);
     try {
@@ -68,11 +77,12 @@ export default function AdminWithdrawalsPage() {
         method: "POST",
         body: JSON.stringify({ note }),
       });
-      setMessage(
+      const pesan =
         action === "approve"
           ? "Pencairan disetujui dan bukti transfer simulasi dibuat."
-          : "Pencairan ditolak. Saldo kembali ke dompet toko.",
-      );
+          : "Pencairan ditolak. Saldo kembali ke dompet toko.";
+      setMessage(pesan);
+      notify(pesan);
       await load();
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Pencairan belum bisa diproses.");
@@ -104,9 +114,13 @@ export default function AdminWithdrawalsPage() {
         </div>
 
         {status === "tamu" || (status === "masuk" && user?.role !== "ADMIN") ? (
-          <div className={`${cardClass} mt-6`}>
-            <p className="text-base text-tinta-lembut">Halaman ini hanya untuk admin.</p>
-          </div>
+          <EmptyState
+            icon="lock"
+            title="Halaman ini hanya untuk admin"
+            description="Masuk dengan akun admin untuk memproses pencairan."
+            action={{ label: "Masuk", href: "/masuk" }}
+            className="mt-6"
+          />
         ) : null}
         {error ? (
           <div className={`${errorBoxClass} mt-4`} role="alert">
@@ -114,22 +128,35 @@ export default function AdminWithdrawalsPage() {
           </div>
         ) : null}
         {message ? (
-          <p className="mt-4 rounded-kartu bg-mint-muda p-3 text-base text-teal-aksi">{message}</p>
+          <div className="mt-4" role="status">
+            <StatusBanner tone="sukses">{message}</StatusBanner>
+          </div>
+        ) : null}
+
+        {loading ? (
+          <div className="mt-5 space-y-3">
+            <Skeleton className="h-32 w-full rounded-kartu" />
+            <Skeleton className="h-32 w-full rounded-kartu" />
+          </div>
         ) : null}
 
         <div className="mt-5 space-y-3">
-          {items.length === 0 ? (
-            <div className={cardClass}>
-              <p className="text-base text-tinta-lembut">Belum ada pengajuan pencairan.</p>
-            </div>
+          {items.length === 0 && !loading ? (
+            <EmptyState
+              icon="bank"
+              title="Belum ada pengajuan pencairan"
+              description="Pengajuan tarik saldo dari toko akan muncul di sini."
+            />
           ) : null}
 
           {items.map((item) => (
             <article key={item.id} className={cardClass}>
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <p className="text-lg font-bold text-tinta">{formatRupiah(item.amount)}</p>
-                  <p className="text-base text-tinta">{item.shopName ?? "Toko"}</p>
+                  <p className="font-display text-2xl font-bold text-tinta">
+                    {formatRupiah(item.amount)}
+                  </p>
+                  <p className="text-base font-semibold text-tinta">{item.shopName ?? "Toko"}</p>
                   <p className="text-base text-tinta-lembut">
                     {item.bankName} · {item.bankAccountNumber} · {item.bankAccountHolder}
                   </p>
@@ -137,7 +164,7 @@ export default function AdminWithdrawalsPage() {
                     Diajukan {tanggal(item.requestedAt)}
                   </p>
                 </div>
-                <span className="rounded-pil bg-abu-kartu px-3 py-1 text-base font-semibold text-tinta">
+                <span className="inline-flex min-h-8 shrink-0 items-center rounded-pil bg-abu-kartu px-3 text-base font-semibold text-tinta">
                   {WITHDRAWAL_STATUS_LABEL[item.status] ?? item.status}
                 </span>
               </div>
@@ -153,15 +180,16 @@ export default function AdminWithdrawalsPage() {
                       type="button"
                       className={primaryButtonClass}
                       disabled={busy === item.id}
-                      onClick={() => void proses(item, "approve")}
+                      onClick={() => setDialog({ item, action: "approve" })}
                     >
+                      <Icon name="check" size={18} />
                       Setujui & cairkan
                     </button>
                     <button
                       type="button"
                       className={dangerButtonClass}
                       disabled={busy === item.id}
-                      onClick={() => void proses(item, "reject")}
+                      onClick={() => setDialog({ item, action: "reject" })}
                     >
                       Tolak
                     </button>
@@ -178,6 +206,7 @@ export default function AdminWithdrawalsPage() {
                       )
                     }
                   >
+                    <Icon name="download" size={18} />
                     Unduh bukti transfer
                   </button>
                 ) : null}
@@ -186,6 +215,33 @@ export default function AdminWithdrawalsPage() {
           ))}
         </div>
       </div>
+
+      <PromptDialog
+        open={dialog !== null}
+        title={
+          dialog?.action === "approve"
+            ? "Setujui pencairan ini?"
+            : "Tolak pencairan ini?"
+        }
+        description={
+          dialog?.action === "approve"
+            ? "Saldo toko dipindahkan dan bukti transfer simulasi dibuat."
+            : "Saldo kembali ke dompet toko dan pengaju diberi tahu."
+        }
+        label={dialog?.action === "approve" ? "Catatan transfer" : "Alasan menolak"}
+        defaultValue={dialog?.action === "approve" ? "Transfer simulasi berhasil." : ""}
+        placeholder={
+          dialog?.action === "approve" ? "Transfer simulasi berhasil." : "Rekening belum lengkap."
+        }
+        confirmLabel={dialog?.action === "approve" ? "Ya, cairkan" : "Ya, tolak"}
+        required={dialog?.action === "reject"}
+        onConfirm={(note) => {
+          if (dialog) {
+            void proses(dialog.item, dialog.action, note);
+          }
+        }}
+        onCancel={() => setDialog(null)}
+      />
     </main>
   );
 }

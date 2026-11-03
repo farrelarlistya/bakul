@@ -4,11 +4,17 @@ import Link from "next/link";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { COURIERS, SHOP_STATUS_LABEL } from "@bakul/shared";
 import { AppHeader } from "@/components/app-header";
+import { EmptyState } from "@/components/empty-state";
+import { Field } from "@/components/field";
+import { Icon } from "@/components/icon";
+import { Skeleton } from "@/components/skeleton";
+import { StatusBanner } from "@/components/status-banner";
+import { useToast } from "@/components/toast";
 import {
   cardClass,
   errorBoxClass,
+  fileInputClass,
   inputClass,
-  labelClass,
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/ui";
@@ -31,6 +37,7 @@ type Shop = {
 
 export default function SellerShopPage() {
   const { status, user, request } = useAuth();
+  const { notify } = useToast();
   const [shop, setShop] = useState<Shop | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -43,6 +50,7 @@ export default function SellerShopPage() {
   const [logoBusy, setLogoBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status !== "masuk" || !user?.shop) {
@@ -89,6 +97,7 @@ export default function SellerShopPage() {
       });
       setShop(updated);
       setMessage("Logo toko diperbarui.");
+      notify("Logo toko diperbarui.");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Logo belum bisa diunggah.");
     } finally {
@@ -97,17 +106,19 @@ export default function SellerShopPage() {
     }
   }
 
-  async function simpan(): Promise<void> {    if (!name.trim()) {
-      setError("Nama toko wajib diisi.");
+  async function simpan(): Promise<void> {
+    if (!name.trim()) {
+      setFormError("Nama toko wajib diisi.");
       return;
     }
     if (couriers.length === 0) {
-      setError("Pilih minimal satu kurir.");
+      setFormError("Pilih minimal satu kurir.");
       return;
     }
 
     setBusy(true);
     setError(null);
+    setFormError(null);
     try {
       const updated = await request<Shop>("/api/v1/seller/shop", {
         method: "PATCH",
@@ -122,6 +133,7 @@ export default function SellerShopPage() {
       });
       setShop(updated);
       setMessage("Pengaturan toko disimpan.");
+      notify("Pengaturan toko disimpan.");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Pengaturan belum bisa disimpan.");
     } finally {
@@ -148,14 +160,20 @@ export default function SellerShopPage() {
           </div>
         </div>
 
-        {loading ? <p className="mt-4 text-base text-tinta-lembut">Memuat toko…</p> : null}
-        {status === "masuk" && !user?.shop ? (
-          <div className={`${cardClass} mt-6`}>
-            <p className="text-base text-tinta-lembut">Kamu belum punya toko.</p>
-            <Link href="/jualan" className={`${primaryButtonClass} mt-4 w-full`}>
-              Buka toko
-            </Link>
+        {loading ? (
+          <div className="mt-4 space-y-3">
+            <Skeleton className="h-32 w-full rounded-kartu" />
+            <Skeleton className="h-64 w-full rounded-kartu" />
           </div>
+        ) : null}
+        {status === "masuk" && !user?.shop ? (
+          <EmptyState
+            icon="store"
+            title="Kamu belum punya toko"
+            description="Buka toko dulu, lalu pengaturan toko bisa diubah di sini."
+            action={{ label: "Buka toko", href: "/jualan" }}
+            className="mt-6"
+          />
         ) : null}
         {error ? (
           <div className={`${errorBoxClass} mt-4`} role="alert">
@@ -163,7 +181,9 @@ export default function SellerShopPage() {
           </div>
         ) : null}
         {message ? (
-          <p className="mt-4 rounded-kartu bg-mint-muda p-3 text-base text-teal-aksi">{message}</p>
+          <div className="mt-4" role="status">
+            <StatusBanner tone="sukses">{message}</StatusBanner>
+          </div>
         ) : null}
 
         {shop ? (
@@ -176,7 +196,7 @@ export default function SellerShopPage() {
                     bakul/{shop.slug} · {shop.cityName}
                   </p>
                 </div>
-                <span className="rounded-pil bg-mint px-3 py-1 text-base font-semibold text-teal-tua">
+                <span className="inline-flex min-h-8 items-center rounded-pil bg-mint px-3 text-base font-semibold text-teal-tua">
                   {SHOP_STATUS_LABEL[shop.status] ?? shop.status}
                 </span>
               </div>
@@ -193,7 +213,7 @@ export default function SellerShopPage() {
             <section className={cardClass}>
               <h2 className="font-display text-2xl font-bold text-tinta">Profil toko</h2>
               <div className="mt-3 flex items-center gap-3">
-                <span className="inline-flex h-16 w-16 items-center justify-center overflow-hidden rounded-pil bg-mint-muda text-xl font-bold text-teal-aksi">
+                <span className="inline-flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-pil bg-mint-muda text-xl font-bold text-teal-aksi">
                   {shop.logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -207,7 +227,7 @@ export default function SellerShopPage() {
                     shop.name.slice(0, 2).toUpperCase()
                   )}
                 </span>
-                <div>
+                <div className="min-w-0 flex-1">
                   <label className="block text-base font-semibold text-tinta" htmlFor="shop-logo">
                     Logo toko
                   </label>
@@ -215,35 +235,41 @@ export default function SellerShopPage() {
                     id="shop-logo"
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
-                    className="mt-1 block min-h-11 w-full text-base text-tinta"
+                    className={`${fileInputClass} mt-1`}
                     disabled={logoBusy}
                     onChange={(event) => void unggahLogo(event)}
                   />
-                  <p className="text-base text-tinta-lembut">
+                  <p className="mt-1 text-base text-tinta-lembut">
                     {logoBusy ? "Mengunggah…" : "JPG, PNG, atau WebP. Maksimal 2 MB."}
                   </p>
                 </div>
               </div>
-              <label className={`${labelClass} mt-3`} htmlFor="shop-name">
-                Nama toko
-              </label>
-              <input
-                id="shop-name"
-                className={inputClass}
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                maxLength={120}
-              />
-              <label className={`${labelClass} mt-3`} htmlFor="shop-description">
-                Cerita toko
-              </label>
-              <textarea
-                id="shop-description"
-                className={`${inputClass} min-h-24 py-3`}
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                maxLength={1000}
-              />
+              <div className="mt-4">
+                <Field label="Nama toko" htmlFor="shop-name">
+                  {(props) => (
+                    <input
+                      {...props}
+                      className={inputClass}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      maxLength={120}
+                    />
+                  )}
+                </Field>
+              </div>
+              <div className="mt-4">
+                <Field label="Cerita toko" htmlFor="shop-description">
+                  {(props) => (
+                    <textarea
+                      {...props}
+                      className={`${inputClass} min-h-24 py-3`}
+                      value={description}
+                      onChange={(event) => setDescription(event.target.value)}
+                      maxLength={1000}
+                    />
+                  )}
+                </Field>
+              </div>
             </section>
 
             <section className={cardClass}>
@@ -251,76 +277,108 @@ export default function SellerShopPage() {
               <p className="mt-1 text-base text-tinta-lembut">
                 Pembeli hanya bisa memilih kurir yang kamu aktifkan.
               </p>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {COURIERS.map((courier) => (
-                  <label
-                    key={courier.code}
-                    className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-kartu border p-3 ${
-                      couriers.includes(courier.code)
-                        ? "border-teal-aksi bg-mint-muda"
-                        : "border-garis"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      className="h-6 w-6 shrink-0"
-                      checked={couriers.includes(courier.code)}
-                      onChange={() => toggleCourier(courier.code)}
-                    />
-                    <span className="text-base font-semibold text-tinta">{courier.name}</span>
-                  </label>
-                ))}
+              <div
+                role="group"
+                aria-label="Kurir yang dilayani"
+                className="mt-3 grid gap-2 sm:grid-cols-2"
+              >
+                {COURIERS.map((courier) => {
+                  const aktif = couriers.includes(courier.code);
+                  return (
+                    <label
+                      key={courier.code}
+                      className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-kartu border p-3 transition duration-cepat ease-standar ${
+                        aktif
+                          ? "border-teal-aksi bg-mint-muda"
+                          : "border-garis bg-putih hover:border-garis-kuat hover:bg-abu-kartu/40"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="h-6 w-6 shrink-0 accent-teal-aksi"
+                        checked={aktif}
+                        onChange={() => toggleCourier(courier.code)}
+                      />
+                      <span className="min-w-0 flex-1 text-base font-semibold text-tinta">
+                        {courier.name}
+                      </span>
+                      {aktif ? (
+                        <span className="shrink-0 text-teal-aksi">
+                          <Icon name="check" size={20} />
+                        </span>
+                      ) : null}
+                    </label>
+                  );
+                })}
               </div>
             </section>
 
             <section className={cardClass}>
               <h2 className="font-display text-2xl font-bold text-tinta">Rekening pencairan</h2>
+              <p className="mt-1 text-base text-tinta-lembut">
+                Dipakai saat kamu menarik saldo. Pastikan namamu sama seperti di bank.
+              </p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <div>
-                  <label className={labelClass} htmlFor="bank-name">
-                    Bank
-                  </label>
-                  <input
-                    id="bank-name"
-                    className={inputClass}
-                    value={bankName}
-                    onChange={(event) => setBankName(event.target.value)}
-                    maxLength={60}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="bank-account">
-                    Nomor rekening
-                  </label>
-                  <input
-                    id="bank-account"
-                    inputMode="numeric"
-                    className={inputClass}
-                    value={accountNumber}
-                    onChange={(event) => setAccountNumber(event.target.value.replace(/\D/g, ""))}
-                    maxLength={40}
-                  />
-                </div>
+                <Field label="Bank" htmlFor="bank-name">
+                  {(props) => (
+                    <input
+                      {...props}
+                      className={inputClass}
+                      value={bankName}
+                      onChange={(event) => setBankName(event.target.value)}
+                      maxLength={60}
+                    />
+                  )}
+                </Field>
+                <Field label="Nomor rekening" htmlFor="bank-account">
+                  {(props) => (
+                    <input
+                      {...props}
+                      inputMode="numeric"
+                      className={inputClass}
+                      value={accountNumber}
+                      onChange={(event) => setAccountNumber(event.target.value.replace(/\D/g, ""))}
+                      maxLength={40}
+                    />
+                  )}
+                </Field>
               </div>
-              <label className={`${labelClass} mt-3`} htmlFor="bank-holder">
-                Nama pemilik rekening
-              </label>
-              <input
-                id="bank-holder"
-                className={inputClass}
-                value={holder}
-                onChange={(event) => setHolder(event.target.value)}
-                maxLength={120}
-              />
+              <div className="mt-3">
+                <Field label="Nama pemilik rekening" htmlFor="bank-holder">
+                  {(props) => (
+                    <input
+                      {...props}
+                      className={inputClass}
+                      value={holder}
+                      onChange={(event) => setHolder(event.target.value)}
+                      maxLength={120}
+                    />
+                  )}
+                </Field>
+              </div>
             </section>
+
+            {formError ? (
+              <div className={errorBoxClass} role="alert">
+                {formError}
+              </div>
+            ) : null}
 
             <button
               type="button"
               className={`${primaryButtonClass} w-full`}
               disabled={busy}
+              aria-busy={busy}
               onClick={() => void simpan()}
             >
-              {busy ? "Menyimpan…" : "Simpan pengaturan"}
+              {busy ? (
+                <>
+                  <Icon name="refresh" size={18} className="animate-memuat" />
+                  Menyimpan…
+                </>
+              ) : (
+                "Simpan pengaturan"
+              )}
             </button>
           </div>
         ) : null}

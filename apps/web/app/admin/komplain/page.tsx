@@ -13,11 +13,17 @@ import {
 } from "@bakul/shared";
 import { OrderStatusBadge } from "@/components/order-status";
 import { AppHeader } from "@/components/app-header";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { EmptyState } from "@/components/empty-state";
+import { Field } from "@/components/field";
+import { Icon } from "@/components/icon";
+import { Skeleton } from "@/components/skeleton";
+import { StatusBanner } from "@/components/status-banner";
+import { useToast } from "@/components/toast";
 import {
   cardClass,
   errorBoxClass,
   inputClass,
-  labelClass,
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/ui";
@@ -28,6 +34,13 @@ const DECISION_LABEL: Record<string, string> = {
   REFUND_FULL: "Uang kembali semua",
   REFUND_PARTIAL: "Uang kembali sebagian",
   RETURN: "Barang dikembalikan",
+};
+
+const DECISION_TONE: Record<string, string> = {
+  RELEASE: "bg-mint-muda text-teal-aksi",
+  REFUND_FULL: "bg-bahaya-muda text-bahaya",
+  REFUND_PARTIAL: "bg-krem text-perhatian-tua",
+  RETURN: "bg-krem text-perhatian-tua",
 };
 
 function waktu(value: string | null): string {
@@ -45,6 +58,7 @@ function waktu(value: string | null): string {
 
 export default function AdminDisputesPage() {
   const { status, user, request } = useAuth();
+  const { notify } = useToast();
   const [items, setItems] = useState<AdminDisputeItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<OrderInvoiceView | null>(null);
@@ -53,8 +67,11 @@ export default function AdminDisputesPage() {
   const [note, setNote] = useState("");
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [noteError, setNoteError] = useState<string | null>(null);
+  const [konfirmasiSimpan, setKonfirmasiSimpan] = useState(false);
 
   const loadList = useCallback(async () => {
     try {
@@ -69,6 +86,8 @@ export default function AdminDisputesPage() {
       setError(null);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Komplain belum bisa dimuat.");
+    } finally {
+      setLoading(false);
     }
   }, [request]);
 
@@ -98,21 +117,23 @@ export default function AdminDisputesPage() {
   }, [selectedId, loadDetail]);
 
   async function putuskan(): Promise<void> {
+    setKonfirmasiSimpan(false);
     if (!selectedId) {
       return;
     }
     if (note.trim().length < 3) {
-      setError("Tulis alasan keputusan dulu.");
+      setNoteError("Tulis alasan keputusan minimal 3 huruf.");
       return;
     }
     const amount = Number(refundAmount.replace(/\D/g, ""));
     if (decision === "REFUND_PARTIAL" && !amount) {
-      setError("Isi jumlah uang yang dikembalikan.");
+      setNoteError("Isi jumlah uang yang dikembalikan.");
       return;
     }
 
     setBusy(true);
     setError(null);
+    setNoteError(null);
     try {
       await request(`/api/v1/admin/disputes/${selectedId}/decide`, {
         method: "POST",
@@ -123,6 +144,7 @@ export default function AdminDisputesPage() {
         }),
       });
       setMessage("Keputusan disimpan.");
+      notify("Keputusan disimpan.");
       await loadList();
       await loadDetail(selectedId);
     } catch (caught: unknown) {
@@ -140,6 +162,7 @@ export default function AdminDisputesPage() {
     try {
       await request(`/api/v1/admin/disputes/${selectedId}/returned`, { method: "POST" });
       setMessage("Barang ditandai sudah kembali. Uang dikembalikan.");
+      notify("Barang ditandai sudah kembali. Uang dikembalikan.");
       await loadDetail(selectedId);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Belum bisa ditandai kembali.");
@@ -160,6 +183,7 @@ export default function AdminDisputesPage() {
       });
       setReply("");
       setMessage("Balasan admin terkirim.");
+      notify("Balasan admin terkirim.");
       await loadDetail(selectedId ?? "");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Balasan belum bisa dikirim.");
@@ -171,7 +195,7 @@ export default function AdminDisputesPage() {
   return (
     <main className="min-h-screen bg-krem pb-10">
       <AppHeader />
-      <div className="mx-auto max-w-5xl px-4 py-8">
+      <div className="mx-auto max-w-[1200px] px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-base font-semibold text-teal-aksi">Tim Bakul</p>
@@ -191,9 +215,13 @@ export default function AdminDisputesPage() {
         </div>
 
         {status === "tamu" || (status === "masuk" && user?.role !== "ADMIN") ? (
-          <div className={`${cardClass} mt-6`}>
-            <p className="text-base text-tinta-lembut">Halaman ini hanya untuk admin.</p>
-          </div>
+          <EmptyState
+            icon="lock"
+            title="Halaman ini hanya untuk admin"
+            description="Masuk dengan akun admin untuk membuka pusat resolusi."
+            action={{ label: "Masuk", href: "/masuk" }}
+            className="mt-6"
+          />
         ) : null}
         {error ? (
           <div className={`${errorBoxClass} mt-4`} role="alert">
@@ -201,45 +229,81 @@ export default function AdminDisputesPage() {
           </div>
         ) : null}
         {message ? (
-          <p className="mt-4 rounded-kartu bg-mint-muda p-3 text-base text-teal-aksi">{message}</p>
+          <div className="mt-4" role="status">
+            <StatusBanner tone="sukses">{message}</StatusBanner>
+          </div>
         ) : null}
 
         <div className="mt-5 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
           <section className={cardClass}>
-            <h2 className="font-display text-2xl font-bold text-tinta">Daftar komplain</h2>
-            {items.length === 0 ? (
-              <p className="mt-2 text-base text-tinta-lembut">Belum ada komplain.</p>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-display text-2xl font-bold text-tinta">Daftar komplain</h2>
+              <span className="inline-flex min-h-8 items-center rounded-pil bg-abu-kartu px-3 text-base font-semibold text-tinta-lembut">
+                {items.length} kasus
+              </span>
+            </div>
+            {loading ? (
+              <div className="mt-3 space-y-2">
+                <Skeleton className="h-20 w-full rounded-kartu" />
+                <Skeleton className="h-20 w-full rounded-kartu" />
+              </div>
+            ) : items.length === 0 ? (
+              <EmptyState
+                icon="shield"
+                title="Belum ada komplain"
+                description="Semua pesanan berjalan lancar. Bagus."
+                className="mt-3"
+              />
             ) : (
               <ul className="mt-3 space-y-2">
-                {items.map((item) => (
-                  <li key={item.id}>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedId(item.id)}
-                      className={`w-full rounded-kartu border p-3 text-left ${
-                        selectedId === item.id
-                          ? "border-teal-aksi bg-mint-muda"
-                          : "border-garis bg-putih"
-                      }`}
-                    >
-                      <p className="text-base font-semibold text-tinta">{item.invoiceNumber}</p>
-                      <p className="text-base text-tinta-lembut">
-                        {item.shopName} · {item.buyerName}
-                      </p>
-                      <p className="text-base text-tinta-lembut">
-                        {formatRupiah(item.totalAmount)} ·{" "}
-                        {DISPUTE_STATUS_LABEL[item.status] ?? item.status}
-                      </p>
-                    </button>
-                  </li>
-                ))}
+                {items.map((item) => {
+                  const aktif = selectedId === item.id;
+                  return (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedId(item.id)}
+                        aria-pressed={aktif}
+                        className={`w-full rounded-kartu border p-3 text-left transition duration-cepat ease-standar active:scale-[0.99] ${
+                          aktif
+                            ? "border-teal-aksi bg-mint-muda"
+                            : "border-garis bg-putih hover:border-garis-kuat hover:bg-abu-kartu/40"
+                        }`}
+                      >
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="text-base font-semibold text-tinta">
+                            {item.invoiceNumber}
+                          </span>
+                          <span className="text-base text-tinta-lembut">
+                            {formatRupiah(item.totalAmount)}
+                          </span>
+                        </span>
+                        <span className="mt-0.5 block text-base text-tinta-lembut">
+                          {item.shopName} · {item.buyerName}
+                        </span>
+                        <span className="mt-1 block text-base font-semibold text-tinta">
+                          {DISPUTE_STATUS_LABEL[item.status] ?? item.status}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>
 
           <section className={cardClass}>
             {!invoice ? (
-              <p className="text-base text-tinta-lembut">Pilih komplain dari daftar.</p>
+              loading ? (
+                <Skeleton className="h-72 w-full rounded-kartu" />
+              ) : (
+                <EmptyState
+                  icon="chat"
+                  title="Pilih komplain dari daftar"
+                  description="Kasus yang dipilih akan tampil di sini lengkap dengan buktinya."
+                  className="border-dashed"
+                />
+              )
             ) : (
               <>
                 <div className="flex flex-wrap items-start justify-between gap-2">
@@ -247,20 +311,21 @@ export default function AdminDisputesPage() {
                     <p className="text-base text-tinta-lembut">{invoice.invoiceNumber}</p>
                     <h2 className="font-display text-2xl font-bold text-tinta">{invoice.shop.name}</h2>
                     <p className="text-base text-tinta-lembut">
-                      Pembeli {invoice.buyerName} · {invoice.dispute ? waktu(invoice.dispute.createdAt) : ""}
+                      Pembeli {invoice.buyerName} ·{" "}
+                      {invoice.dispute ? waktu(invoice.dispute.createdAt) : ""}
                     </p>
                   </div>
                   <OrderStatusBadge status={invoice.orderStatus} />
                 </div>
 
-                <div className="mt-3 rounded-kartu bg-krem p-3">
+                <div className="mt-3 rounded-kartu border border-garis-kuat bg-krem p-3">
                   <p className="text-base text-tinta">{invoice.dispute?.reason}</p>
                   <p className="mt-1 text-base text-tinta-lembut">
                     Diminta:{" "}
                     {DISPUTE_SOLUTION_LABEL[invoice.dispute?.requestedSolution ?? ""] ??
                       invoice.dispute?.requestedSolution}
                   </p>
-                  <p className="text-base text-tinta-lembut">
+                  <p className="mt-1 text-base text-tinta-lembut">
                     Nilai pesanan {formatRupiah(invoice.totalAmount)}
                   </p>
                 </div>
@@ -281,28 +346,35 @@ export default function AdminDisputesPage() {
                 ) : null}
 
                 <h3 className="mt-4 text-base font-semibold text-tinta">Ruang diskusi</h3>
-                <ul className="mt-2 space-y-2">
-                  {invoice.dispute?.messages.map((item) => (
-                    <li key={item.id} className="rounded-kartu bg-abu-kartu p-3">
-                      <p className="text-base font-semibold text-tinta">
-                        {item.senderName} · {item.senderRole}
-                      </p>
-                      <p className="text-base text-tinta">{item.body}</p>
-                      <p className="text-base text-tinta-lembut">{waktu(item.createdAt)}</p>
-                    </li>
-                  ))}
-                </ul>
+                {invoice.dispute?.messages.length ? (
+                  <ul className="mt-2 space-y-2">
+                    {invoice.dispute.messages.map((item) => (
+                      <li key={item.id} className="rounded-kartu border border-garis bg-abu-kartu p-3">
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <p className="text-base font-semibold text-tinta">{item.senderName}</p>
+                          <p className="text-base text-tinta-lembut">{waktu(item.createdAt)}</p>
+                        </div>
+                        <p className="mt-1 text-base text-tinta">{item.body}</p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-base text-tinta-lembut">Belum ada balasan.</p>
+                )}
 
-                <label className={`${labelClass} mt-3`} htmlFor="admin-reply">
-                  Balas sebagai admin
-                </label>
-                <textarea
-                  id="admin-reply"
-                  className={`${inputClass} min-h-20 py-3`}
-                  value={reply}
-                  onChange={(event) => setReply(event.target.value)}
-                  maxLength={2000}
-                />
+                <div className="mt-4">
+                  <Field label="Balas sebagai admin" htmlFor="admin-reply">
+                    {(props) => (
+                      <textarea
+                        {...props}
+                        className={`${inputClass} min-h-20 py-3`}
+                        value={reply}
+                        onChange={(event) => setReply(event.target.value)}
+                        maxLength={2000}
+                      />
+                    )}
+                  </Field>
+                </div>
                 <button
                   type="button"
                   className={`${secondaryButtonClass} mt-2`}
@@ -324,58 +396,107 @@ export default function AdminDisputesPage() {
                 ) : null}
 
                 <h3 className="mt-5 text-base font-semibold text-tinta">Keputusan</h3>
-                <div className="mt-2 space-y-2">
-                  {ADMIN_DECISIONS.map((item) => (
-                    <label
-                      key={item}
-                      className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-kartu border p-3 ${
-                        decision === item ? "border-teal-aksi bg-mint-muda" : "border-garis"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="decision"
-                        checked={decision === item}
-                        onChange={() => setDecision(item)}
-                        className="h-6 w-6 shrink-0"
-                      />
-                      <span className="text-base font-semibold text-tinta">
-                        {DECISION_LABEL[item]}
-                      </span>
-                    </label>
-                  ))}
+                <div
+                  role="radiogroup"
+                  aria-label="Keputusan dana"
+                  className="mt-2 space-y-2"
+                >
+                  {ADMIN_DECISIONS.map((item) => {
+                    const dipilih = decision === item;
+                    return (
+                      <label
+                        key={item}
+                        className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-kartu border p-3 transition duration-cepat ease-standar ${
+                          dipilih
+                            ? "border-teal-aksi bg-mint-muda"
+                            : "border-garis bg-putih hover:border-garis-kuat hover:bg-abu-kartu/40"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="decision"
+                          checked={dipilih}
+                          onChange={() => setDecision(item)}
+                          className="h-6 w-6 shrink-0 accent-teal-aksi"
+                        />
+                        <span className="min-w-0 flex-1 text-base font-semibold text-tinta">
+                          {DECISION_LABEL[item]}
+                        </span>
+                        <span
+                          className={`inline-flex min-h-8 shrink-0 items-center rounded-pil px-3 text-base font-semibold ${
+                            DECISION_TONE[item]
+                          }`}
+                        >
+                          {dipilih ? (
+                            <Icon name="check" size={16} />
+                          ) : null}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
 
                 {decision === "REFUND_PARTIAL" ? (
-                  <>
-                    <label className={`${labelClass} mt-3`} htmlFor="refund-amount">
-                      Jumlah uang kembali
-                    </label>
-                    <input
-                      id="refund-amount"
-                      inputMode="numeric"
-                      className={inputClass}
-                      value={refundAmount}
-                      onChange={(event) => setRefundAmount(event.target.value.replace(/\D/g, ""))}
-                    />
-                  </>
+                  <div className="mt-3">
+                    <Field label="Jumlah uang kembali" htmlFor="refund-amount">
+                      {(props) => (
+                        <input
+                          {...props}
+                          inputMode="numeric"
+                          className={inputClass}
+                          value={refundAmount}
+                          onChange={(event) =>
+                            setRefundAmount(event.target.value.replace(/\D/g, ""))
+                          }
+                        />
+                      )}
+                    </Field>
+                  </div>
                 ) : null}
 
-                <label className={`${labelClass} mt-3`} htmlFor="decision-note">
-                  Alasan keputusan
-                </label>
-                <textarea
-                  id="decision-note"
-                  className={`${inputClass} min-h-20 py-3`}
-                  value={note}
-                  onChange={(event) => setNote(event.target.value)}
-                  maxLength={2000}
-                />
+                <div className="mt-3">
+                  <Field
+                    label="Alasan keputusan"
+                    htmlFor="decision-note"
+                    error={noteError}
+                    hint="Alasan ini dilihat pembeli dan penjual."
+                  >
+                    {(props) => (
+                      <textarea
+                        {...props}
+                        className={`${inputClass} min-h-20 py-3`}
+                        value={note}
+                        onChange={(event) => {
+                          setNote(event.target.value);
+                          if (noteError) {
+                            setNoteError(null);
+                          }
+                        }}
+                        maxLength={2000}
+                      />
+                    )}
+                  </Field>
+                </div>
+
+                <div className="mt-3 rounded-kartu border border-garis-kuat bg-abu-kartu p-3">
+                  <p className="text-base font-semibold text-tinta">Dampak keputusan</p>
+                  <p className="mt-1 text-base text-tinta-lembut">
+                    {decision === "RELEASE"
+                      ? `Dana ${formatRupiah(invoice.totalAmount)} diteruskan ke ${invoice.shop.name}.`
+                      : decision === "REFUND_FULL"
+                        ? `Dana ${formatRupiah(invoice.totalAmount)} dikembalikan penuh ke ${invoice.buyerName}.`
+                        : decision === "REFUND_PARTIAL"
+                          ? `Sebagian dana dikembalikan ke ${invoice.buyerName}, sisanya ke ${invoice.shop.name}.`
+                          : `Barang dikembalikan ke ${invoice.shop.name}, dana ditahan sampai barang diterima.`}
+                  </p>
+                </div>
+
                 <button
                   type="button"
-                  className={`${primaryButtonClass} mt-3 w-full`}
+                  className={`${primaryButtonClass} mt-4 w-full`}
                   disabled={busy}
-                  onClick={() => void putuskan()}
+                  aria-busy={busy}
+                  onClick={() => setKonfirmasiSimpan(true)}
                 >
                   {busy ? "Menyimpan…" : "Simpan keputusan"}
                 </button>
@@ -384,6 +505,16 @@ export default function AdminDisputesPage() {
           </section>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={konfirmasiSimpan}
+        title="Simpan keputusan ini?"
+        description="Keputusan dana akan langsung dijalankan dan tidak bisa dibatalkan."
+        confirmLabel="Ya, simpan"
+        cancelLabel="Cek lagi"
+        onConfirm={() => void putuskan()}
+        onCancel={() => setKonfirmasiSimpan(false)}
+      />
     </main>
   );
 }

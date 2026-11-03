@@ -7,14 +7,24 @@ import {
   type CategorySummary,
 } from "@bakul/shared";
 import { AppHeader } from "@/components/app-header";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { EmptyState } from "@/components/empty-state";
+import { Field } from "@/components/field";
+import { Icon } from "@/components/icon";
+import { PromptDialog } from "@/components/prompt-dialog";
+import { SkeletonRow } from "@/components/skeleton";
+import { StatusBanner } from "@/components/status-banner";
+import { useToast } from "@/components/toast";
 import {
   cardClass,
   dangerButtonClass,
   errorBoxClass,
+  fileInputClass,
   inputClass,
   labelClass,
   primaryButtonClass,
   secondaryButtonClass,
+  selectClass,
 } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
 
@@ -63,8 +73,16 @@ const STATUS_LABEL: Record<string, string> = {
   DRAFT: "Draf",
 };
 
+const STATUS_TONE: Record<string, string> = {
+  ACTIVE: "bg-mint-muda text-teal-aksi",
+  INACTIVE: "bg-krem text-perhatian-tua",
+  DELETED: "bg-abu-kartu text-tinta-lembut",
+  DRAFT: "bg-abu-kartu text-tinta-lembut",
+};
+
 export default function SellerProductsPage() {
   const { status, user, request } = useAuth();
+  const { notify } = useToast();
   const [products, setProducts] = useState<SellerProduct[]>([]);
   const [etalases, setEtalases] = useState<Etalase[]>([]);
   const [categories, setCategories] = useState<CategorySummary[]>([]);
@@ -86,7 +104,11 @@ export default function SellerProductsPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [existingImage, setExistingImage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [newEtalaseName, setNewEtalaseName] = useState("");
+  const [hapusProduk, setHapusProduk] = useState<SellerProduct | null>(null);
+  const [hapusEtalaseDialog, setHapusEtalaseDialog] = useState<Etalase | null>(null);
+  const [ubahEtalase, setUbahEtalase] = useState<Etalase | null>(null);
   const formRef = useRef<HTMLElement | null>(null);
 
   const load = useCallback(async () => {
@@ -142,6 +164,7 @@ export default function SellerProductsPage() {
     setExistingImage(null);
     setError(null);
     setMessage(null);
+    setFormError(null);
   }
 
   function openCreate(): void {
@@ -170,6 +193,7 @@ export default function SellerProductsPage() {
     setFormOpen(true);
     setMessage(null);
     setError(null);
+    setFormError(null);
   }
 
   function pilihFoto(event: ChangeEvent<HTMLInputElement>): void {
@@ -193,9 +217,10 @@ export default function SellerProductsPage() {
 
   function tambahVariant(): void {
     if (variants.length >= 5) {
-      setError("Maksimal 5 pilihan per barang.");
+      setFormError("Maksimal 5 pilihan per barang.");
       return;
     }
+    setFormError(null);
     setVariants((current) => [...current, { name: "", price: "", stock: "0" }]);
   }
 
@@ -206,7 +231,7 @@ export default function SellerProductsPage() {
     }
 
     if (row.id) {
-      if (!editingId || !window.confirm("Hapus pilihan ini?")) {
+      if (!editingId) {
         return;
       }
 
@@ -228,6 +253,7 @@ export default function SellerProductsPage() {
           current.map((product) => (product.id === updated.id ? updated : product)),
         );
         setMessage("Pilihan dihapus.");
+        notify("Pilihan dihapus.");
       } catch (caught: unknown) {
         setError(caught instanceof Error ? caught.message : "Pilihan belum bisa dihapus.");
       } finally {
@@ -237,7 +263,7 @@ export default function SellerProductsPage() {
     }
 
     if (variants.length <= 1) {
-      setError("Barang harus punya minimal satu pilihan.");
+      setFormError("Barang harus punya minimal satu pilihan.");
       return;
     }
 
@@ -259,18 +285,18 @@ export default function SellerProductsPage() {
 
   async function simpan(): Promise<void> {
     if (!categoryId) {
-      setError("Pilih kategori dulu.");
+      setFormError("Pilih kategori dulu.");
       return;
     }
 
     if (variants.length === 0) {
-      setError("Isi minimal satu pilihan.");
+      setFormError("Isi minimal satu pilihan.");
       return;
     }
 
     for (const variant of variants) {
       if (!variant.name.trim() || Number(variant.price) < 1_000) {
-        setError("Setiap pilihan perlu nama dan harga minimal Rp 1.000.");
+        setFormError("Setiap pilihan perlu nama dan harga minimal Rp 1.000.");
         return;
       }
     }
@@ -279,6 +305,7 @@ export default function SellerProductsPage() {
     setBusy(true);
     setError(null);
     setMessage(null);
+    setFormError(null);
 
     try {
       if (editingId) {
@@ -342,6 +369,7 @@ export default function SellerProductsPage() {
       resetForm();
       await load();
       setMessage(wasEditing ? "Barang diperbarui." : "Barang ditambahkan.");
+      notify(wasEditing ? "Barang diperbarui." : "Barang ditambahkan.");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Barang belum bisa disimpan.");
     } finally {
@@ -366,6 +394,7 @@ export default function SellerProductsPage() {
         current.map((item) => (item.id === updated.id ? updated : item)),
       );
       setMessage(next === "ACTIVE" ? "Barang diaktifkan." : "Barang dinonaktifkan.");
+      notify(next === "ACTIVE" ? "Barang diaktifkan." : "Barang dinonaktifkan.");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Status belum bisa diubah.");
     } finally {
@@ -374,10 +403,7 @@ export default function SellerProductsPage() {
   }
 
   async function hapusBarang(product: SellerProduct): Promise<void> {
-    if (!window.confirm(`Hapus “${product.name}” dari katalog?`)) {
-      return;
-    }
-
+    setHapusProduk(null);
     setBusy(true);
     setError(null);
 
@@ -393,6 +419,7 @@ export default function SellerProductsPage() {
         current.map((item) => (item.id === updated.id ? updated : item)),
       );
       setMessage("Barang disembunyikan dari katalog.");
+      notify("Barang disembunyikan dari katalog.");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Barang belum bisa dihapus.");
     } finally {
@@ -416,6 +443,7 @@ export default function SellerProductsPage() {
       setNewEtalaseName("");
       await load();
       setMessage("Etalase ditambahkan.");
+      notify("Etalase ditambahkan.");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Etalase belum bisa dibuat.");
     } finally {
@@ -423,9 +451,8 @@ export default function SellerProductsPage() {
     }
   }
 
-  async function ubahEtalase(etalase: Etalase): Promise<void> {
-    const name = window.prompt("Nama etalase baru", etalase.name);
-    if (!name?.trim()) {
+  async function simpanUbahEtalase(nama: string): Promise<void> {
+    if (!ubahEtalase) {
       return;
     }
 
@@ -433,12 +460,13 @@ export default function SellerProductsPage() {
     setError(null);
 
     try {
-      await request(`/api/v1/seller/etalases/${etalase.id}`, {
+      await request(`/api/v1/seller/etalases/${ubahEtalase.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: nama }),
       });
       await load();
       setMessage("Etalase diubah.");
+      notify("Etalase diubah.");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Etalase belum bisa diubah.");
     } finally {
@@ -447,10 +475,7 @@ export default function SellerProductsPage() {
   }
 
   async function hapusEtalase(etalase: Etalase): Promise<void> {
-    if (!window.confirm(`Hapus etalase “${etalase.name}”? Barang di dalamnya tetap ada.`)) {
-      return;
-    }
-
+    setHapusEtalaseDialog(null);
     setBusy(true);
     setError(null);
 
@@ -458,6 +483,7 @@ export default function SellerProductsPage() {
       await request(`/api/v1/seller/etalases/${etalase.id}`, { method: "DELETE" });
       await load();
       setMessage("Etalase dihapus.");
+      notify("Etalase dihapus.");
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Etalase belum bisa dihapus.");
     } finally {
@@ -468,7 +494,7 @@ export default function SellerProductsPage() {
   return (
     <main className="min-h-screen bg-krem pb-10">
       <AppHeader />
-      <div className="mx-auto max-w-5xl px-4 py-8">
+      <div className="mx-auto max-w-[1200px] px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-base font-semibold text-teal-aksi">Toko kamu</p>
@@ -479,7 +505,11 @@ export default function SellerProductsPage() {
               Tambah, ubah, atur stok, dan sembunyikan barang.
             </p>
           </div>
-          <Link href="/akun" className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi">
+          <Link
+            href="/akun"
+            className="inline-flex min-h-11 items-center gap-1 rounded-tombol px-1 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
+          >
+            <Icon name="arrowLeft" size={18} />
             Kembali ke akun
           </Link>
         </div>
@@ -491,23 +521,23 @@ export default function SellerProductsPage() {
         ) : null}
 
         {status === "tamu" ? (
-          <div className={`${cardClass} mt-6`}>
-            <p className="text-base text-tinta-lembut">Masuk dulu untuk mengelola barang.</p>
-            <Link href="/masuk" className={`${primaryButtonClass} mt-4 w-full`}>
-              Masuk
-            </Link>
-          </div>
+          <EmptyState
+            icon="user"
+            title="Masuk dulu untuk mengelola barang"
+            description="Masuk dengan nomor HP, lalu barang tokomu bisa dikelola di sini."
+            action={{ label: "Masuk", href: "/masuk" }}
+            className="mt-6"
+          />
         ) : null}
 
         {status === "masuk" && !user?.shop ? (
-          <div className={`${cardClass} mt-6`}>
-            <p className="text-base text-tinta-lembut">
-              Kamu belum punya toko. Buka toko dulu, lalu barang bisa ditambahkan.
-            </p>
-            <Link href="/jualan" className={`${primaryButtonClass} mt-4 w-full`}>
-              Buka toko
-            </Link>
-          </div>
+          <EmptyState
+            icon="store"
+            title="Kamu belum punya toko"
+            description="Buka toko dulu, lalu barang bisa ditambahkan."
+            action={{ label: "Buka toko", href: "/jualan" }}
+            className="mt-6"
+          />
         ) : null}
 
         {status === "masuk" && user?.shop ? (
@@ -518,9 +548,9 @@ export default function SellerProductsPage() {
               </div>
             ) : null}
             {message ? (
-              <p className="mt-5 rounded-kartu bg-mint-muda p-3 text-base text-teal-aksi">
-                {message}
-              </p>
+              <div className="mt-5" role="status">
+                <StatusBanner tone="sukses">{message}</StatusBanner>
+              </div>
             ) : null}
 
             <div className="mt-6 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
@@ -530,19 +560,23 @@ export default function SellerProductsPage() {
                     Daftar barang
                   </h2>
                   <button type="button" className={primaryButtonClass} onClick={openCreate}>
+                    <Icon name="plus" size={18} />
                     Tambah barang
                   </button>
                 </div>
 
                 {loading ? (
-                  <p className="mt-4 text-base text-tinta-lembut">Memuat barang…</p>
+                  <div className="mt-4 space-y-3">
+                    <SkeletonRow />
+                    <SkeletonRow />
+                  </div>
                 ) : null}
 
                 <div className="mt-4 space-y-3">
                   {products.map((product) => (
                     <article
                       key={product.id}
-                      className="rounded-kartu border border-garis bg-abu-kartu p-3"
+                      className="rounded-kartu border border-garis bg-abu-kartu p-3 transition duration-sedang ease-standar hover:border-garis-kuat"
                     >
                       <div className="flex gap-3">
                         <div className="h-20 w-20 shrink-0 overflow-hidden rounded-tombol bg-mint-muda">
@@ -566,10 +600,8 @@ export default function SellerProductsPage() {
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <p className="text-base font-semibold text-tinta">{product.name}</p>
                             <span
-                              className={`rounded-pil px-2 text-base font-semibold ${
-                                product.status === "ACTIVE"
-                                  ? "bg-mint text-teal-tua"
-                                  : "bg-krem text-tinta-lembut"
+                              className={`inline-flex min-h-8 items-center rounded-pil px-3 text-base font-semibold ${
+                                STATUS_TONE[product.status] ?? "bg-abu-kartu text-tinta"
                               }`}
                             >
                               {STATUS_LABEL[product.status] ?? product.status}
@@ -589,6 +621,7 @@ export default function SellerProductsPage() {
                               className={secondaryButtonClass}
                               onClick={() => openEdit(product)}
                             >
+                              <Icon name="edit" size={18} />
                               Ubah
                             </button>
                             <button
@@ -604,8 +637,9 @@ export default function SellerProductsPage() {
                                 type="button"
                                 className={dangerButtonClass}
                                 disabled={busy}
-                                onClick={() => void hapusBarang(product)}
+                                onClick={() => setHapusProduk(product)}
                               >
+                                <Icon name="trash" size={18} />
                                 Hapus
                               </button>
                             ) : null}
@@ -615,9 +649,16 @@ export default function SellerProductsPage() {
                     </article>
                   ))}
                   {!loading && products.length === 0 ? (
-                    <p className="text-base text-tinta-lembut">
-                      Belum ada barang. Klik “Tambah barang”.
-                    </p>
+                    <EmptyState
+                      icon="package"
+                      title="Belum ada barang"
+                      description="Tambah barang pertama supaya pembeli bisa melihat daganganmu."
+                    >
+                      <button type="button" className={primaryButtonClass} onClick={openCreate}>
+                        <Icon name="plus" size={18} />
+                        Tambah barang
+                      </button>
+                    </EmptyState>
                   ) : null}
                 </div>
               </section>
@@ -649,21 +690,28 @@ export default function SellerProductsPage() {
                             type="button"
                             className={secondaryButtonClass}
                             disabled={busy}
-                            onClick={() => void ubahEtalase(etalase)}
+                            onClick={() => setUbahEtalase(etalase)}
                           >
+                            <Icon name="edit" size={18} />
                             Ubah
                           </button>
                           <button
                             type="button"
                             className={dangerButtonClass}
                             disabled={busy}
-                            onClick={() => void hapusEtalase(etalase)}
+                            onClick={() => setHapusEtalaseDialog(etalase)}
                           >
+                            <Icon name="trash" size={18} />
                             Hapus
                           </button>
                         </div>
                       </div>
                     ))}
+                    {etalases.length === 0 ? (
+                      <p className="text-base text-tinta-lembut">
+                        Belum ada etalase. Buat dulu untuk mengelompokkan barang.
+                      </p>
+                    ) : null}
                   </div>
                   <div className="mt-3 flex gap-2">
                     <input
@@ -696,96 +744,92 @@ export default function SellerProductsPage() {
                       </h2>
                       <button
                         type="button"
-                        className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi"
+                        className="inline-flex min-h-11 items-center gap-1 rounded-tombol px-1 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
                         onClick={() => {
                           setFormOpen(false);
                           resetForm();
                         }}
                       >
+                        <Icon name="close" size={18} />
                         Tutup
                       </button>
                     </div>
 
                     <div className="mt-4 space-y-4">
-                      <div>
-                        <label className={labelClass} htmlFor="form-name">
-                          Nama barang
-                        </label>
-                        <input
-                          id="form-name"
-                          className={inputClass}
-                          value={name}
-                          onChange={(event) => setName(event.target.value)}
-                        />
-                      </div>
+                      <Field label="Nama barang" htmlFor="form-name">
+                        {(props) => (
+                          <input
+                            {...props}
+                            className={inputClass}
+                            value={name}
+                            onChange={(event) => setName(event.target.value)}
+                          />
+                        )}
+                      </Field>
 
                       <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                          <label className={labelClass} htmlFor="form-category">
-                            Kategori
-                          </label>
-                          <select
-                            id="form-category"
+                        <Field label="Kategori" htmlFor="form-category">
+                          {(props) => (
+                            <select
+                              {...props}
+                              className={selectClass}
+                              value={categoryId}
+                              onChange={(event) => setCategoryId(event.target.value)}
+                            >
+                              {categories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                  {category.name}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </Field>
+                        <Field label="Etalase" htmlFor="form-etalase">
+                          {(props) => (
+                            <select
+                              {...props}
+                              className={selectClass}
+                              value={etalaseId}
+                              onChange={(event) => setEtalaseId(event.target.value)}
+                            >
+                              <option value="">Tanpa etalase</option>
+                              {etalases.map((etalase) => (
+                                <option key={etalase.id} value={etalase.id}>
+                                  {etalase.name}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </Field>
+                      </div>
+
+                      <Field label="Deskripsi" htmlFor="form-description">
+                        {(props) => (
+                          <textarea
+                            {...props}
+                            className={`${inputClass} min-h-24 py-3`}
+                            value={description}
+                            onChange={(event) => setDescription(event.target.value)}
+                          />
+                        )}
+                      </Field>
+
+                      <Field label="Berat (gram)" htmlFor="form-weight">
+                        {(props) => (
+                          <input
+                            {...props}
+                            inputMode="numeric"
                             className={inputClass}
-                            value={categoryId}
-                            onChange={(event) => setCategoryId(event.target.value)}
-                          >
-                            {categories.map((category) => (
-                              <option key={category.id} value={category.id}>
-                                {category.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className={labelClass} htmlFor="form-etalase">
-                            Etalase
-                          </label>
-                          <select
-                            id="form-etalase"
-                            className={inputClass}
-                            value={etalaseId}
-                            onChange={(event) => setEtalaseId(event.target.value)}
-                          >
-                            <option value="">Tanpa etalase</option>
-                            {etalases.map((etalase) => (
-                              <option key={etalase.id} value={etalase.id}>
-                                {etalase.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
+                            value={weight}
+                            onChange={(event) =>
+                              setWeight(event.target.value.replace(/\D/g, ""))
+                            }
+                          />
+                        )}
+                      </Field>
 
                       <div>
-                        <label className={labelClass} htmlFor="form-description">
-                          Deskripsi
-                        </label>
-                        <textarea
-                          id="form-description"
-                          className={`${inputClass} min-h-24 py-3`}
-                          value={description}
-                          onChange={(event) => setDescription(event.target.value)}
-                        />
-                      </div>
-
-                      <div>
-                        <label className={labelClass} htmlFor="form-weight">
-                          Berat (gram)
-                        </label>
-                        <input
-                          id="form-weight"
-                          inputMode="numeric"
-                          className={inputClass}
-                          value={weight}
-                          onChange={(event) =>
-                            setWeight(event.target.value.replace(/\D/g, ""))
-                          }
-                        />
-                      </div>
-
-                      <div>
-                        <label className={labelClass} htmlFor="form-photo">
+                        <label className="mb-2 block text-base font-semibold text-tinta" htmlFor="form-photo">
                           Foto barang
                         </label>
                         <div className="rounded-kartu border border-garis bg-mint-muda p-3">
@@ -799,16 +843,17 @@ export default function SellerProductsPage() {
                               className="h-32 w-full rounded-tombol object-cover"
                             />
                           ) : (
-                            <p className="py-8 text-center text-base text-tinta-lembut">
-                              Belum ada foto.
-                            </p>
+                            <div className="flex flex-col items-center gap-2 py-8 text-center">
+                              <Icon name="image" size={28} className="text-teal-aksi" />
+                              <p className="text-base text-tinta-lembut">Belum ada foto.</p>
+                            </div>
                           )}
                           <input
                             id="form-photo"
                             type="file"
                             accept="image/jpeg,image/png,image/webp"
                             onChange={pilihFoto}
-                            className="mt-2 block min-h-11 w-full text-base text-tinta"
+                            className={`${fileInputClass} mt-2`}
                           />
                         </div>
                       </div>
@@ -818,9 +863,10 @@ export default function SellerProductsPage() {
                           <p className={labelClass}>Pilihan dan stok</p>
                           <button
                             type="button"
-                            className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi"
+                            className="inline-flex min-h-11 items-center gap-1 rounded-tombol px-1 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
                             onClick={tambahVariant}
                           >
+                            <Icon name="plus" size={18} />
                             Tambah pilihan
                           </button>
                         </div>
@@ -868,9 +914,10 @@ export default function SellerProductsPage() {
                               </div>
                               <button
                                 type="button"
-                                className="mt-2 inline-flex min-h-11 items-center text-base font-semibold text-bahaya"
+                                className="mt-2 inline-flex min-h-11 items-center gap-1 rounded-tombol px-1 text-base font-semibold text-bahaya transition duration-cepat ease-standar hover:bg-bahaya-muda"
                                 onClick={() => void hapusVariant(index)}
                               >
+                                <Icon name="trash" size={18} />
                                 Hapus pilihan
                               </button>
                             </div>
@@ -878,13 +925,29 @@ export default function SellerProductsPage() {
                         </div>
                       </div>
 
+                      {formError ? (
+                        <div className={errorBoxClass} role="alert">
+                          {formError}
+                        </div>
+                      ) : null}
+
                       <button
                         type="button"
                         className={`${primaryButtonClass} w-full`}
                         disabled={busy || !name.trim() || variants.length === 0}
+                        aria-busy={busy}
                         onClick={() => void simpan()}
                       >
-                        {busy ? "Menyimpan…" : editingId ? "Simpan perubahan" : "Simpan barang"}
+                        {busy ? (
+                          <>
+                            <Icon name="refresh" size={18} className="animate-memuat" />
+                            Menyimpan…
+                          </>
+                        ) : editingId ? (
+                          "Simpan perubahan"
+                        ) : (
+                          "Simpan barang"
+                        )}
                       </button>
                     </div>
                   </section>
@@ -894,6 +957,56 @@ export default function SellerProductsPage() {
           </>
         ) : null}
       </div>
+
+      <ConfirmDialog
+        open={hapusProduk !== null}
+        title="Hapus barang dari katalog?"
+        description={
+          hapusProduk
+            ? `“${hapusProduk.name}” akan disembunyikan dari katalog. Stok dan pesanannya tetap aman.`
+            : undefined
+        }
+        confirmLabel="Ya, hapus"
+        cancelLabel="Batal"
+        danger
+        onConfirm={() => {
+          if (hapusProduk) {
+            void hapusBarang(hapusProduk);
+          }
+        }}
+        onCancel={() => setHapusProduk(null)}
+      />
+
+      <ConfirmDialog
+        open={hapusEtalaseDialog !== null}
+        title="Hapus etalase?"
+        description={
+          hapusEtalaseDialog
+            ? `Etalase “${hapusEtalaseDialog.name}” akan dihapus. Barang di dalamnya tetap ada.`
+            : undefined
+        }
+        confirmLabel="Ya, hapus"
+        cancelLabel="Batal"
+        danger
+        onConfirm={() => {
+          if (hapusEtalaseDialog) {
+            void hapusEtalase(hapusEtalaseDialog);
+          }
+        }}
+        onCancel={() => setHapusEtalaseDialog(null)}
+      />
+
+      <PromptDialog
+        open={ubahEtalase !== null}
+        title="Ubah nama etalase"
+        description="Nama baru langsung dipakai di halaman toko."
+        label="Nama etalase"
+        defaultValue={ubahEtalase?.name ?? ""}
+        placeholder="Contoh: Kue Kering"
+        confirmLabel="Simpan nama"
+        onConfirm={(value) => void simpanUbahEtalase(value)}
+        onCancel={() => setUbahEtalase(null)}
+      />
     </main>
   );
 }

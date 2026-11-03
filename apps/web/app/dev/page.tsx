@@ -4,12 +4,18 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { formatRupiah, type DemoStatus, type ResetResult } from "@bakul/shared";
 import { AppHeader } from "@/components/app-header";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { EmptyState } from "@/components/empty-state";
+import { Field } from "@/components/field";
+import { Icon } from "@/components/icon";
+import { Skeleton } from "@/components/skeleton";
+import { StatusBanner } from "@/components/status-banner";
+import { useToast } from "@/components/toast";
 import {
   cardClass,
   dangerButtonClass,
   errorBoxClass,
   inputClass,
-  labelClass,
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/ui";
@@ -38,13 +44,16 @@ function tanggal(value: string): string {
 
 export default function DemoConsolePage() {
   const { status, user, request } = useAuth();
+  const { notify } = useToast();
   const [clock, setClock] = useState<DemoStatus | null>(null);
   const [pending, setPending] = useState<PendingPayment[]>([]);
   const [minutes, setMinutes] = useState("60");
   const [speed, setSpeed] = useState("60");
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [konfirmasiReset, setKonfirmasiReset] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -58,6 +67,8 @@ export default function DemoConsolePage() {
       setError(null);
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Demo console belum bisa dimuat.");
+    } finally {
+      setLoading(false);
     }
   }, [request]);
 
@@ -83,7 +94,9 @@ export default function DemoConsolePage() {
         body: JSON.stringify({ minutes: value }),
       });
       setClock(next);
-      setMessage(`Waktu dimajukan ${value} menit.`);
+      const pesan = `Waktu dimajukan ${value} menit.`;
+      setMessage(pesan);
+      notify(pesan);
       await load();
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Waktu belum bisa dimajukan.");
@@ -101,9 +114,11 @@ export default function DemoConsolePage() {
         body: JSON.stringify({ speed: value }),
       });
       setClock(next);
-      setMessage(`Kecepatan waktu ${value}×.`);
+      const pesan = `Kecepatan waktu ${value}×.`;
+      setMessage(pesan);
+      notify(pesan);
     } catch (caught: unknown) {
-      setError(caught instanceof Error ? caught.message : "Kecepatan belum bisa diubah.");
+      setError(caught instanceof Error ? caught.message : "Kecepatan waktu belum bisa diubah.");
     } finally {
       setBusy(false);
     }
@@ -118,10 +133,11 @@ export default function DemoConsolePage() {
         cancelled: number;
         completed: number;
       }>("/api/v1/demo/tick", { method: "POST" });
-      setMessage(
+      const pesan =
         `Pemeriksaan: ${result.expired} tagihan habis, ${result.shipments} resi bergerak, ` +
-          `${result.cancelled} batal otomatis, ${result.completed} selesai otomatis.`,
-      );
+        `${result.cancelled} batal otomatis, ${result.completed} selesai otomatis.`;
+      setMessage(pesan);
+      notify(pesan);
       await load();
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Pemeriksaan belum bisa dijalankan.");
@@ -130,11 +146,16 @@ export default function DemoConsolePage() {
     }
   }
 
-  async function aksiPembayaran(id: string, action: "pay" | "fail" | "expire"): Promise<void> {
+  async function aksiPembayaran(
+    id: string,
+    action: "pay" | "fail" | "expire",
+  ): Promise<void> {
     setBusy(true);
     try {
       await request(`/api/v1/demo/payments/${id}/${action}`, { method: "POST" });
-      setMessage("Perintah pembayaran dikirim. Tunggu beberapa detik lalu periksa pesanan.");
+      const pesan = "Perintah pembayaran dikirim. Tunggu beberapa detik lalu periksa pesanan.";
+      setMessage(pesan);
+      notify(pesan);
       await new Promise((resolve) => setTimeout(resolve, 1800));
       await load();
     } catch (caught: unknown) {
@@ -145,20 +166,15 @@ export default function DemoConsolePage() {
   }
 
   async function reset(): Promise<void> {
-    if (
-      !window.confirm(
-        "Kosongkan semua pesanan, pembayaran, dompet, dan ledger demo? Data toko dan barang tetap ada.",
-      )
-    ) {
-      return;
-    }
+    setKonfirmasiReset(false);
     setBusy(true);
     try {
       const result = await request<ResetResult>("/api/v1/demo/reset", { method: "POST" });
-      setMessage(
+      const pesan =
         `Data transaksi dikosongkan: ${result.deleted.payments} pembayaran, ` +
-          `${result.deleted.invoices} pesanan, ${result.deleted.ledgerJournals} jurnal.`,
-      );
+        `${result.deleted.invoices} pesanan, ${result.deleted.ledgerJournals} jurnal.`;
+      setMessage(pesan);
+      notify(pesan);
       await load();
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Reset belum bisa dijalankan.");
@@ -181,14 +197,13 @@ export default function DemoConsolePage() {
         </p>
 
         {!allowed ? (
-          <div className={`${cardClass} mt-6`}>
-            <p className="text-base text-tinta-lembut">
-              Halaman ini hanya untuk admin atau operator demo.
-            </p>
-            <Link href="/masuk" className={`${primaryButtonClass} mt-4`}>
-              Masuk
-            </Link>
-          </div>
+          <EmptyState
+            icon="lock"
+            title="Halaman ini hanya untuk admin atau operator demo"
+            description="Masuk dengan akun yang sesuai untuk membuka console demo."
+            action={{ label: "Masuk", href: "/masuk" }}
+            className="mt-6"
+          />
         ) : null}
 
         {error ? (
@@ -197,7 +212,15 @@ export default function DemoConsolePage() {
           </div>
         ) : null}
         {message ? (
-          <p className="mt-4 rounded-kartu bg-mint-muda p-3 text-base text-teal-aksi">{message}</p>
+          <div className="mt-4" role="status">
+            <StatusBanner tone="sukses">{message}</StatusBanner>
+          </div>
+        ) : null}
+
+        {loading && allowed ? (
+          <div className="mt-5 space-y-3">
+            <Skeleton className="h-64 w-full rounded-kartu" />
+          </div>
         ) : null}
 
         {allowed && clock ? (
@@ -205,26 +228,29 @@ export default function DemoConsolePage() {
             <section className={cardClass}>
               <h2 className="font-display text-2xl font-bold text-tinta">Waktu simulasi</h2>
               <p className="mt-2 text-base text-tinta-lembut">Sekarang</p>
-              <p className="text-lg font-semibold text-tinta">{tanggal(clock.now)}</p>
-              <p className="mt-1 text-base text-tinta-lembut">Kecepatan {clock.speed}×</p>
-              <p className="text-base text-tinta-lembut">
-                Mode demo {clock.demoMode ? "aktif" : "mati"}
-              </p>
+              <p className="font-display text-2xl font-bold text-tinta">{tanggal(clock.now)}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <span className="inline-flex min-h-8 items-center gap-1 rounded-pil bg-mint-muda px-3 text-base font-semibold text-teal-aksi">
+                  <Icon name="clock" size={16} />
+                  Kecepatan {clock.speed}×
+                </span>
+                <span className="inline-flex min-h-8 items-center gap-1 rounded-pil bg-abu-kartu px-3 text-base font-semibold text-tinta">
+                  Mode demo {clock.demoMode ? "aktif" : "mati"}
+                </span>
+              </div>
 
-              <label className={`${labelClass} mt-4`} htmlFor="minutes">
-                Majukan berapa menit?
-              </label>
-              <div className="flex gap-2">
-                <input
-                  id="minutes"
-                  inputMode="numeric"
-                  className={inputClass}
-                  value={minutes}
-                  onChange={(event) => setMinutes(event.target.value.replace(/\D/g, ""))}
-                />
-                <button type="button" className={primaryButtonClass} disabled={busy} onClick={() => void majukan()}>
-                  Majukan
-                </button>
+              <div className="mt-4">
+                <Field label="Majukan berapa menit?" htmlFor="minutes">
+                  {(props) => (
+                    <input
+                      {...props}
+                      inputMode="numeric"
+                      className={inputClass}
+                      value={minutes}
+                      onChange={(event) => setMinutes(event.target.value.replace(/\D/g, ""))}
+                    />
+                  )}
+                </Field>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {[60, 24 * 60, 48 * 60, 72 * 60].map((value) => (
@@ -239,33 +265,64 @@ export default function DemoConsolePage() {
                   </button>
                 ))}
               </div>
+              <button
+                type="button"
+                className={`${primaryButtonClass} mt-3 w-full`}
+                disabled={busy}
+                aria-busy={busy}
+                onClick={() => void majukan()}
+              >
+                Majukan waktu
+              </button>
 
-              <label className={`${labelClass} mt-4`} htmlFor="speed">
-                Kecepatan waktu
-              </label>
-              <div className="flex gap-2">
-                <input
-                  id="speed"
-                  inputMode="numeric"
-                  className={inputClass}
-                  value={speed}
-                  onChange={(event) => setSpeed(event.target.value.replace(/\D/g, ""))}
-                />
-                <button type="button" className={secondaryButtonClass} disabled={busy} onClick={() => void ubahKecepatan()}>
-                  Simpan
-                </button>
+              <div className="mt-4">
+                <Field label="Kecepatan waktu" htmlFor="speed">
+                  {(props) => (
+                    <input
+                      {...props}
+                      inputMode="numeric"
+                      className={inputClass}
+                      value={speed}
+                      onChange={(event) => setSpeed(event.target.value.replace(/\D/g, ""))}
+                    />
+                  )}
+                </Field>
               </div>
-              <button type="button" className={`${primaryButtonClass} mt-4 w-full`} disabled={busy} onClick={() => void tick()}>
-                Jalankan pemeriksaan sekarang
+              <button
+                type="button"
+                className={`${secondaryButtonClass} mt-2 w-full`}
+                disabled={busy}
+                onClick={() => void ubahKecepatan()}
+              >
+                Simpan kecepatan
+              </button>
+              <button
+                type="button"
+                className={`${primaryButtonClass} mt-2 w-full`}
+                disabled={busy}
+                aria-busy={busy}
+                onClick={() => void tick()}
+              >
+                {busy ? (
+                  <>
+                    <Icon name="refresh" size={18} className="animate-memuat" />
+                    Memeriksa…
+                  </>
+                ) : (
+                  "Jalankan pemeriksaan sekarang"
+                )}
               </button>
             </section>
 
             <section className={cardClass}>
               <h2 className="font-display text-2xl font-bold text-tinta">Simulator pembayaran</h2>
               {pending.length === 0 ? (
-                <p className="mt-2 text-base text-tinta-lembut">
-                  Tidak ada tagihan yang menunggu. Buat pesanan dari akun pembeli dulu.
-                </p>
+                <EmptyState
+                  icon="card"
+                  title="Tidak ada tagihan yang menunggu"
+                  description="Buat pesanan dari akun pembeli dulu. Tagihannya akan muncul di sini."
+                  className="mt-3"
+                />
               ) : (
                 <ul className="mt-3 space-y-3">
                   {pending.map((payment) => (
@@ -283,11 +340,12 @@ export default function DemoConsolePage() {
                           disabled={busy}
                           onClick={() => void aksiPembayaran(payment.id, "pay")}
                         >
+                          <Icon name="check" size={18} />
                           Bayar
                         </button>
                         <button
                           type="button"
-                          className={secondaryButtonClass}
+                          className={dangerButtonClass}
                           disabled={busy}
                           onClick={() => void aksiPembayaran(payment.id, "fail")}
                         >
@@ -299,6 +357,7 @@ export default function DemoConsolePage() {
                           disabled={busy}
                           onClick={() => void aksiPembayaran(payment.id, "expire")}
                         >
+                          <Icon name="clock" size={18} />
                           Kedaluwarsa
                         </button>
                       </div>
@@ -312,7 +371,7 @@ export default function DemoConsolePage() {
               <h2 className="font-display text-2xl font-bold text-tinta">Alat demo</h2>
               <p className="mt-2 text-base text-tinta-lembut">
                 Reset mengosongkan pesanan, pembayaran, dompet, dan ledger. Data pengguna, toko,
-                dan barang tetap. Jalankan <code>npm run db:seed</code> untuk mengisi riwayat lagi.
+                dan barang tetap. Jalankan <code className="font-semibold">npm run db:seed</code> untuk mengisi riwayat lagi.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Link href="/admin" className={secondaryButtonClass}>
@@ -324,7 +383,13 @@ export default function DemoConsolePage() {
                 <Link href="/admin/pencairan" className={secondaryButtonClass}>
                   Pencairan
                 </Link>
-                <button type="button" className={dangerButtonClass} disabled={busy} onClick={() => void reset()}>
+                <button
+                  type="button"
+                  className={dangerButtonClass}
+                  disabled={busy}
+                  onClick={() => setKonfirmasiReset(true)}
+                >
+                  <Icon name="trash" size={18} />
                   Reset data transaksi
                 </button>
               </div>
@@ -332,6 +397,17 @@ export default function DemoConsolePage() {
           </div>
         ) : null}
       </div>
+
+      <ConfirmDialog
+        open={konfirmasiReset}
+        title="Kosongkan semua data transaksi?"
+        description="Pesanan, pembayaran, dompet, dan ledger akan dihapus. Data pengguna, toko, dan barang tetap ada. Tindakan ini tidak bisa dibatalkan."
+        confirmLabel="Ya, kosongkan"
+        cancelLabel="Batal"
+        danger
+        onConfirm={() => void reset()}
+        onCancel={() => setKonfirmasiReset(false)}
+      />
     </main>
   );
 }
