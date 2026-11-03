@@ -1012,8 +1012,11 @@ async function clearTransactions(): Promise<void> {
   await prisma.notification.deleteMany({});
   await prisma.otpCode.deleteMany({});
   await prisma.session.deleteMany({});
+  // Jam demo juga direset supaya OTP tidak langsung kedaluwarsa setelah seed.
+  // `demo_speed` yang tertinggal tinggi (mis. dari demo console) membuat kode
+  // 10 menit habis dalam hitungan detik waktu nyata.
   await prisma.appSetting.deleteMany({
-    where: { key: { in: ["demo_epoch", "demo_started_at"] } },
+    where: { key: { in: ["demo_epoch", "demo_started_at", "demo_speed"] } },
   });
 }
 

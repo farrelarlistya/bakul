@@ -46,7 +46,7 @@ async function main(): Promise<void> {
   await prisma.otpCode.deleteMany({});
   await prisma.session.deleteMany({});
   await prisma.appSetting.deleteMany({
-    where: { key: { in: ["demo_epoch", "demo_started_at"] } },
+    where: { key: { in: ["demo_epoch", "demo_started_at", "demo_speed"] } },
   });
 
   const [orders, journals, wallets] = await Promise.all([

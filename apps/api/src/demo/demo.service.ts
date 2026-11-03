@@ -125,7 +125,7 @@ export class DemoService {
     await this.prisma.notification.deleteMany({});
     await this.prisma.otpCode.deleteMany({});
     await this.prisma.appSetting.deleteMany({
-      where: { key: { in: ["demo_epoch", "demo_started_at"] } },
+      where: { key: { in: ["demo_epoch", "demo_started_at", "demo_speed"] } },
     });
     await this.clock.reload();
 
