@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAppBadges } from "@/components/app-badges";
 import { Icon, type IconName } from "@/components/icon";
 
 const items: Array<{ href: string; label: string; icon: IconName }> = [
@@ -14,6 +15,7 @@ const items: Array<{ href: string; label: string; icon: IconName }> = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { cartCount } = useAppBadges();
 
   function isActive(href: string): boolean {
     if (href === "/") {
@@ -47,20 +49,29 @@ export function BottomNav() {
       <ul className="grid grid-cols-5">
         {items.map((item) => {
           const active = isActive(item.href);
+          const showBadge = item.href === "/keranjang" && cartCount > 0;
 
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className="flex min-h-16 flex-col items-center justify-center gap-1 rounded-tombol"
+                className="flex min-h-16 flex-col items-center justify-center gap-1 rounded-tombol transition duration-cepat ease-standar active:scale-95"
               >
                 <span
-                  className={`flex h-8 w-12 items-center justify-center rounded-[10px] ${
+                  className={`relative flex h-8 w-12 items-center justify-center rounded-[10px] transition duration-cepat ease-standar ${
                     active ? "bg-mint-muda text-teal-aksi" : "text-tinta-lembut"
                   }`}
                 >
                   <Icon name={item.icon} size={22} />
+                  {showBadge ? (
+                    <span
+                      aria-hidden="true"
+                      className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-pil bg-perhatian px-1 text-sm font-bold leading-none text-putih"
+                    >
+                      {cartCount > 9 ? "9+" : cartCount}
+                    </span>
+                  ) : null}
                 </span>
                 <span
                   className={`text-base leading-5 ${

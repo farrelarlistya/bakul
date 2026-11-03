@@ -1,9 +1,12 @@
 import Link from "next/link";
 
+const linkClass =
+  "inline-flex min-h-11 items-center rounded-tombol px-2 text-base text-mint transition duration-cepat ease-standar hover:bg-putih/10 hover:underline";
+
 export function SiteFooter() {
   return (
-    <footer className="mt-12 bg-tinta text-putih">
-      <div className="mx-auto max-w-5xl px-4 py-10">
+    <footer className="mt-12 border-t border-garis-kuat bg-tinta text-putih">
+      <div className="mx-auto max-w-[1200px] px-4 py-10">
         <div className="grid gap-8 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <p className="font-display text-2xl font-bold">bakul</p>
@@ -13,67 +16,67 @@ export function SiteFooter() {
             </p>
           </div>
 
-          <div>
+          <nav aria-label="Tautan halaman">
             <p className="text-base font-semibold text-putih">Jelajahi</p>
-            <ul className="mt-3 space-y-2 text-base text-mint [&_a]:hover:underline">
+            <ul className="mt-3 space-y-1">
               <li>
-                <Link href="/" className="inline-flex min-h-11 items-center hover:underline">
+                <Link href="/" className={linkClass}>
                   Beranda
                 </Link>
               </li>
               <li>
-                <Link href="/cari" className="inline-flex min-h-11 min-w-11 items-center">
+                <Link href="/cari" className={linkClass}>
                   Cari barang
                 </Link>
               </li>
               <li>
-                <Link href="/keranjang" className="inline-flex min-h-11 min-w-11 items-center">
+                <Link href="/keranjang" className={linkClass}>
                   Keranjang
                 </Link>
               </li>
               <li>
-                <Link href="/pesanan" className="inline-flex min-h-11 min-w-11 items-center">
+                <Link href="/pesanan" className={linkClass}>
                   Pesanan
                 </Link>
               </li>
               <li>
-                <Link href="/inbox" className="inline-flex min-h-11 min-w-11 items-center">
+                <Link href="/inbox" className={linkClass}>
                   Inbox
                 </Link>
               </li>
             </ul>
-          </div>
+          </nav>
 
-          <div>
+          <nav aria-label="Tautan penjual">
             <p className="text-base font-semibold text-putih">Untuk penjual</p>
-            <ul className="mt-3 space-y-2 text-base text-mint [&_a]:hover:underline">
+            <ul className="mt-3 space-y-1">
               <li>
-                <Link href="/jualan" className="inline-flex min-h-11 min-w-11 items-center">
+                <Link href="/jualan" className={linkClass}>
                   Buka toko gratis
                 </Link>
               </li>
               <li>
-                <Link href="/jualan/pesanan" className="inline-flex min-h-11 min-w-11 items-center">
+                <Link href="/jualan/pesanan" className={linkClass}>
                   Pesanan masuk
                 </Link>
               </li>
               <li>
-                <Link href="/jualan/dompet" className="inline-flex min-h-11 min-w-11 items-center">
+                <Link href="/jualan/dompet" className={linkClass}>
                   Dompet toko
                 </Link>
               </li>
               <li>
-                <Link href="/akun" className="inline-flex min-h-11 min-w-11 items-center">
+                <Link href="/akun" className={linkClass}>
                   Akun dan alamat
                 </Link>
               </li>
               <li>
-                <a href="/api/v1/health" className="inline-flex min-h-11 min-w-11 items-center">
+                <a href="/api/v1/health" className={linkClass}>
                   Status sistem
                 </a>
               </li>
             </ul>
-          </div>
+          </nav>
         </div>
 
         <div className="mt-8 border-t border-[#3c4a43] pt-5 text-base text-mint">

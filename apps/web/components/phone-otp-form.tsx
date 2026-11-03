@@ -8,7 +8,14 @@ import {
   type KeyboardEvent,
 } from "react";
 import type { AuthSession, OtpRequestResult } from "@bakul/shared";
-import { errorBoxClass, inputClass, labelClass, primaryButtonClass, secondaryButtonClass } from "./ui";
+import { Icon } from "@/components/icon";
+import { StatusBanner } from "@/components/status-banner";
+import {
+  inputClass,
+  labelClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+} from "./ui";
 
 type Props = {
   mode: "login" | "register";
@@ -138,11 +145,13 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
     inputsRef.current[Math.min(digits.length, 5)]?.focus();
   }
 
+  const phoneTooShort = phone.trim().length > 0 && phone.trim().length < 8;
+
   return (
     <div className="space-y-5">
       {step === "phone" ? (
         <div>
-          <label className={labelClass} htmlFor="phone">
+          <label htmlFor="phone" className={labelClass}>
             Nomor HP
           </label>
           <input
@@ -152,14 +161,21 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
             inputMode="tel"
             autoComplete="tel"
             aria-describedby="phone-hint"
-            aria-invalid={Boolean(error)}
+            aria-invalid={phoneTooShort || Boolean(error)}
             className={inputClass}
             placeholder="0812-3456-7890"
             value={phone}
-            onChange={(event) => setPhone(event.target.value)}
+            onChange={(event) => {
+              setPhone(event.target.value);
+              if (error) {
+                setError(null);
+              }
+            }}
           />
           <p id="phone-hint" className="mt-2 text-base text-tinta-lembut">
-            Kami kirim kode 6 angka lewat SMS. Tidak perlu email.
+            {phoneTooShort
+              ? "Nomor HP belum lengkap. Masukkan minimal 8 angka."
+              : "Kami kirim kode 6 angka lewat SMS. Tidak perlu email."}
           </p>
           <button
             type="button"
@@ -168,7 +184,17 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
             aria-busy={busy}
             onClick={() => void sendCode()}
           >
-            {busy ? "Mengirim…" : "Kirim kode"}
+            {busy ? (
+              <>
+                <Icon name="refresh" size={18} className="animate-memuat" />
+                Mengirim…
+              </>
+            ) : (
+              <>
+                <Icon name="phone" size={18} />
+                Kirim kode
+              </>
+            )}
           </button>
         </div>
       ) : (
@@ -179,9 +205,10 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
               setStep("phone");
               setError(null);
             }}
-            className="mb-4 inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi"
+            className="mb-4 inline-flex min-h-11 items-center gap-1 rounded-tombol px-1 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
           >
-            ← Ubah nomor
+            <Icon name="arrowLeft" size={18} />
+            Ubah nomor
           </button>
 
           <p className="text-base text-tinta-lembut">
@@ -189,13 +216,13 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
           </p>
 
           {result?.demoCode ? (
-            <div className="mt-3 rounded-kartu bg-mint-muda p-3 text-base text-tinta">
-              Mode demo: kode <strong>{result.demoCode}</strong>
+            <div className="mt-3 rounded-kartu border border-teal bg-mint-muda p-3 text-base text-tinta">
+              Mode demo: kode <strong className="text-xl">{result.demoCode}</strong>
             </div>
           ) : null}
 
           {result?.existing && mode === "register" ? (
-            <p className="mt-3 rounded-kartu bg-krem p-3 text-base text-tinta">
+            <p className="mt-3 rounded-kartu border border-garis-kuat bg-krem p-3 text-base text-tinta">
               Nomor ini sudah terdaftar. Kode di atas dipakai untuk masuk, bukan membuat akun baru.
             </p>
           ) : null}
@@ -222,7 +249,7 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
                 value={digit}
                 onChange={(event) => updateDigit(index, event.target.value)}
                 onKeyDown={(event) => handleBackspace(index, event)}
-                className="h-14 w-12 rounded-tombol border border-garis bg-putih text-center text-2xl font-bold text-tinta outline-none focus:border-teal-aksi focus:ring-2 focus:ring-mint"
+                className="h-14 w-12 rounded-tombol border border-garis bg-putih text-center text-2xl font-bold text-tinta outline-none transition duration-cepat ease-standar hover:border-garis-kuat focus:border-teal-aksi"
               />
             ))}
           </div>
@@ -234,7 +261,14 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
             aria-busy={busy}
             onClick={() => void verifyCode()}
           >
-            {busy ? "Memeriksa…" : "Masuk"}
+            {busy ? (
+              <>
+                <Icon name="refresh" size={18} className="animate-memuat" />
+                Memeriksa…
+              </>
+            ) : (
+              "Masuk"
+            )}
           </button>
 
           <button
@@ -243,14 +277,24 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
             disabled={busy || seconds > 0}
             onClick={() => void sendCode()}
           >
-            {seconds > 0 ? `Kirim ulang dalam ${seconds} detik` : "Kirim ulang kode"}
+            {seconds > 0 ? (
+              <>
+                <Icon name="clock" size={18} />
+                Kirim ulang dalam {seconds} detik
+              </>
+            ) : (
+              <>
+                <Icon name="refresh" size={18} />
+                Kirim ulang kode
+              </>
+            )}
           </button>
         </div>
       )}
 
       {error ? (
-        <div id="otp-error" className={errorBoxClass} role="alert">
-          {error}
+        <div id="otp-error" role="alert">
+          <StatusBanner tone="gagal">{error}</StatusBanner>
         </div>
       ) : null}
     </div>

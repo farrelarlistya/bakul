@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import type { CartView, NotificationItem, UserRole } from "@bakul/shared";
+import type { UserRole } from "@bakul/shared";
+import { useAppBadges } from "@/components/app-badges";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Icon } from "@/components/icon";
-import { BADGES_EVENT } from "@/lib/badges";
 import { useAuth } from "@/lib/auth";
 
 const ROLE_LABEL: Record<UserRole, string> = {
@@ -16,7 +17,7 @@ const ROLE_LABEL: Record<UserRole, string> = {
 };
 
 const iconLinkClass =
-  "relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-tombol text-teal-aksi transition-colors hover:bg-mint-muda";
+  "relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-tombol text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda active:scale-95";
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) {
@@ -36,11 +37,12 @@ function CountBadge({ count }: { count: number }) {
 export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { status, user, logout, request } = useAuth();
-  const [cartCount, setCartCount] = useState(0);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [badgeVersion, setBadgeVersion] = useState(0);
-  const menuRef = useRef<HTMLDetailsElement>(null);
+  const { status, user, logout } = useAuth();
+  const { cartCount, unreadCount } = useAppBadges();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmKeluar, setConfirmKeluar] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const accountButtonRef = useRef<HTMLButtonElement>(null);
   const roleActiveRef = useRef<HTMLAnchorElement>(null);
   const isHome = pathname === "/";
   const isCari =
@@ -82,45 +84,7 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
   }
 
   useEffect(() => {
-    function refresh(): void {
-      setBadgeVersion((value) => value + 1);
-    }
-
-    window.addEventListener(BADGES_EVENT, refresh);
-    return () => window.removeEventListener(BADGES_EVENT, refresh);
-  }, []);
-
-  useEffect(() => {
-    if (status !== "masuk") {
-      setCartCount(0);
-      setUnreadCount(0);
-      return;
-    }
-
-    let alive = true;
-
-    void Promise.all([
-      request<CartView>("/api/v1/cart"),
-      request<NotificationItem[]>("/api/v1/notifications"),
-    ])
-      .then(([cart, notifications]) => {
-        if (!alive) {
-          return;
-        }
-        setCartCount(cart.totalItems);
-        setUnreadCount(notifications.filter((item) => !item.isRead).length);
-      })
-      .catch(() => {
-        // Badge tidak boleh menghalangi halaman utama.
-      });
-
-    return () => {
-      alive = false;
-    };
-  }, [status, request, pathname, badgeVersion]);
-
-  useEffect(() => {
-    menuRef.current?.removeAttribute("open");
+    setMenuOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -132,18 +96,18 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
 
   useEffect(() => {
     function closeOnOutside(event: PointerEvent): void {
-      if (!menuRef.current?.open) {
+      if (!menuOpen) {
         return;
       }
-      if (!menuRef.current.contains(event.target as Node)) {
-        menuRef.current.removeAttribute("open");
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false);
       }
     }
 
     function closeOnEscape(event: KeyboardEvent): void {
-      if (event.key === "Escape" && menuRef.current?.open) {
-        menuRef.current.removeAttribute("open");
-        menuRef.current.querySelector("summary")?.focus();
+      if (event.key === "Escape" && menuOpen) {
+        setMenuOpen(false);
+        accountButtonRef.current?.focus();
       }
     }
 
@@ -153,13 +117,14 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
       document.removeEventListener("pointerdown", closeOnOutside);
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, []);
+  }, [menuOpen]);
 
   async function keluar(): Promise<void> {
+    setConfirmKeluar(false);
     try {
       await logout();
     } finally {
-      menuRef.current?.removeAttribute("open");
+      setMenuOpen(false);
       router.push("/");
       router.refresh();
     }
@@ -170,12 +135,15 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
   const inboxLabel =
     unreadCount > 0 ? `Buka inbox, ${unreadCount} belum dibaca` : "Buka inbox";
 
+  const menuItemClass =
+    "flex min-h-11 w-full items-center gap-3 rounded-tombol px-3 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-abu-kartu";
+
   return (
     <header className="sticky top-0 z-40 border-b border-garis bg-putih">
-      <div className="mx-auto flex h-16 max-w-5xl items-center gap-1 px-4">
+      <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-1 px-4">
         <Link
           href="/"
-          className="mr-1 inline-flex min-h-11 shrink-0 items-center font-display text-2xl font-bold text-tinta"
+          className="mr-1 inline-flex min-h-11 shrink-0 items-center font-display text-2xl font-bold text-tinta transition duration-cepat ease-standar hover:text-teal-aksi"
         >
           bakul
         </Link>
@@ -189,13 +157,13 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
               <>
                 <a
                   href="#kategori"
-                  className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition-colors hover:bg-abu-kartu"
+                  className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-abu-kartu"
                 >
                   Kategori
                 </a>
                 <a
                   href="#produk"
-                  className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition-colors hover:bg-abu-kartu"
+                  className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-abu-kartu"
                 >
                   Lagi laris
                 </a>
@@ -204,7 +172,7 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
               <Link
                 href="/cari"
                 aria-current={isCari ? "page" : undefined}
-                className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition-colors hover:bg-abu-kartu aria-[current=page]:text-teal-aksi"
+                className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-abu-kartu aria-[current=page]:text-teal-aksi"
               >
                 Cari
               </Link>
@@ -212,7 +180,7 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
             <Link
               href="/pesanan"
               aria-current={isPesanan ? "page" : undefined}
-              className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition-colors hover:bg-abu-kartu aria-[current=page]:text-teal-aksi"
+              className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-abu-kartu aria-[current=page]:text-teal-aksi"
             >
               Pesanan
             </Link>
@@ -223,7 +191,7 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
           action="/cari"
           method="get"
           role="search"
-          className="ml-3 hidden min-h-11 flex-1 items-center gap-2 rounded-tombol border border-garis bg-abu-kartu px-3 md:flex"
+          className="ml-3 hidden min-h-11 flex-1 items-center gap-2 rounded-tombol border border-garis bg-abu-kartu px-3 transition duration-cepat ease-standar hover:border-garis-kuat focus-within:border-teal-aksi focus-within:bg-putih md:flex"
         >
           <Icon
             name="search"
@@ -277,86 +245,69 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
           </Link>
 
           {status === "masuk" && user ? (
-            <details
-              ref={menuRef}
-              className="relative ml-0.5"
-              onBlur={(event) => {
-                if (
-                  !event.currentTarget.contains(
-                    event.relatedTarget as Node | null,
-                  )
-                ) {
-                  event.currentTarget.removeAttribute("open");
-                }
-              }}
-            >
-              <summary
+            <div ref={menuRef} className="relative ml-0.5">
+              <button
+                type="button"
+                ref={accountButtonRef}
                 aria-label={`Menu akun ${user.name}`}
-                className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-pil bg-krem font-display text-base font-bold text-teal-aksi marker:hidden [&::-webkit-details-marker]:hidden"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((value) => !value)}
+                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-pil bg-krem font-display text-base font-bold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda active:scale-95"
               >
                 {user.name.slice(0, 1).toUpperCase()}
-              </summary>
+              </button>
 
-              <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-64 rounded-kartu border border-garis bg-putih p-2">
-                <div className="px-3 py-2">
-                  <p className="text-base font-semibold text-tinta">
-                    {user.name}
-                  </p>
-                  <p className="text-base text-tinta-lembut">
-                    {ROLE_LABEL[user.role]}
-                  </p>
+              {menuOpen ? (
+                <div className="animate-muncul absolute right-0 top-[calc(100%+0.5rem)] z-50 w-64 rounded-kartu border border-garis bg-putih p-2">
+                  <div className="px-3 py-2">
+                    <p className="text-base font-semibold text-tinta">{user.name}</p>
+                    <p className="text-base text-tinta-lembut">
+                      {ROLE_LABEL[user.role]}
+                    </p>
+                  </div>
+                  <div className="my-1 border-t border-garis" />
+                  <Link href="/akun" className={menuItemClass}>
+                    <Icon name="user" size={18} className="text-tinta-lembut" />
+                    Akun dan alamat
+                  </Link>
+                  <Link href="/pesanan" className={menuItemClass}>
+                    <Icon name="receipt" size={18} className="text-tinta-lembut" />
+                    Pesanan
+                  </Link>
+                  {user.shop ? (
+                    <Link href="/jualan" className={menuItemClass}>
+                      <Icon name="store" size={18} className="text-tinta-lembut" />
+                      Jualan
+                    </Link>
+                  ) : null}
+                  {user.role === "ADMIN" ? (
+                    <Link href="/admin" className={menuItemClass}>
+                      <Icon name="chart" size={18} className="text-tinta-lembut" />
+                      Admin
+                    </Link>
+                  ) : null}
+                  {user.role === "ADMIN" || user.role === "OPERATOR_DEMO" ? (
+                    <Link href="/dev" className={menuItemClass}>
+                      <Icon name="sliders" size={18} className="text-tinta-lembut" />
+                      Demo console
+                    </Link>
+                  ) : null}
+                  <div className="my-1 border-t border-garis" />
+                  <button
+                    type="button"
+                    className="flex min-h-11 w-full items-center gap-3 rounded-tombol px-3 text-left text-base font-semibold text-bahaya transition duration-cepat ease-standar hover:bg-bahaya-muda"
+                    onClick={() => setConfirmKeluar(true)}
+                  >
+                    <Icon name="close" size={18} />
+                    Keluar
+                  </button>
                 </div>
-                <div className="my-1 border-t border-garis" />
-                <Link
-                  href="/akun"
-                  className="flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta hover:bg-abu-kartu"
-                >
-                  Akun dan alamat
-                </Link>
-                <Link
-                  href="/pesanan"
-                  className="flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta hover:bg-abu-kartu"
-                >
-                  Pesanan
-                </Link>
-                {user.shop ? (
-                  <Link
-                    href="/jualan"
-                    className="flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta hover:bg-abu-kartu"
-                  >
-                    Jualan
-                  </Link>
-                ) : null}
-                {user.role === "ADMIN" ? (
-                  <Link
-                    href="/admin"
-                    className="flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta hover:bg-abu-kartu"
-                  >
-                    Admin
-                  </Link>
-                ) : null}
-                {user.role === "ADMIN" || user.role === "OPERATOR_DEMO" ? (
-                  <Link
-                    href="/dev"
-                    className="flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta hover:bg-abu-kartu"
-                  >
-                    Demo console
-                  </Link>
-                ) : null}
-                <div className="my-1 border-t border-garis" />
-                <button
-                  type="button"
-                  className="flex min-h-11 w-full items-center rounded-tombol px-3 text-left text-base font-semibold text-bahaya hover:bg-[#fbeae8]"
-                  onClick={() => void keluar()}
-                >
-                  Keluar
-                </button>
-              </div>
-            </details>
+              ) : null}
+            </div>
           ) : (
             <Link
               href="/masuk"
-              className="ml-0.5 inline-flex min-h-11 shrink-0 items-center rounded-tombol bg-teal-aksi px-3 text-base font-semibold text-putih transition-colors hover:bg-teal-tua"
+              className="ml-0.5 inline-flex min-h-11 shrink-0 items-center rounded-tombol bg-teal-aksi px-3 text-base font-semibold text-putih transition duration-sedang ease-standar hover:bg-teal-tua active:scale-[0.98]"
             >
               Masuk
             </Link>
@@ -365,10 +316,10 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
       </div>
 
       {roleNav ? (
-        <div className="border-t border-garis">
+        <div className="border-t border-garis bg-krem-terang">
           <nav
             aria-label="Navigasi peran"
-            className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-4 py-1"
+            className="mx-auto flex max-w-[1200px] gap-1 overflow-x-auto px-4 py-1"
           >
             {roleNav.map((item) => {
               const active = isRoleActive(item.href);
@@ -378,7 +329,7 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
                   ref={active ? roleActiveRef : undefined}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`inline-flex min-h-11 shrink-0 items-center rounded-tombol px-3 text-base font-semibold transition-colors ${
+                  className={`inline-flex min-h-11 shrink-0 items-center rounded-tombol px-3 text-base font-semibold transition duration-cepat ease-standar ${
                     active
                       ? "bg-mint-muda text-teal-aksi"
                       : "text-tinta hover:bg-abu-kartu"
@@ -391,6 +342,16 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
           </nav>
         </div>
       ) : null}
+
+      <ConfirmDialog
+        open={confirmKeluar}
+        title="Keluar dari akun?"
+        description="Kamu bisa masuk lagi dengan nomor HP dan kode 6 angka."
+        confirmLabel="Ya, keluar"
+        cancelLabel="Batal"
+        onConfirm={() => void keluar()}
+        onCancel={() => setConfirmKeluar(false)}
+      />
     </header>
   );
 }

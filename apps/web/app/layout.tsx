@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
+import { AppBadgesProvider } from "@/components/app-badges";
 import { DocumentTitle } from "@/components/document-title";
+import { ToastProvider } from "@/components/toast";
 import "./globals.css";
 
 const inter = Inter({
@@ -38,10 +40,14 @@ export default function RootLayout({
           Lewati ke konten
         </a>
         <AuthProvider>
-          <DocumentTitle />
-          <div id="konten" tabIndex={-1}>
-            {children}
-          </div>
+          <ToastProvider>
+            <AppBadgesProvider>
+              <DocumentTitle />
+              <div id="konten" tabIndex={-1}>
+                {children}
+              </div>
+            </AppBadgesProvider>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

@@ -9,7 +9,7 @@ export function HomeProductCard({ product }: { product: ProductCardData }) {
   return (
     <Link
       href={`/p/${product.slug}`}
-      className="group block overflow-hidden rounded-kartu border border-garis bg-putih transition-colors hover:border-teal-aksi focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-aksi focus-visible:ring-offset-2"
+      className="group block overflow-hidden rounded-kartu border border-garis bg-putih transition duration-sedang ease-standar hover:border-garis-kuat hover:bg-abu-kartu/40 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-aksi focus-visible:ring-offset-2"
     >
       <div className="relative aspect-[5/3] overflow-hidden bg-mint-muda">
         {product.imageUrl ? (
@@ -30,7 +30,7 @@ export function HomeProductCard({ product }: { product: ProductCardData }) {
         )}
 
         {stokHabis ? (
-          <span className="absolute left-2 top-2 inline-flex min-h-7 items-center rounded-tombol bg-[#fbeae8] px-2 text-sm font-semibold text-bahaya">
+          <span className="absolute left-2 top-2 inline-flex min-h-8 items-center rounded-tombol bg-bahaya-muda px-2 text-base font-semibold text-bahaya">
             Stok habis
           </span>
         ) : stokTipis ? (
@@ -49,7 +49,9 @@ export function HomeProductCard({ product }: { product: ProductCardData }) {
         <div className="mt-1 flex min-w-0 items-center gap-1 text-base text-tinta-lembut">
           <Icon name="star" size={14} className="shrink-0 text-perhatian" />
           <span className="shrink-0">{product.rating.toFixed(1).replace(".", ",")}</span>
-          <span className="shrink-0">·</span>
+          <span className="shrink-0" aria-hidden="true">
+            ·
+          </span>
           <span className="truncate">{product.city}</span>
         </div>
 
