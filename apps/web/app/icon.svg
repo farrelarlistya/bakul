@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Bakul">
+  <rect width="64" height="64" rx="14" fill="#0F6E66"/>
+  <path d="M17 25h30l-3 24H20z" fill="#AEE3CD"/>
+  <path d="M24 25c0-6 3.6-10 8-10s8 4 8 10" fill="none" stroke="#AEE3CD" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="27" cy="34" r="2" fill="#0F6E66"/>
+  <circle cx="37" cy="34" r="2" fill="#0F6E66"/>
+  <path d="M27 42c3 2 7 2 10 0" fill="none" stroke="#0F6E66" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

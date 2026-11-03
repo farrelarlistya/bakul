@@ -402,3 +402,4 @@ git push
 | 3 Nov 2026 | Sprint 1 selesai (12 layar termasuk state); tag `desain-d2` |
 | 3 Nov 2026 | Sprint 2 selesai (8 frame); desain tahap pertama selesai; tag `desain-v1` |
 | 3 Nov 2026 | Sprint 3 selesai: PostgreSQL 17.11, monorepo, health API, Prisma + seed, token Tailwind; tag `m0-selesai` |
+| 3 Nov 2026 | Perbaikan pasca-M0: hidrasi dev di `127.0.0.1`, timeout health check, ikon aplikasi |

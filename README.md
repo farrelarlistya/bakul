@@ -58,10 +58,10 @@ npm run db:seed
 npm run dev
 ```
 
-- Web: <http://127.0.0.1:3000>
-- API health: <http://127.0.0.1:3001/api/v1/health>
-- Lewat satu origin: <http://127.0.0.1:3000/api/v1/health>
-- Dokumentasi API: <http://127.0.0.1:3001/api/docs>
+- Web: <http://localhost:3000>
+- API health: <http://localhost:3001/api/v1/health>
+- Lewat satu origin: <http://localhost:3000/api/v1/health>
+- Dokumentasi API: <http://localhost:3001/api/docs>
 
 ## Perintah penting
 

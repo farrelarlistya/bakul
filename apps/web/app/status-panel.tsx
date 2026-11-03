@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { HealthResponse } from "@bakul/shared";
+
+const HEALTH_TIMEOUT_MS = 5_000;
 
 type ConnectionState =
   | { kind: "memeriksa" }
@@ -18,13 +20,33 @@ function waktu(value: string): string {
 
 export function StatusPanel() {
   const [state, setState] = useState<ConnectionState>({ kind: "memeriksa" });
+  const requestRef = useRef(0);
 
   const periksa = useCallback(async (signal?: AbortSignal) => {
+    const requestId = requestRef.current + 1;
+    requestRef.current = requestId;
     setState({ kind: "memeriksa" });
 
+    const controller = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, HEALTH_TIMEOUT_MS);
+
+    const abortFromOutside = () => controller.abort();
+    signal?.addEventListener("abort", abortFromOutside, { once: true });
+
     try {
-      const response = await fetch("/api/v1/health", { signal, cache: "no-store" });
+      const response = await fetch("/api/v1/health", {
+        signal: controller.signal,
+        cache: "no-store",
+      });
       const body: unknown = await response.json();
+
+      if (requestRef.current !== requestId) {
+        return;
+      }
 
       if (!response.ok) {
         const pesan =
@@ -36,15 +58,19 @@ export function StatusPanel() {
 
       setState({ kind: "tersambung", health: body as HealthResponse });
     } catch (error: unknown) {
-      if (error instanceof DOMException && error.name === "AbortError") {
+      if (requestRef.current !== requestId || signal?.aborted) {
         return;
       }
 
-      const pesan =
-        error instanceof Error
+      const pesan = timedOut
+        ? "Pemeriksaan terlalu lama. Pastikan PostgreSQL dan API berjalan, lalu coba lagi."
+        : error instanceof Error
           ? error.message
           : "API belum tersambung. Pastikan PostgreSQL dan API berjalan.";
       setState({ kind: "gagal", pesan });
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abortFromOutside);
     }
   }, []);
 
@@ -60,6 +86,7 @@ export function StatusPanel() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-xl font-bold text-tinta">Status sambungan</h2>
         <span
+          aria-live="polite"
           className={`inline-flex min-h-8 items-center rounded-pil px-3 text-base font-semibold ${
             state.kind === "tersambung"
               ? "bg-mint-muda text-teal-aksi"
