@@ -327,9 +327,9 @@ dan `rounded-kartu`.
 Radius: `--radius-tombol` 8 px, `--radius-kartu` 12 px, `--radius-hero` 16 px,
 `--radius-pil` 999 px. Font: `--font-display` (Poppins) dan `--font-body` (Inter).
 
-Halaman `apps/web/app/page.tsx` adalah halaman status internal, bukan Beranda
-final. Tujuannya membuktikan token, format Rupiah, dan health API bekerja. Beranda
-sesuai desain B1 dibuat pada Sprint 5.
+Halaman `apps/web/app/page.tsx` sekarang adalah Beranda katalog sesuai arah desain
+B1: hero mint, kategori, barang terlaris, dan ajakan buka toko. Halaman status
+internal M0 tidak lagi menjadi halaman utama.
 
 Aturan kontras tetap berlaku di kode: teks putih hanya di atas `teal-aksi`
 (`#0F6E66`), bukan di atas `teal` (`#198B81`). Teks minimum 16 px dan target sentuh
@@ -357,5 +357,26 @@ Tambahan di luar S1–S4:
 Perbedaan kecil dari mockup: pilihan kota memakai lima wilayah seed; foto produk
 disimpan lokal (bukan kamera langsung) dan bersifat opsional. Semua tetap memakai
 token warna, radius, dan aturan teks yang sama.
+
+---
+
+## 16. Implementasi M2
+
+Katalog sudah memakai data nyata dari database:
+
+| Layar desain | Route | Catatan implementasi |
+| :--- | :--- | :--- |
+| B1 Beranda | `/` | Hero, kategori, 4 barang terlaris, CTA buka toko |
+| B2 Cari | `/cari` | Pencarian, kategori, kota, harga, rating, urutan, halaman |
+| B3 Detail produk | `/p/:slug` | Galeri, pilihan, stok, toko, ulasan |
+| B4 Halaman toko | `/toko/:slug` | Profil toko, rating, barang per etalase |
+
+Dashboard penjual sederhana ada di `/jualan/barang`: daftar barang, tambah/ubah,
+pilihan dan stok, foto, etalase, aktif/nonaktif, dan soft delete. Desain dashboard
+penjual yang lebih lengkap tetap dijadwalkan sebelum Sprint 8–10.
+
+Foto produk memakai WebP target 32 KB dan `loading="lazy"`. Berat Beranda produksi
+pada 390 px tercatat **488 KB**, di bawah batas 500 KB. Tombol keranjang pada detail
+barang sengaja dinonaktifkan karena keranjang baru dibuat pada Sprint 6.
 
 

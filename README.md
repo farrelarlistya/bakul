@@ -4,14 +4,20 @@ Pasar daring untuk pedagang kecil Indonesia. Janji utamanya: **uang aman sampai
 barang diterima**. Logika transaksi dibuat seperti produksi; perpindahan uang dan
 pihak ketiga disimulasikan.
 
-Repo ini sedang di tahap **M1 — akun dan onboarding**. Yang sudah ada: fondasi
-monorepo, PostgreSQL lokal, login nomor HP + kode demo, profil, alamat, buka toko,
-barang pertama dengan foto, dan Inbox. Katalog dan pembayaran belum dibuat.
+Repo ini sedang di tahap **M2 — katalog dan toko**. Yang sudah ada: fondasi monorepo,
+login nomor HP + kode demo, profil, alamat, buka toko, katalog dengan pencarian dan
+filter, detail barang, halaman toko, serta kelola barang/etalase/foto. Pembayaran
+belum dibuat.
 
 ## Yang bisa dicoba
 
+- `/` — Beranda katalog dengan kategori dan barang terlaris.
+- `/cari` — cari dan filter kategori, kota, harga, rating, serta urutan.
+- `/p/:slug` — detail barang, pilihan, stok, toko, dan ulasan.
+- `/toko/:slug` — halaman toko dengan barang per etalase.
 - `/masuk` — masuk dengan nomor HP dan kode 6 angka.
 - `/jualan` — buka toko 3 langkah lalu unggah barang pertama.
+- `/jualan/barang` — kelola barang, pilihan, stok, foto, dan etalase.
 - `/akun` — ubah profil dan kelola alamat.
 - `/inbox` — baca kode masuk dan pesan Bakul.
 
@@ -104,9 +110,10 @@ cookie saat pengembangan.
 | `npm run db:generate` | Buat ulang Prisma Client |
 | `npm run db:migrate` | Jalankan migrasi baru |
 | `npm run db:deploy` | Terapkan migrasi yang sudah ada |
-| `npm run db:seed` | Isi 12 pengguna, 5 toko, 8 kategori, 100 produk |
+| `npm run db:seed` | Isi 12 pengguna, 5 toko, 8 kategori, 100 produk, 10 etalase, 200 ulasan |
 | `npm run db:studio` | Buka Prisma Studio |
 | `npm run verify:m1` | Uji T-12/T-13 dan tulis hasil ke `docs/bukti/m1-auth.txt` |
+| `npm run verify:m2` | Uji katalog, slug, variasi, foto, etalase, soft delete ke `docs/bukti/m2-katalog.txt` |
 
 ## Struktur
 
@@ -129,7 +136,9 @@ docs/         PRD, desain, rencana sprint, ADR, bukti
 - Waktu domain lewat `ClockService`; jangan `new Date()` di lapisan domain.
 - Ledger append-only; belum dibuat.
 - Vendor lewat adapter; belum dibuat.
-- Foto produk disimpan lokal di `storage/products`, maksimal 2 MB.
+- Foto produk disimpan lokal di `storage/products`, maksimal 2 MB, dikonversi ke WebP target 32 KB.
+- Barang yang “dihapus” memakai status `DELETED` dan hilang dari katalog, bukan dihapus permanen.
+- Nama barang unik lewat slug; etalase dikelompokkan per toko.
 - Tanpa Docker, Redis, queue, microservices, promo, atau dark mode.
 - Teks minimal 16 px, target sentuh 44 px, kontras minimal 4,5:1.
 

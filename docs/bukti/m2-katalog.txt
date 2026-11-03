@@ -1,0 +1,7 @@
+PASS pencarian, filter kategori/kota/harga/rating, urutan, detail, toko
+PASS slug unik dan produk + dua pilihan dibuat
+PASS foto WebP 29 KB
+PASS tambah/ubah/hapus pilihan dan stok
+PASS status nonaktif dan soft delete menyembunyikan dari katalog
+PASS CRUD etalase
+PASS berat halaman Beranda 488 KB (<500 KB) pada 390 px, build produksi, 4 produk + hero

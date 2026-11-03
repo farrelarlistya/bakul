@@ -19,3 +19,8 @@ Catatan:
   atas dan tautan sumbernya.
 - Jika proyek dipublikasikan, pertahankan berkas ini di repositori.
 - Jangan menambahkan foto dari hasil pencarian gambar biasa tanpa memeriksa lisensinya.
+
+## Turunan WebP
+
+Foto seed produk dibuat ulang sebagai WebP (target 32 KB) oleh 
+pm run db:seed. Foto asli dan lisensinya tetap sama seperti tabel di atas. Hasil WebP hanya ada di folder storage/ yang tidak di-commit.

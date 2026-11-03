@@ -4,7 +4,7 @@
 | :--- | :--- |
 | Versi dokumen | 1.0 |
 | Tanggal | 3 November 2026 |
-| Status | Sprint 0–4 selesai · Sprint 5 berikutnya |
+| Status | Sprint 0–5 selesai · Sprint 6 berikutnya |
 | Sumber kebenaran produk | `docs/prd/bakul-v0.2.md` |
 | Sumber kebenaran visual | `docs/desain/design.md` + `docs/desain/referensi/referensiStyleDesign.jpg` |
 | Berkas lokal (tidak di Git) | `AGENTS.md`, `bakul.figcraft` |
@@ -62,8 +62,8 @@ Aturan kerja:
 | 2 | Desain pesanan, onboarding penjual, inbox (D3) | **Selesai** | `desain-v1` |
 | 3 | Fondasi teknis / M0 | **Selesai** | `m0-selesai` |
 | 4 | Akun & onboarding / M1 | **Selesai** | `m1-selesai` |
-| 5 | Katalog & toko / M2 | Berikutnya | `m2-selesai` |
-| 6 | Keranjang & checkout / M3 | Belum | `m3-selesai` |
+| 5 | Katalog & toko / M2 | **Selesai** | `m2-selesai` |
+| 6 | Keranjang & checkout / M3 | Berikutnya | `m3-selesai` |
 | 7 | Pembayaran, escrow, ledger / M4 | Belum | `m4-selesai` |
 | 8 | Pemenuhan & pengiriman / M5 | Belum | `m5-selesai` |
 | 9 | Dompet & pencairan / M6 | Belum | `m6-selesai` |
@@ -277,12 +277,36 @@ Tailwind 4.x, TypeScript **5.9.x**. Jangan Prisma 8 RC atau TypeScript 7.
 
 ## Sprint 5 — Katalog & toko (M2)
 
-**Status:** belum · **Estimasi:** ± 1,5 minggu · **Tag:** `m2-selesai`
+**Status:** selesai · **Tag:** `m2-selesai`
 
 - CRUD produk, varian, etalase, stok, gambar (storage lokal).
 - Pencarian, filter, urutan, halaman toko, ulasan (tampil).
 - Halaman katalog pertama < 500 KB; gambar WebP + lazy load.
 - Uji: pencarian/filter benar; slug unik; soft delete via status.
+
+**Hasil**
+
+- Tabel baru: `shop_etalases`, `reviews`; `products.etalase_id`.
+- Seed: 100 produk, 10 etalase, 100 foto, 200 ulasan; foto produk WebP
+  (nastar/keripik/kopi/batik/anyaman) sesuai kategori.
+- Beranda katalog, `/cari` dengan filter kategori/kota/harga/rating dan urutan,
+  detail `/p/:slug`, halaman toko `/toko/:slug` dengan kelompok etalase.
+- Penjual `/jualan/barang`: tambah/ubah barang, tambah/ubah/hapus pilihan,
+  stok, foto (maksimal 5), etalase, aktif/nonaktif, dan soft delete.
+- Foto unggahan dikonversi WebP target 32 KB; seed foto juga ≤32 KB.
+- Berat Beranda produksi **488 KB** pada 390 px (di bawah 500 KB).
+- Bukti `docs/bukti/m2-katalog.txt`: pencarian/filter, slug unik, foto WebP,
+  variasi/stok, soft delete, etalase, dan berat halaman lulus.
+
+**Definisi selesai**
+
+- [x] CRUD produk, varian, etalase, stok, dan gambar.
+- [x] Pencarian/filter/urutan dan halaman toko.
+- [x] Ulasan tampil di detail barang.
+- [x] Berat halaman pertama < 500 KB; gambar WebP + lazy load.
+- [x] Slug unik dan soft delete via status.
+- [x] `npm run build` dan `npm test` lulus.
+- [x] Papan status diperbarui, commit, push, tag `m2-selesai`.
 
 ---
 
@@ -432,3 +456,4 @@ git push
 | 3 Nov 2026 | Sprint 3 selesai: PostgreSQL 17.11, monorepo, health API, Prisma + seed, token Tailwind; tag `m0-selesai` |
 | 3 Nov 2026 | Perbaikan pasca-M0: hidrasi dev di `127.0.0.1`, timeout health check, ikon aplikasi |
 | 3 Nov 2026 | Sprint 4 selesai: OTP, sesi aman, profil/alamat, buka toko, produk pertama + foto; tag `m1-selesai` |
+| 3 Nov 2026 | Sprint 5 selesai: katalog, pencarian/filter, detail, toko, etalase, ulasan, kelola barang, foto WebP; tag `m2-selesai` |
