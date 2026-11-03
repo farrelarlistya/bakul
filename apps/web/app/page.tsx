@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { formatRupiah } from "@bakul/shared";
+import { SiteHeader } from "@/components/site-header";
+import { primaryButtonClass, secondaryButtonClass } from "@/components/ui";
 import { StatusPanel } from "./status-panel";
 
 const tokens = [
@@ -36,14 +39,7 @@ const fondasi = [
 export default function Page() {
   return (
     <main className="min-h-screen bg-putih">
-      <header className="border-b border-garis bg-putih">
-        <div className="mx-auto flex min-h-16 max-w-5xl items-center justify-between px-4">
-          <span className="font-display text-2xl font-bold text-tinta">bakul</span>
-          <span className="inline-flex min-h-8 items-center rounded-pil bg-krem px-3 text-base font-semibold text-tinta">
-            Fondasi M0
-          </span>
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="bg-mint">
         <div className="mx-auto max-w-5xl px-4 py-12 md:py-16">
@@ -78,6 +74,27 @@ export default function Page() {
             Status sambungan
           </h2>
           <StatusPanel />
+        </section>
+
+        <section aria-labelledby="akun" className="rounded-kartu bg-krem p-5">
+          <h2 id="akun" className="font-display text-2xl font-bold text-tinta">
+            Akun dan toko sudah bisa dicoba
+          </h2>
+          <p className="mt-2 max-w-2xl text-base leading-6 text-tinta">
+            Masuk dengan nomor HP, simpan alamat, buka toko, lalu unggah barang pertama.
+            Semua tanpa email dan tanpa KTP. Saat demo, kode masuknya <strong>123456</strong>.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href="/masuk" className={primaryButtonClass}>
+              Masuk
+            </Link>
+            <Link href="/jualan" className={secondaryButtonClass}>
+              Buka toko
+            </Link>
+            <Link href="/akun" className={secondaryButtonClass}>
+              Lihat akun
+            </Link>
+          </div>
         </section>
 
         <section aria-labelledby="fondasi">
@@ -134,16 +151,16 @@ export default function Page() {
 
         <section aria-labelledby="berikutnya">
           <h2 id="berikutnya" className="font-display text-2xl font-bold text-tinta">
-            Berikutnya
+            Perjalanan sprint
           </h2>
           <ol className="mt-4 space-y-3">
-            <li className="rounded-kartu border border-garis p-4 text-base leading-6 text-tinta">
-              <strong>Sprint 4 — Akun.</strong> Login nomor HP, OTP mock, alamat, dan buka
-              toko tanpa email.
+            <li className="rounded-kartu border border-garis bg-mint-muda p-4 text-base leading-6 text-tinta">
+              <strong>Sprint 4 — Akun dan toko. Selesai.</strong> Login nomor HP, alamat,
+              buka toko, dan barang pertama dengan foto.
             </li>
             <li className="rounded-kartu border border-garis p-4 text-base leading-6 text-tinta">
               <strong>Sprint 5 — Katalog.</strong> Beranda, cari, detail produk, dan halaman
-              toko memakai data seed yang sudah ada.
+              toko memakai data yang sudah ada.
             </li>
             <li className="rounded-kartu border border-garis p-4 text-base leading-6 text-tinta">
               <strong>Sprint 6–7 — Bayar dan uang ditahan.</strong> Keranjang multi-toko,

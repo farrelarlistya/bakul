@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
+import { AuthProvider } from "@/lib/auth";
 import "./globals.css";
 
 const inter = Inter({
@@ -16,9 +17,9 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Bakul — fondasi siap",
+  title: "Bakul — uang aman sampai barang diterima",
   description:
-    "Ruang kerja Bakul. Web, API, PostgreSQL, dan token desain sudah tersambung.",
+    "Pasar daring untuk pedagang kecil Indonesia. Buka toko tanpa email, belanja dengan tenang.",
 };
 
 export default function RootLayout({
@@ -28,7 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={`${inter.variable} ${poppins.variable}`}>
-      <body>{children}</body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
