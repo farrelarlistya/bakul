@@ -669,4 +669,22 @@ dari sapaan, hero, dan kategori.
 `seed-history.ts` dihapus karena tidak ada lagi riwayat transaksi yang dibuat
 otomatis.
 
+### 20.5 Navbar Beranda dan panjang etalase
+
+Beranda dirapikan supaya tidak ada tautan yang hanya menggulir halaman sendiri.
+
+| Sebelum | Sesudah |
+| :--- | :--- |
+| Navbar kiri: **Kategori** dan **Lagi laris** (anchor ke bawah halaman) | Dihapus. Keduanya tautan semu: halaman yang sama, hanya bergulir |
+| **Pesanan** sebagai teks di navbar kiri | Pindah ke deret ikon kanan kolom cari, dengan ikon struk dan `aria-current` |
+| **Kategori**: "Lihat semua" → `/cari` | Dihapus. Tautan itu berakhir di tempat yang sama dengan "Lihat semua" milik Lagi laris |
+| **Lagi laris**: 4 barang (1 baris di desktop) | **16 barang**: 4 baris di desktop, 8 baris di mobile |
+
+Urutan ikon kanan setelah perubahan: cari (khusus mobile), pesanan, inbox,
+keranjang, lalu menu akun. Di mobile ikon pesanan disembunyikan karena
+navigasi bawah sudah memuat Pesanan.
+
+"Lihat semua" pada Lagi laris tetap ada karena mengarah ke katalog lengkap
+dengan urutan terlaris, bukan ke bagian lain halaman ini.
+
 
