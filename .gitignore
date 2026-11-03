@@ -47,3 +47,7 @@ desktop.ini
 # FigCraft: simpan file desain, abaikan berkas sementara
 *.figcraft~
 .figcraft-cache/
+
+# Berkas lokal — sengaja tidak dipublikasikan ke GitHub
+AGENTS.md
+bakul.figcraft
