@@ -33,7 +33,8 @@ function SectionHeading({
   eyebrow: string;
   title: string;
   id: string;
-  href: string;
+  /** Opsional. Tanpa href, judul tampil tanpa tautan "Lihat semua". */
+  href?: string;
 }) {
   return (
     <div className="flex items-end justify-between gap-3">
@@ -43,14 +44,16 @@ function SectionHeading({
           {title}
         </h2>
       </div>
-      <Link
-        href={href}
-        aria-label={`Lihat semua ${title.toLowerCase()}`}
-        className="inline-flex min-h-11 items-center gap-1 rounded-tombol px-2 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
-      >
-        Lihat semua
-        <Icon name="chevronRight" size={16} />
-      </Link>
+      {href ? (
+        <Link
+          href={href}
+          aria-label={`Lihat semua ${title.toLowerCase()}`}
+          className="inline-flex min-h-11 items-center gap-1 rounded-tombol px-2 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
+        >
+          Lihat semua
+          <Icon name="chevronRight" size={16} />
+        </Link>
+      ) : null}
     </div>
   );
 }
@@ -58,7 +61,7 @@ function SectionHeading({
 export default async function Page() {
   const [categories, products] = await Promise.all([
     getJson<CategorySummary[]>("/api/v1/categories"),
-    getJson<CatalogPage>("/api/v1/products?sort=terlaris&limit=4"),
+    getJson<CatalogPage>("/api/v1/products?sort=terlaris&limit=16"),
   ]);
 
   const categoryTints = [
@@ -164,7 +167,6 @@ export default async function Page() {
             eyebrow="Jelajahi"
             title="Kategori"
             id="kategori-title"
-            href="/cari"
           />
 
           {categories ? (
@@ -211,7 +213,7 @@ export default async function Page() {
             </div>
           ) : (
             <div className="mt-3">
-              <SkeletonGrid count={4} />
+              <SkeletonGrid count={16} />
             </div>
           )}
         </section>

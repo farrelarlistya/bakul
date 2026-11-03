@@ -148,41 +148,17 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
           bakul
         </Link>
 
-        {!roleNav ? (
+        {!roleNav && !isHome ? (
           <nav
             className="ml-1 hidden items-center gap-0.5 md:flex"
             aria-label="Navigasi utama"
           >
-            {isHome ? (
-              <>
-                <a
-                  href="#kategori"
-                  className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-abu-kartu"
-                >
-                  Kategori
-                </a>
-                <a
-                  href="#produk"
-                  className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-abu-kartu"
-                >
-                  Lagi laris
-                </a>
-              </>
-            ) : (
-              <Link
-                href="/cari"
-                aria-current={isCari ? "page" : undefined}
-                className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-abu-kartu aria-[current=page]:text-teal-aksi"
-              >
-                Cari
-              </Link>
-            )}
             <Link
-              href="/pesanan"
-              aria-current={isPesanan ? "page" : undefined}
+              href="/cari"
+              aria-current={isCari ? "page" : undefined}
               className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-abu-kartu aria-[current=page]:text-teal-aksi"
             >
-              Pesanan
+              Cari
             </Link>
           </nav>
         ) : null}
@@ -220,6 +196,14 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
             aria-label="Cari barang"
           >
             <Icon name="search" size={22} />
+          </Link>
+          <Link
+            href="/pesanan"
+            aria-current={isPesanan ? "page" : undefined}
+            className={`${iconLinkClass} hidden md:inline-flex`}
+            aria-label="Pesanan"
+          >
+            <Icon name="receipt" size={22} />
           </Link>
           <Link
             href="/inbox"

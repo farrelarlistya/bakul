@@ -34,7 +34,7 @@ test("beranda: app bar ikon, kategori, produk, dan bottom nav", async ({ page })
   await expect(page.getByRole("link", { name: "Lewati ke konten" })).toBeVisible();
 
   expect(await page.locator('a[href^="/cari?category="]').count()).toBe(8);
-  expect(await page.locator('a[href^="/p/"]').count()).toBe(4);
+  expect(await page.locator('a[href^="/p/"]').count()).toBe(16);
 
   const layout = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,

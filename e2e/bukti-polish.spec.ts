@@ -123,5 +123,11 @@ test("bukti tangkapan layar polish UI/UX", async ({ page }) => {
     await page.screenshot({ path: `${OUT}/polish-13-dialog.png` });
   }
 
+  // 14. Beranda desktop (1440) — navbar dan grid 4 kolom
+  await page.context().clearCookies();
+  await page.goto("/");
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${OUT}/polish-14-beranda-desktop.png`, fullPage: true });
+
   expect(errors).toEqual([]);
 });
