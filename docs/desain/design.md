@@ -295,10 +295,44 @@ Delapan frame terakhir, tersebar di dua halaman:
 ## 13. Status desain
 
 Desain tahap pertama **selesai**: 9 layar inti + 6 state khusus + 4 frame onboarding.
-Berikutnya masuk Sprint 3 (fondasi kode). Dashboard penjual, dompet, dan admin
-didesain menjelang Sprint 8–10.
+Sprint 3 (fondasi kode) juga sudah selesai; token di bawah sudah dipakai Tailwind.
+Dashboard penjual, dompet, dan admin didesain menjelang Sprint 8–10.
 
 Berkas sumber `bakul.figcraft` hanya ada di komputer pemilik (tidak di-push).
 Repositori menyimpan PNG ekspor sebagai bukti dan acuan implementasi.
+
+---
+
+## 14. Token di kode
+
+Token dari bagian 2 sudah masuk ke `apps/web/app/globals.css` lewat blok `@theme`
+Tailwind 4. Nama kelas mengikuti token, misalnya `bg-teal-aksi`, `text-tinta-lembut`,
+dan `rounded-kartu`.
+
+| Token FigCraft | Variabel Tailwind | Nilai |
+| :--- | :--- | :--- |
+| `mint` | `--color-mint` | `#AEE3CD` |
+| `mint-muda` | `--color-mint-muda` | `#D7F2E6` |
+| `teal` | `--color-teal` | `#198B81` |
+| `teal-aksi` | `--color-teal-aksi` | `#0F6E66` |
+| `krem` | `--color-krem` | `#F1EADA` |
+| `abu-kartu` | `--color-abu-kartu` | `#F5F5F5` |
+| `putih` | `--color-putih` | `#FFFFFF` |
+| `tinta` | `--color-tinta` | `#14201B` |
+| `tinta-lembut` | `--color-tinta-lembut` | `#5C6B64` |
+| `garis` | `--color-garis` | `#E6E6E6` |
+| `perhatian` | `--color-perhatian` | `#B45309` |
+| `bahaya` | `--color-bahaya` | `#B42318` |
+
+Radius: `--radius-tombol` 8 px, `--radius-kartu` 12 px, `--radius-hero` 16 px,
+`--radius-pil` 999 px. Font: `--font-display` (Poppins) dan `--font-body` (Inter).
+
+Halaman `apps/web/app/page.tsx` adalah halaman status internal, bukan Beranda
+final. Tujuannya membuktikan token, format Rupiah, dan health API bekerja. Beranda
+sesuai desain B1 dibuat pada Sprint 5.
+
+Aturan kontras tetap berlaku di kode: teks putih hanya di atas `teal-aksi`
+(`#0F6E66`), bukan di atas `teal` (`#198B81`). Teks minimum 16 px dan target sentuh
+minimum 44 px.
 
 

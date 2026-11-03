@@ -4,7 +4,7 @@
 | :--- | :--- |
 | Versi dokumen | 1.0 |
 | Tanggal | 3 November 2026 |
-| Status | Sprint 0–2 selesai · Sprint 3 berikutnya |
+| Status | Sprint 0–3 selesai · Sprint 4 berikutnya |
 | Sumber kebenaran produk | `docs/prd/bakul-v0.2.md` |
 | Sumber kebenaran visual | `docs/desain/design.md` + `docs/desain/referensi/referensiStyleDesign.jpg` |
 | Berkas lokal (tidak di Git) | `AGENTS.md`, `bakul.figcraft` |
@@ -60,8 +60,8 @@ Aturan kerja:
 | 0 | Fondasi repo + sistem desain + Beranda | **Selesai** | `desain-d1-rev1` |
 | 1 | Desain alur pembeli inti (D2) | **Selesai** | `desain-d2` |
 | 2 | Desain pesanan, onboarding penjual, inbox (D3) | **Selesai** | `desain-v1` |
-| 3 | Fondasi teknis / M0 | Berikutnya | `m0-selesai` |
-| 4 | Akun & onboarding / M1 | Belum | `m1-selesai` |
+| 3 | Fondasi teknis / M0 | **Selesai** | `m0-selesai` |
+| 4 | Akun & onboarding / M1 | Berikutnya | `m1-selesai` |
 | 5 | Katalog & toko / M2 | Belum | `m2-selesai` |
 | 6 | Keranjang & checkout / M3 | Belum | `m3-selesai` |
 | 7 | Pembayaran, escrow, ledger / M4 | Belum | `m4-selesai` |
@@ -181,7 +181,7 @@ menjelang sprint 8–10 agar tidak basi.
 
 ## Sprint 3 — Fondasi teknis (M0)
 
-**Status:** belum · **Estimasi:** ± 1 minggu · **Tag:** `m0-selesai`
+**Status:** selesai · **Tag:** `m0-selesai`
 
 **Tujuan:** `npm run dev` menyalakan web + API, database nyambung, dan token desain
 masuk ke kode.
@@ -201,6 +201,36 @@ masuk ke kode.
 Tailwind 4.x, TypeScript **5.9.x**. Jangan Prisma 8 RC atau TypeScript 7.
 
 **Di luar lingkup:** auth, CI, Docker, deploy.
+
+**Hasil**
+
+- PostgreSQL 17.11 native berjalan di `127.0.0.1:5432`; role `bakul` memiliki
+  database `bakul_dev`. Rincian pemasangan ada di `docs/adr/0002-postgresql-lokal.md`.
+- Monorepo npm workspaces selesai: `apps/web`, `apps/api`, `packages/shared`,
+  `packages/config`.
+- Next 16.4.4 + React 19.3.1 di :3000; Nest 12.3.2 di :3001; satu origin lewat
+  rewrite `/api/*`. `GET /api/v1/health` membalas `status: "ok"` dari kedua port.
+- Prisma 7.10.1 + `@prisma/adapter-pg`, enam tabel M0, migrasi dengan CHECK harga/
+  stok dan indeks satu alamat default per pengguna.
+- Seed deterministik: 12 pengguna, 5 toko di 5 kota, 8 kategori, 100 produk,
+  200 varian, 10 alamat.
+- Token FigCraft masuk ke `apps/web/app/globals.css` lewat `@theme`; halaman status
+  internal memakai token tersebut dan menampilkan health API.
+- `npm run build` dan `npm test` lulus. `npm run dev` menyalakan web + API tanpa
+  error; halaman 390 px tidak overflow dan konsol browser bersih.
+- Nest CLI tidak dipakai karena versi 12 menuntut TypeScript 6; kompilasi memakai
+  `tsc` 5.9.3. Keputusan dicatat di `docs/adr/0001-fondasi-teknis.md`.
+
+**Definisi selesai**
+
+- [x] `psql -c "select 1"` berhasil.
+- [x] `npm install` bersih dan Prisma Client dibuat ulang lewat `postinstall`.
+- [x] Web :3000 + API :3001 berjalan; `/api/v1/health` lewat satu origin.
+- [x] Migrasi enam tabel dan seed 5 toko / 100 produk.
+- [x] Token desain masuk ke Tailwind `@theme`.
+- [x] `.env.example` lengkap; `.env` tidak di-commit.
+- [x] `npm run build` dan `npm test` lulus.
+- [x] Papan status diperbarui, commit, push, tag `m0-selesai`.
 
 ---
 
@@ -371,3 +401,4 @@ git push
 | 3 Nov 2026 | Dokumen dibuat; Sprint 0 selesai, Sprint 1 disiapkan |
 | 3 Nov 2026 | Sprint 1 selesai (12 layar termasuk state); tag `desain-d2` |
 | 3 Nov 2026 | Sprint 2 selesai (8 frame); desain tahap pertama selesai; tag `desain-v1` |
+| 3 Nov 2026 | Sprint 3 selesai: PostgreSQL 17.11, monorepo, health API, Prisma + seed, token Tailwind; tag `m0-selesai` |
