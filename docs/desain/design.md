@@ -3,7 +3,7 @@
 | Atribut | Nilai |
 | :--- | :--- |
 | Versi | 0.1 |
-| Status | D1 selesai — menunggu review |
+| Status | D2 selesai — menunggu review |
 | Sumber produk | `docs/prd/bakul-v0.2.md` |
 | Sumber gaya | `docs/desain/referensi/referensiStyleDesign.jpg` |
 | Berkas desain | `bakul.figcraft` |
@@ -107,12 +107,12 @@ terpisah saat implementasi. Header atas dan bubble chat menyusul di D2–D3.
 | :-- | :--- | :--- | :--- | :-- | :--- |
 | F | Fondasi: token, tipe, atom | — | UX-1 | D1 | Selesai |
 | B1 | Beranda (mobile + desktop) | `/` | CAT-1 | D1 | Selesai |
-| B2 | Cari + filter | `/search` | CAT-1 | D2 | Belum |
-| B3 | Detail produk | `/p/:slug` | CAT-2 | D2 | Belum |
-| B4 | Halaman toko | `/toko/:slug` | CAT-3 | D2 | Belum |
-| B5 | Keranjang multi-toko | `/cart` | CART-1 | D2 | Belum |
-| B6 | Checkout | `/checkout` | CART-2 | D2 | Belum |
-| B7 | Instruksi pembayaran | `/pay/:id` | PAY-1 | D2 | Belum |
+| B2 | Cari + filter | `/search` | CAT-1 | D2 | Selesai (normal + kosong) |
+| B3 | Detail produk | `/p/:slug` | CAT-2 | D2 | Selesai (normal + stok habis) |
+| B4 | Halaman toko | `/toko/:slug` | CAT-3 | D2 | Selesai (normal + kosong) |
+| B5 | Keranjang multi-toko | `/cart` | CART-1 | D2 | Selesai (normal + kosong) |
+| B6 | Checkout | `/checkout` | CART-2 | D2 | Selesai (normal + error kurir) |
+| B7 | Instruksi pembayaran | `/pay/:id` | PAY-1 | D2 | Selesai (normal + kedaluwarsa) |
 | B8 | Pesanan saya | `/orders` | ORD-1 | D3 | Belum |
 | B9 | Lacak paket | `/lacak/:awb` | ORD-1 | D3 | Belum |
 | B10 | Komplain | `/orders/:id/komplain` | DSP-1 | D3 | Belum |
@@ -206,7 +206,7 @@ Pada produksi, foto diganti dengan unggahan penjual.
 **Keterbatasan D1 yang disadari**
 
 - Belum ada varian 360 px; aturan penyesuaiannya sudah dicatat di bagian 4.
-- Belum ada state kosong, memuat, dan error; dibuat bersama layar terkait di D2.
+- State memuat (loading) belum dibuat; state kosong/error sudah ada untuk D2.
 - Warna belum di-bind ke variabel `Core` di setiap lapisan. Variabel sudah ada dan
   siap diekspor ke Tailwind; binding menyeluruh dilakukan saat implementasi agar
   tidak ada nilai lepas.
@@ -214,3 +214,45 @@ Pada produksi, foto diganti dengan unggahan penjual.
   foto penjual saat produksi.
 - Berkas `bakul.figcraft` berukuran ± 7,7 MB karena menyimpan riwayat gambar.
   Jika tumbuh melebihi 50 MB, pindahkan ke Git LFS.
+
+---
+
+## 11. Hasil D2
+
+Enam layar alur pembeli, masing-masing dengan satu state khusus. Semua berada di
+halaman `01 · Pembeli` pada `bakul.figcraft`.
+
+| Layar | Normal | State khusus |
+| :--- | :--- | :--- |
+| B2 Cari | `b2-cari.png` | Hasil kosong: `b2-cari-kosong.png` |
+| B3 Detail produk | `b3-detail.png` | Stok habis: `b3-detail-stok-habis.png` |
+| B4 Halaman toko | `b4-toko.png` | Toko kosong: `b4-toko-kosong.png` |
+| B5 Keranjang | `b5-keranjang.png` | Keranjang kosong: `b5-keranjang-kosong.png` |
+| B6 Checkout | `b6-checkout.png` | Kurir tidak tersedia: `b6-checkout-error-kurir.png` |
+| B7 Instruksi bayar | `b7-bayar.png` | Kedaluwarsa: `b7-bayar-kedaluwarsa.png` |
+
+Ekspor normal 2×, state khusus 1×. Semua di `docs/desain/ekspor/`.
+
+**Keputusan yang diambil di D2**
+
+- Foto produk yang sama dipakai ulang di beberapa layar; latar berbeda dibiarkan
+  karena menyerupai etalase UMKM sungguhan.
+- Kartu produk selalu menampilkan kota + rating (mobile) atau kota + rating +
+  jumlah terjual (desktop).
+- Checkout memakai contoh nyata: subtotal Rp70.000, ongkir Rp17.000, biaya layanan
+  Rp1.609 (Rp1.000 + 0,7%), total Rp88.609.
+- Checkout error: ongkir hanya toko pertama (Rp9.000), biaya layanan Rp1.553,
+  total sementara Rp80.553, tombol dinonaktifkan.
+- Instruksi bayar memakai "kode pembayaran" dan contoh VA BCA 14 digit, bukan
+  istilah Virtual Account.
+- Tidak ada promo, harga coret, atau kolom email di seluruh layar.
+
+**Yang perlu diputuskan saat review D2**
+
+1. Alur Cari → Detail → Keranjang → Checkout → Bayar sudah masuk akal?
+2. State kosong/error cukup jelas, atau perlu ilustrasi yang lebih besar?
+3. Checkout: pilihan kurir per toko sudah terbaca, atau terlalu padat?
+4. Instruksi bayar: 3 langkah sudah cukup, atau perlu tombol bantuan?
+5. Halaman toko: tab Produk/Ulasan/Info sudah pas?
+
+
