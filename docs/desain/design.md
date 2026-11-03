@@ -38,17 +38,21 @@ menyeimbangkan mint/teal agar tidak terasa seperti toko sayur.
 | `mint-muda` | `#D7F2E6` | State terpilih, latar chip |
 | `teal` | `#198B81` | Ikon, tautan, garis aktif |
 | `teal-aksi` | `#0F6E66` | Latar tombol utama (kontras 6,4:1 dengan putih) |
+| `teal-tua` | `#0B5A54` | Teks di atas latar mint (kontras 5,6:1) |
 | `krem` | `#F1EADA` | Kartu kategori, blok ajakan buka toko |
 | `abu-kartu` | `#F5F5F5` | Kartu produk, kolom pencarian |
 | `putih` | `#FFFFFF` | Halaman, header, kartu |
 | `tinta` | `#14201B` | Teks utama |
 | `tinta-lembut` | `#5C6B64` | Teks sekunder (kontras 5,7:1 di putih) |
 | `garis` | `#E6E6E6` | Pembatas, border |
-| `perhatian` | `#B45309` | Stok hampir habis |
+| `perhatian` | `#B45309` | Stok hampir habis, ikon peringatan |
+| `perhatian-tua` | `#94420A` | Teks peringatan di atas krem (kontras 5,8:1) |
 | `bahaya` | `#B42318` | Error, komplain |
 
 Catatan kontras: `#198B81` dengan teks putih hanya ±4,1:1, sehingga **tidak dipakai
-sebagai latar teks**. Latar tombol selalu `#0F6E66`.
+sebagai latar teks**. Latar tombol selalu `#0F6E66`. Teks di atas `mint` memakai
+`teal-tua`, bukan `teal-aksi`; teks peringatan di atas `krem` memakai
+`perhatian-tua`, bukan `perhatian`.
 
 ---
 
@@ -93,7 +97,7 @@ Komponen master yang sudah dibuat di halaman `00 · Fondasi` (9 buah):
 5. `Atom/Kartu Produk` — 173×232, termasuk ilustrasi, harga, tombol 44 px
 6. `Atom/Kartu Kategori` — krem, 104×104
 7. `Atom/Badge Menunggu bayar` — 148×36 (varian lain masih frame)
-8. `Atom/Nav Bawah` — 390×80, 4 tab
+8. `Atom/Nav Bawah` — 390×80, 5 tab: Beranda, Cari, Keranjang, Pesanan, Akun
 9. `Atom/Baris Kepercayaan` — 340×52
 
 Input OTP dibuat sebagai enam frame (bukan komponen) karena tiap kotak perlu state
@@ -127,17 +131,21 @@ Dashboard penjual, dompet, dan admin belum dibuat; dijadwalkan sebelum Sprint 8�
 
 Urutan dari atas ke bawah (mobile):
 
-1. Header: merek `bakul`, lonceng, keranjang, kolom cari.
-2. Hero mint: judul "Dukung UMKM sekitarmu", subjudul "Uang aman sampai barang tiba",
-   tombol "Mulai belanja", foto produk UMKM (tas anyaman).
-3. Baris kepercayaan: "Uang ditahan aman" dan "Bantuan komplain".
-4. Kategori: kartu krem, gulir horizontal.
-5. Sedang laris: grid 2 kolom, foto asli, harga tanpa coretan, kota + rating,
-   tombol "Tambah".
-6. Navigasi bawah: Beranda, Pesanan, Keranjang, Akun.
+1. Header: merek `bakul`, ikon cari, ikon chat/Inbox dengan badge, ikon keranjang
+   dengan badge, dan menu akun.
+2. Baris kepercayaan gelap: "Uang ditahan aman sampai barang diterima".
+3. Sapaan pembeli, kolom cari besar, dan tombol filter.
+4. Hero mint: judul "Belanja dari tetangga, sampai ke rumah", subjudul, tombol
+   "Jelajahi kategori", foto tas anyaman.
+5. Dua kartu kepercayaan: "Uang aman" dan "Komplain".
+6. Kategori: 8 kartu ikon, gulir horizontal di layar sempit.
+7. Lagi laris: grid 2 kolom, foto asli, harga tanpa coretan, kota + rating,
+   nama toko.
+8. Ajakan "Punya dagangan? Buka toko gratis".
+9. Navigasi bawah: Beranda, Cari, Keranjang, Pesanan, Akun.
 
-Desktop menambahkan: menu atas, empat kategori sejajar, empat produk sejajar
-(kota, rating, jumlah terjual), blok ajakan "Punya dagangan? Buka toko gratis",
+Desktop menambahkan: menu atas, kolom pencarian, empat kategori sejajar, empat produk
+sejajar (kota, rating, jumlah terjual), blok ajakan "Punya dagangan? Buka toko gratis",
 dan footer hitam berisi tautan, metode pembayaran simulasi, serta keterangan
 "tidak ada uang nyata yang berpindah".
 
@@ -315,6 +323,7 @@ dan `rounded-kartu`.
 | `mint-muda` | `--color-mint-muda` | `#D7F2E6` |
 | `teal` | `--color-teal` | `#198B81` |
 | `teal-aksi` | `--color-teal-aksi` | `#0F6E66` |
+| `teal-tua` | `--color-teal-tua` | `#0B5A54` |
 | `krem` | `--color-krem` | `#F1EADA` |
 | `abu-kartu` | `--color-abu-kartu` | `#F5F5F5` |
 | `putih` | `--color-putih` | `#FFFFFF` |
@@ -322,6 +331,7 @@ dan `rounded-kartu`.
 | `tinta-lembut` | `--color-tinta-lembut` | `#5C6B64` |
 | `garis` | `--color-garis` | `#E6E6E6` |
 | `perhatian` | `--color-perhatian` | `#B45309` |
+| `perhatian-tua` | `--color-perhatian-tua` | `#94420A` |
 | `bahaya` | `--color-bahaya` | `#B42318` |
 
 Radius: `--radius-tombol` 8 px, `--radius-kartu` 12 px, `--radius-hero` 16 px,
@@ -332,8 +342,9 @@ B1: hero mint, kategori, barang terlaris, dan ajakan buka toko. Halaman status
 internal M0 tidak lagi menjadi halaman utama.
 
 Aturan kontras tetap berlaku di kode: teks putih hanya di atas `teal-aksi`
-(`#0F6E66`), bukan di atas `teal` (`#198B81`). Teks minimum 16 px dan target sentuh
-minimum 44 px.
+(`#0F6E66`), bukan di atas `teal` (`#198B81`). Teks di atas `mint` memakai
+`teal-tua`; teks peringatan di atas `krem` memakai `perhatian-tua`. Teks minimum
+16 px dan target sentuh minimum 44 px.
 
 ---
 
@@ -416,4 +427,47 @@ Galeri implementasi (390 x 844) ada di `docs/desain/ekspor/implementasi-m8-*.png
 GIF ringkas 30 detik ada di `docs/bukti/demo-bakul.gif`; dibuat dari sepuluh
 tangkapan layar alur pembeli, penjual, admin, dan demo console.
 
+---
 
+## 18. Audit UI/UX dan aksesibilitas (November 2026)
+
+Audit dijalankan pada 31 tampilan halaman (390 px dan 1440 px), termasuk sesi
+pembeli, penjual, admin, dan operator demo.
+
+**Alat dan hasil**
+
+| Alat | Cakupan | Hasil |
+| :--- | :--- | :--- |
+| axe-core 4.10.3 + Chrome | WCAG 2.1/2.2 AA dan best practice | 0 pelanggaran, 0 gambar tanpa teks alternatif, 0 kolom tanpa label |
+| Lighthouse 12.8.2 (build produksi) | Beranda 390 px | Performa 97, Aksesibilitas 100, Best Practices 100, LCP 1,9 dtk, CLS 0 |
+| Pemeriksaan keyboard | Skip link, fokus, menu akun, navigasi bawah | Fokus terlihat, Escape menutup menu, `aria-current` aktif |
+
+**Perbaikan yang dilakukan**
+
+1. Satu header bersama (`AppHeader`) untuk seluruh halaman: ikon cari, chat/Inbox,
+   keranjang, dan menu akun. Tautan peran (Jualan, Admin, Demo console) pindah ke
+   menu akun, tidak lagi memenuhi header.
+2. Bottom nav lima tab dipakai konsisten di semua halaman pembeli, termasuk Inbox
+   dan Akun. Item aktif memakai pil mint dan `aria-current="page"`. Halaman
+   penjual dan admin memakai subnavigasi peran di bawah header (Ringkasan/Pesanan/
+   Barang/Dompet/Toko, atau Dashboard/Komplain/Pencairan/Toko/Demo).
+3. Token kontras baru: `teal-tua` untuk teks di atas mint dan `perhatian-tua` untuk
+   teks peringatan di atas krem. Semua kombinasi teks lulus 4,5:1.
+4. Skip link "Lewati ke konten", fokus global 3 px, dan state hover tombol.
+5. Label ARIA diperbaiki: titik "belum dibaca" tidak lagi memakai `aria-label` pada
+   elemen tanpa peran; jumlah badge diumumkan lewat nama tautan.
+6. Filter Cari diringkas di mobile: kategori bisa digulir horizontal, filter kota/
+   harga/rating/urutan berada di balik tombol "Filter lainnya".
+7. Judul dokumen per halaman, sapaan pembeli memakai nama depan, dan pesan galat
+   Beranda tidak lagi menyebut API/PostgreSQL.
+8. Target sentuh ikon header, kolom cari, dan checkbox/radio diperbesar; teks badge
+   angka dinaikkan ke 16 px.
+
+**Catatan lanjutan**
+
+- Performa Lighthouse diukur pada build produksi; server `next dev` memberi skor
+  lebih rendah karena bundel pengembangan.
+- Optimalisasi `srcset` foto produk masih terbuka; foto seed yang dipakai ulang
+  berukuran lebih besar dari ukuran tampil.
+- Halaman penjual/admin belum memakai sidebar; header bersama dan menu akun adalah
+  langkah antara sampai sidebar peran dikerjakan.
