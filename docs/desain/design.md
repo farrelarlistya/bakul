@@ -7,6 +7,7 @@
 | Sumber produk | `docs/prd/bakul-v0.2.md` |
 | Sumber gaya | `docs/desain/referensi/referensiStyleDesign.jpg` |
 | Berkas desain | `bakul.figcraft` |
+| Rencana sprint | `docs/rencana-sprint.md` |
 | Ekspor tinjauan | `docs/desain/ekspor/` |
 
 ---
