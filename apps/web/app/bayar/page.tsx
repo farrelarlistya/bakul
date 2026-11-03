@@ -15,7 +15,11 @@ import {
 } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
+import { EmptyState } from "@/components/empty-state";
+import { Icon } from "@/components/icon";
 import { SiteFooter } from "@/components/site-footer";
+import { Skeleton } from "@/components/skeleton";
+import { StatusBanner } from "@/components/status-banner";
 import { refreshBadges } from "@/lib/badges";
 import {
   cardClass,
@@ -174,12 +178,16 @@ export default function BayarPage() {
   );
 
   return (
-    <main className="min-h-screen bg-putih pb-24 md:pb-0">
+    <main className="min-h-screen bg-putih pb-28 md:pb-0">
       <AppHeader />
 
-      <div className="mx-auto max-w-5xl px-4 py-6">
-        <Link href="/keranjang" className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi">
-          ← Kembali ke keranjang
+      <div className="mx-auto max-w-[1200px] px-4 py-6">
+        <Link
+          href="/keranjang"
+          className="inline-flex min-h-11 items-center gap-1 rounded-tombol px-1 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
+        >
+          <Icon name="arrowLeft" size={18} />
+          Kembali ke keranjang
         </Link>
         <h1 className="mt-2 font-display text-3xl font-bold text-tinta">Bayar</h1>
         <p className="mt-1 text-base text-tinta-lembut">
@@ -187,12 +195,13 @@ export default function BayarPage() {
         </p>
 
         {status === "tamu" ? (
-          <div className={`${cardClass} mt-6`}>
-            <p className="text-base text-tinta-lembut">Masuk dulu untuk membayar.</p>
-            <Link href="/masuk" className={`${primaryButtonClass} mt-4 w-full`}>
-              Masuk
-            </Link>
-          </div>
+          <EmptyState
+            icon="user"
+            title="Masuk dulu untuk membayar"
+            description="Masuk dengan nomor HP, lalu lanjutkan ke pembayaran."
+            action={{ label: "Masuk", href: "/masuk" }}
+            className="mt-6"
+          />
         ) : null}
 
         {status === "masuk" ? (
@@ -204,15 +213,13 @@ export default function BayarPage() {
             ) : null}
 
             {addresses.length === 0 ? (
-              <div className={`${cardClass} mt-6`}>
-                <p className="text-lg font-semibold text-tinta">Alamat belum diisi.</p>
-                <p className="mt-1 text-base text-tinta-lembut">
-                  Tambahkan alamat pengiriman dulu supaya ongkir bisa dihitung.
-                </p>
-                <Link href="/akun" className={`${primaryButtonClass} mt-4 w-full`}>
-                  Isi alamat
-                </Link>
-              </div>
+              <EmptyState
+                icon="pin"
+                title="Alamat belum diisi"
+                description="Tambahkan alamat pengiriman dulu supaya ongkir bisa dihitung."
+                action={{ label: "Isi alamat", href: "/akun" }}
+                className="mt-6"
+              />
             ) : null}
 
             {addresses.length > 0 ? (
@@ -221,43 +228,58 @@ export default function BayarPage() {
                   <section className={cardClass}>
                     <h2 className="font-display text-2xl font-bold text-tinta">Alamat kirim</h2>
                     <div className="mt-3 space-y-2">
-                      {addresses.map((address) => (
-                        <label
-                          key={address.id}
-                          className={`flex min-h-11 cursor-pointer gap-3 rounded-kartu border p-3 ${
-                            addressId === address.id
-                              ? "border-teal-aksi bg-mint-muda"
-                              : "border-garis bg-putih"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="address"
-                            className="mt-1 h-6 w-6 shrink-0"
-                            checked={addressId === address.id}
-                            onChange={() => setAddressId(address.id)}
-                          />
-                          <span className="min-w-0">
-                            <span className="block text-base font-semibold text-tinta">
-                              {address.label} · {address.recipientName}
+                      {addresses.map((address) => {
+                        const selected = addressId === address.id;
+                        return (
+                          <label
+                            key={address.id}
+                            className={`flex min-h-11 cursor-pointer gap-3 rounded-kartu border p-3 transition duration-cepat ease-standar ${
+                              selected
+                                ? "border-teal-aksi bg-mint-muda"
+                                : "border-garis bg-putih hover:border-garis-kuat hover:bg-abu-kartu/40"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="address"
+                              className="mt-1 h-6 w-6 shrink-0 accent-teal-aksi"
+                              checked={selected}
+                              onChange={() => setAddressId(address.id)}
+                            />
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-base font-semibold text-tinta">
+                                {address.label} · {address.recipientName}
+                              </span>
+                              <span className="block text-base text-tinta-lembut">
+                                {address.phone}
+                              </span>
+                              <span className="block text-base text-tinta">
+                                {address.fullAddress}, {address.postalCode}
+                              </span>
                             </span>
-                            <span className="block text-base text-tinta-lembut">
-                              {address.phone}
-                            </span>
-                            <span className="block text-base text-tinta">
-                              {address.fullAddress}, {address.postalCode}
-                            </span>
-                          </span>
-                        </label>
-                      ))}
+                            {selected ? (
+                              <span className="shrink-0 self-start text-teal-aksi">
+                                <Icon name="check" size={20} />
+                              </span>
+                            ) : null}
+                          </label>
+                        );
+                      })}
                     </div>
-                    <Link href="/akun" className="mt-3 inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi">
-                      + Tambah atau ubah alamat
+                    <Link
+                      href="/akun"
+                      className="mt-3 inline-flex min-h-11 items-center gap-1 rounded-tombol px-1 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
+                    >
+                      <Icon name="plus" size={18} />
+                      Tambah atau ubah alamat
                     </Link>
                   </section>
 
                   {quoteLoading ? (
-                    <p className="text-base text-tinta-lembut">Menghitung ongkir…</p>
+                    <div className="space-y-3" aria-hidden="true">
+                      <Skeleton className="h-48 w-full rounded-kartu" />
+                      <Skeleton className="h-48 w-full rounded-kartu" />
+                    </div>
                   ) : null}
 
                   {quote?.shops.map((shop) => {
@@ -301,35 +323,63 @@ export default function BayarPage() {
                         </ul>
 
                         <div className="mt-4">
-                          <label className="mb-2 block text-base font-semibold text-tinta" htmlFor={`courier-${shop.shopId}`}>
+                          <p className="mb-2 text-base font-semibold text-tinta" id={`courier-${shop.shopId}`}>
                             Pilih kurir
-                          </label>
-                          <select
-                            id={`courier-${shop.shopId}`}
-                            className={inputClass}
-                            value={choice ? `${choice.courier}:${choice.service}` : ""}
-                            onChange={(event) => {
-                              const [courier, service] = event.target.value.split(":");
-                              if (courier && service) {
-                                setChoices((current) => ({
-                                  ...current,
-                                  [shop.shopId]: { courier, service },
-                                }));
-                              }
-                            }}
-                          >
-                            <option value="">Pilih kurir</option>
-                            {shop.rates.map((rate) => (
-                              <option key={`${rate.courier}-${rate.service}`} value={`${rate.courier}:${rate.service}`}>
-                                {rate.courierName} {rate.serviceName} · {formatRupiah(rate.cost)} · {rate.etd}
-                              </option>
-                            ))}
-                          </select>
+                          </p>
                           {shop.rates.length === 0 ? (
-                            <p className="mt-2 text-base text-bahaya">
-                              Toko ini belum punya kurir aktif. Hubungi penjual atau pilih barang lain.
-                            </p>
-                          ) : null}
+                            <div role="alert">
+                              <StatusBanner tone="gagal">
+                                Toko ini belum punya kurir aktif. Hubungi penjual atau pilih barang lain.
+                              </StatusBanner>
+                            </div>
+                          ) : (
+                            <div
+                              role="radiogroup"
+                              aria-labelledby={`courier-${shop.shopId}`}
+                              className="space-y-2"
+                            >
+                              {shop.rates.map((rate) => {
+                                const rateChoice = { courier: rate.courier, service: rate.service };
+                                const selected =
+                                  choice?.courier === rateChoice.courier &&
+                                  choice?.service === rateChoice.service;
+                                return (
+                                  <label
+                                    key={`${rate.courier}-${rate.service}`}
+                                    className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-kartu border p-3 transition duration-cepat ease-standar ${
+                                      selected
+                                        ? "border-teal-aksi bg-mint-muda"
+                                        : "border-garis bg-putih hover:border-garis-kuat hover:bg-abu-kartu/40"
+                                    }`}
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`courier-${shop.shopId}`}
+                                      className="h-6 w-6 shrink-0 accent-teal-aksi"
+                                      checked={selected}
+                                      onChange={() =>
+                                        setChoices((current) => ({
+                                          ...current,
+                                          [shop.shopId]: rateChoice,
+                                        }))
+                                      }
+                                    />
+                                    <span className="min-w-0 flex-1">
+                                      <span className="block text-base font-semibold text-tinta">
+                                        {rate.courierName} {rate.serviceName}
+                                      </span>
+                                      <span className="block text-base text-tinta-lembut">
+                                        Tiba sekitar {rate.etd}
+                                      </span>
+                                    </span>
+                                    <span className="shrink-0 text-base font-bold text-tinta">
+                                      {formatRupiah(rate.cost)}
+                                    </span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       </section>
                     );
@@ -337,27 +387,41 @@ export default function BayarPage() {
 
                   <section className={cardClass}>
                     <h2 className="font-display text-2xl font-bold text-tinta">Cara bayar</h2>
-                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                      {PAYMENT_METHODS.map((item) => (
-                        <label
-                          key={item.value}
-                          className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-kartu border p-3 ${
-                            method === item.value
-                              ? "border-teal-aksi bg-mint-muda"
-                              : "border-garis bg-putih"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="method"
-                            value={item.value}
-                            checked={method === item.value}
-                            onChange={() => setMethod(item.value)}
-                            className="h-6 w-6 shrink-0"
-                          />
-                          <span className="text-base font-semibold text-tinta">{item.label}</span>
-                        </label>
-                      ))}
+                    <div
+                      role="radiogroup"
+                      aria-label="Cara bayar"
+                      className="mt-3 grid gap-2 sm:grid-cols-2"
+                    >
+                      {PAYMENT_METHODS.map((item) => {
+                        const selected = method === item.value;
+                        return (
+                          <label
+                            key={item.value}
+                            className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-kartu border p-3 transition duration-cepat ease-standar ${
+                              selected
+                                ? "border-teal-aksi bg-mint-muda"
+                                : "border-garis bg-putih hover:border-garis-kuat hover:bg-abu-kartu/40"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="method"
+                              value={item.value}
+                              checked={selected}
+                              onChange={() => setMethod(item.value)}
+                              className="h-6 w-6 shrink-0 accent-teal-aksi"
+                            />
+                            <span className="min-w-0 flex-1 text-base font-semibold text-tinta">
+                              {item.label}
+                            </span>
+                            {selected ? (
+                              <span className="shrink-0 text-teal-aksi">
+                                <Icon name="check" size={20} />
+                              </span>
+                            ) : null}
+                          </label>
+                        );
+                      })}
                     </div>
                   </section>
 
@@ -375,7 +439,7 @@ export default function BayarPage() {
                   </section>
                 </div>
 
-                <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+                <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
                   <section className={cardClass}>
                     <h2 className="font-display text-2xl font-bold text-tinta">Rincian</h2>
                     <dl className="mt-3 space-y-2 text-base">
@@ -396,22 +460,56 @@ export default function BayarPage() {
                         <dd className="text-xl font-bold text-tinta">{formatRupiah(totals.totalAmount)}</dd>
                       </div>
                     </dl>
-                    <p className="mt-3 text-base text-tinta-lembut">
+                    <p className="mt-3 flex items-start gap-1 text-base text-tinta-lembut">
+                      <Icon name="shield" size={18} className="mt-0.5 shrink-0 text-teal-aksi" />
                       Uang ditahan aman. Penjual baru menerima dana setelah barang kamu terima.
                     </p>
-                    <button
-                      type="button"
-                      className={`${primaryButtonClass} mt-4 w-full`}
-                      disabled={!canPay || busy || quoteLoading}
-                      onClick={() => void bayar()}
-                    >
-                      {busy ? "Membuat tagihan…" : "Bayar sekarang"}
-                    </button>
+                    <div className="hidden lg:block">
+                      <button
+                        type="button"
+                        className={`${primaryButtonClass} mt-4 w-full`}
+                        disabled={!canPay || busy || quoteLoading}
+                        aria-busy={busy}
+                        onClick={() => void bayar()}
+                      >
+                        {busy ? (
+                          <>
+                            <Icon name="refresh" size={18} className="animate-memuat" />
+                            Membuat tagihan…
+                          </>
+                        ) : (
+                          "Bayar sekarang"
+                        )}
+                      </button>
+                    </div>
                     <Link href="/keranjang" className={`${secondaryButtonClass} mt-2 w-full`}>
                       Ubah keranjang
                     </Link>
                   </section>
                 </aside>
+              </div>
+            ) : null}
+
+            {/* Ringkasan total lengket di mobile supaya selalu terlihat. */}
+            {quote && quote.shops.length > 0 ? (
+              <div className="fixed inset-x-0 bottom-16 z-30 border-t border-garis bg-putih px-4 py-3 lg:hidden">
+                <div className="flex items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-base text-tinta-lembut">Total bayar</p>
+                    <p className="text-xl font-bold text-tinta" aria-live="polite">
+                      {formatRupiah(totals.totalAmount)}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className={primaryButtonClass}
+                    disabled={!canPay || busy || quoteLoading}
+                    aria-busy={busy}
+                    onClick={() => void bayar()}
+                  >
+                    {busy ? "Membuat tagihan…" : "Bayar sekarang"}
+                  </button>
+                </div>
               </div>
             ) : null}
           </>

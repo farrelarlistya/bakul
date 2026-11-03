@@ -11,10 +11,19 @@ import {
 } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
+import { EmptyState } from "@/components/empty-state";
 import { Icon } from "@/components/icon";
 import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
-import { errorBoxClass, inputClass, labelClass, secondaryButtonClass } from "@/components/ui";
+import { SkeletonGrid } from "@/components/skeleton";
+import {
+  chipActiveClass,
+  chipClass,
+  errorBoxClass,
+  labelClass,
+  secondaryButtonClass,
+  selectClass,
+} from "@/components/ui";
 
 const SORT_LABEL: Record<ProductSort, string> = {
   terbaru: "Terbaru",
@@ -124,11 +133,14 @@ export function CariClient() {
   const advancedFilterCount =
     [city, maxPrice, rating].filter(Boolean).length + (sort !== "terbaru" ? 1 : 0);
 
+  const hasFilter =
+    Boolean(query.trim()) || Boolean(category) || advancedFilterCount > 0;
+
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
       <AppHeader defaultQuery={query} />
 
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-6">
+      <div className="mx-auto max-w-[1200px] space-y-6 px-4 py-6">
         <div>
           <p className="text-base font-semibold text-teal-aksi">Katalog</p>
           <h1 className="mt-1 font-display text-3xl font-bold text-tinta">
@@ -152,9 +164,7 @@ export function CariClient() {
                 setCategory("");
                 setPage(1);
               }}
-              className={`inline-flex min-h-11 shrink-0 items-center rounded-pil px-4 text-base font-semibold ${
-                category === "" ? "bg-teal-aksi text-putih" : "bg-abu-kartu text-tinta"
-              }`}
+              className={category === "" ? chipActiveClass : chipClass}
             >
               Semua
             </button>
@@ -167,11 +177,7 @@ export function CariClient() {
                   setCategory(item.slug);
                   setPage(1);
                 }}
-                className={`inline-flex min-h-11 shrink-0 items-center rounded-pil px-4 text-base font-semibold ${
-                  category === item.slug
-                    ? "bg-teal-aksi text-putih"
-                    : "bg-abu-kartu text-tinta"
-                }`}
+                className={category === item.slug ? chipActiveClass : chipClass}
               >
                 {item.name}
               </button>
@@ -183,7 +189,7 @@ export function CariClient() {
             aria-expanded={filtersOpen}
             aria-controls="filter-lainnya"
             onClick={() => setFiltersOpen((value) => !value)}
-            className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-tombol border border-garis bg-putih px-4 text-base font-semibold text-tinta md:hidden"
+            className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-tombol border border-garis bg-putih px-4 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:border-garis-kuat hover:bg-abu-kartu active:scale-[0.98] md:hidden"
           >
             <Icon name="sliders" size={18} />
             {filtersOpen
@@ -191,6 +197,7 @@ export function CariClient() {
               : advancedFilterCount > 0
                 ? `Filter lainnya (${advancedFilterCount})`
                 : "Filter lainnya"}
+            <Icon name={filtersOpen ? "chevronDown" : "chevronRight"} size={16} />
           </button>
 
           <div
@@ -204,7 +211,7 @@ export function CariClient() {
                 </label>
                 <select
                   id="filter-city"
-                  className={inputClass}
+                  className={selectClass}
                   value={city}
                   onChange={(event) => {
                     setCity(event.target.value);
@@ -226,7 +233,7 @@ export function CariClient() {
                 </label>
                 <select
                   id="filter-price"
-                  className={inputClass}
+                  className={selectClass}
                   value={maxPrice}
                   onChange={(event) => {
                     setMaxPrice(event.target.value);
@@ -247,7 +254,7 @@ export function CariClient() {
                 </label>
                 <select
                   id="filter-rating"
-                  className={inputClass}
+                  className={selectClass}
                   value={rating}
                   onChange={(event) => {
                     setRating(event.target.value);
@@ -266,7 +273,7 @@ export function CariClient() {
                 </label>
                 <select
                   id="filter-sort"
-                  className={inputClass}
+                  className={selectClass}
                   value={sort}
                   onChange={(event) => {
                     setSort(event.target.value as ProductSort);
@@ -282,7 +289,12 @@ export function CariClient() {
               </div>
             </div>
 
-            <button type="button" className={`${secondaryButtonClass} mt-4`} onClick={reset}>
+            <button
+              type="button"
+              className={`${secondaryButtonClass} mt-4`}
+              onClick={reset}
+              disabled={!hasFilter}
+            >
               Hapus filter
             </button>
           </div>
@@ -294,18 +306,18 @@ export function CariClient() {
           </div>
         ) : null}
 
-        {loading ? <p className="text-base text-tinta-lembut">Memuat barang…</p> : null}
+        {loading ? <SkeletonGrid count={8} className="md:grid-cols-4" /> : null}
 
         {!loading && data?.products.length === 0 ? (
-          <div className="rounded-kartu border border-garis bg-abu-kartu p-6 text-center">
-            <p className="text-lg font-semibold text-tinta">Barang tidak ditemukan.</p>
-            <p className="mt-1 text-base text-tinta-lembut">
-              Coba kata lain atau hapus filter.
-            </p>
-            <button type="button" className={`${secondaryButtonClass} mt-4`} onClick={reset}>
+          <EmptyState
+            icon="search"
+            title="Barang tidak ditemukan"
+            description="Coba kata lain atau hapus filter yang dipakai."
+          >
+            <button type="button" className={secondaryButtonClass} onClick={reset}>
               Hapus filter
             </button>
-          </div>
+          </EmptyState>
         ) : null}
 
         {data && data.products.length > 0 ? (
@@ -317,13 +329,17 @@ export function CariClient() {
         ) : null}
 
         {data && data.meta.totalPages > 1 ? (
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <nav
+            aria-label="Halaman hasil"
+            className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+          >
             <button
               type="button"
               className={`${secondaryButtonClass} order-2 w-full sm:order-1 sm:w-auto`}
               disabled={page <= 1}
               onClick={() => setPage((value) => Math.max(1, value - 1))}
             >
+              <Icon name="chevronLeft" size={18} />
               Sebelumnya
             </button>
             <p className="order-1 text-center text-base text-tinta-lembut sm:order-2">
@@ -336,8 +352,9 @@ export function CariClient() {
               onClick={() => setPage((value) => value + 1)}
             >
               Berikutnya
+              <Icon name="chevronRight" size={18} />
             </button>
-          </div>
+          </nav>
         ) : null}
       </div>
 

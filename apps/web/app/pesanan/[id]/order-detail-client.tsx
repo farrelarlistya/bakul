@@ -11,11 +11,17 @@ import {
 } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Icon } from "@/components/icon";
 import { OrderStatusBadge } from "@/components/order-status";
 import { SiteFooter } from "@/components/site-footer";
+import { Skeleton } from "@/components/skeleton";
+import { StatusBanner } from "@/components/status-banner";
+import { useToast } from "@/components/toast";
 import {
   cardClass,
   errorBoxClass,
+  fileInputClass,
   inputClass,
   labelClass,
   primaryButtonClass,
@@ -38,11 +44,13 @@ function tanggal(value: string | null): string {
 
 export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
   const { status, request } = useAuth();
+  const { notify } = useToast();
   const [order, setOrder] = useState<OrderInvoiceView | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [konfirmasiSelesai, setKonfirmasiSelesai] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [reviewEvidence, setReviewEvidence] = useState<string[]>([]);
@@ -66,14 +74,13 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
   }, [status, load]);
 
   async function selesaikan(): Promise<void> {
-    if (!window.confirm("Barang sudah diterima dengan baik? Dana akan diteruskan ke penjual.")) {
-      return;
-    }
+    setKonfirmasiSelesai(false);
     setBusy(true);
     setError(null);
     try {
       await request(`/api/v1/orders/${invoiceId}/complete`, { method: "POST" });
       setMessage("Pesanan selesai. Dana sudah diteruskan ke penjual.");
+      notify("Pesanan selesai. Dana sudah diteruskan ke penjual.");
       await load();
     } catch (caught: unknown) {
       setError(caught instanceof Error ? caught.message : "Pesanan belum bisa diselesaikan.");
@@ -95,6 +102,7 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
         }),
       });
       setMessage("Terima kasih, ulasanmu sudah dikirim.");
+      notify("Terima kasih, ulasanmu sudah dikirim.");
       setReviewEvidence([]);
       await load();
     } catch (caught: unknown) {
@@ -132,8 +140,12 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
       <AppHeader />
 
       <div className="mx-auto max-w-4xl px-4 py-6">
-        <Link href="/pesanan" className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi">
-          ← Kembali ke pesanan
+        <Link
+          href="/pesanan"
+          className="inline-flex min-h-11 items-center gap-1 rounded-tombol px-1 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
+        >
+          <Icon name="arrowLeft" size={18} />
+          Kembali ke pesanan
         </Link>
 
         {status === "tamu" ? (
@@ -145,14 +157,21 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
           </div>
         ) : null}
 
-        {loading ? <p className="mt-4 text-base text-tinta-lembut">Memuat pesanan…</p> : null}
+        {loading ? (
+          <div className="mt-4 space-y-3">
+            <Skeleton className="h-48 w-full rounded-kartu" />
+            <Skeleton className="h-64 w-full rounded-kartu" />
+          </div>
+        ) : null}
         {error ? (
           <div className={`${errorBoxClass} mt-4`} role="alert">
             {error}
           </div>
         ) : null}
         {message ? (
-          <p className="mt-4 rounded-kartu bg-mint-muda p-3 text-base text-teal-aksi">{message}</p>
+          <div className="mt-4" role="status">
+            <StatusBanner tone="sukses">{message}</StatusBanner>
+          </div>
         ) : null}
 
         {order ? (
@@ -169,11 +188,12 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
                 <OrderStatusBadge status={order.orderStatus} />
               </div>
 
-              <div className="mt-4 rounded-kartu bg-krem p-4">
-                <p className="text-lg font-semibold text-tinta">
+              <div className="mt-4 rounded-kartu border border-teal bg-mint-muda p-4">
+                <p className="flex items-start gap-2 text-lg font-semibold text-teal-tua">
+                  <Icon name="shield" size={22} className="mt-0.5 shrink-0" />
                   {ESCROW_STATUS_LABEL[order.escrowStatus] ?? order.escrowStatus}
                 </p>
-                <p className="mt-1 text-base text-tinta">
+                <p className="mt-1 text-base leading-6 text-tinta">
                   {order.escrowStatus === "HELD"
                     ? "Uangmu aman di Bakul. Penjual baru menerima setelah kamu menekan Pesanan Selesai atau pesanan selesai otomatis."
                     : order.escrowStatus === "FROZEN"
@@ -197,7 +217,7 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
                     type="button"
                     className={primaryButtonClass}
                     disabled={busy}
-                    onClick={() => void selesaikan()}
+                    onClick={() => setKonfirmasiSelesai(true)}
                   >
                     Pesanan selesai
                   </button>
@@ -240,7 +260,10 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
                     </div>
                     <div className="min-w-0 flex-1">
                       {item.productSlug ? (
-                        <Link href={`/p/${item.productSlug}`} className="text-base font-semibold text-tinta">
+                        <Link
+                          href={`/p/${item.productSlug}`}
+                          className="text-base font-semibold text-tinta transition duration-cepat ease-standar hover:text-teal-aksi"
+                        >
                           {item.name}
                         </Link>
                       ) : (
@@ -354,17 +377,17 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
                 <p className="mt-1 text-base text-tinta-lembut">
                   Ulasan membantu pembeli lain memilih pedagang yang tepat.
                 </p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Rating bintang">
                   {[1, 2, 3, 4, 5].map((value) => (
                     <button
                       key={value}
                       type="button"
                       onClick={() => setRating(value)}
                       aria-pressed={rating >= value}
-                      className={`inline-flex h-11 w-11 items-center justify-center rounded-tombol border text-xl ${
+                      className={`inline-flex h-11 w-11 items-center justify-center rounded-tombol border text-xl transition duration-cepat ease-standar active:scale-95 ${
                         rating >= value
-                          ? "border-perhatian bg-[#fff7e6] text-perhatian"
-                          : "border-garis bg-putih text-tinta-lembut"
+                          ? "border-perhatian bg-krem text-perhatian"
+                          : "border-garis bg-putih text-tinta-lembut hover:border-garis-kuat"
                       }`}
                       aria-label={`${value} bintang`}
                     >
@@ -389,7 +412,7 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
                   id="review-photo"
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
-                  className="block min-h-11 w-full text-base text-tinta"
+                  className={fileInputClass}
                   disabled={reviewUploadBusy || reviewEvidence.length >= 3}
                   onChange={(event) => void unggahFotoUlasan(event)}
                 />
@@ -407,6 +430,7 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
                   type="button"
                   className={`${primaryButtonClass} mt-3 w-full`}
                   disabled={busy || reviewUploadBusy}
+                  aria-busy={busy}
                   onClick={() => void kirimUlasan()}
                 >
                   {busy ? "Mengirim…" : "Kirim ulasan"}
@@ -419,6 +443,16 @@ export function OrderDetailClient({ invoiceId }: { invoiceId: string }) {
 
       <SiteFooter />
       <BottomNav />
+
+      <ConfirmDialog
+        open={konfirmasiSelesai}
+        title="Barang sudah diterima dengan baik?"
+        description="Dana akan diteruskan ke penjual dan tidak bisa dibatalkan lagi."
+        confirmLabel="Ya, barang diterima"
+        cancelLabel="Belum"
+        onConfirm={() => void selesaikan()}
+        onCancel={() => setKonfirmasiSelesai(false)}
+      />
     </main>
   );
 }

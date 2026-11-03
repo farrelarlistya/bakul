@@ -5,8 +5,11 @@ import { useEffect, useState } from "react";
 import { slugify, type ProductCard as ProductCardData, type ShopDetail } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
+import { EmptyState } from "@/components/empty-state";
+import { Icon } from "@/components/icon";
 import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
+import { Skeleton, SkeletonGrid } from "@/components/skeleton";
 import { errorBoxClass } from "@/components/ui";
 
 export function ShopClient({ slug }: { slug: string }) {
@@ -53,19 +56,29 @@ export function ShopClient({ slug }: { slug: string }) {
     groups.set(key, current);
   }
 
+  const entries = [...groups.entries()];
+
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
       <AppHeader />
 
-      <div className="mx-auto max-w-5xl px-4 py-6">
+      <div className="mx-auto max-w-[1200px] px-4 py-6">
         <Link
           href="/cari"
-          className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi"
+          className="inline-flex min-h-11 items-center gap-1 rounded-tombol px-1 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
         >
-          ← Kembali ke pencarian
+          <Icon name="arrowLeft" size={18} />
+          Kembali ke pencarian
         </Link>
 
-        {loading ? <p className="mt-4 text-base text-tinta-lembut">Memuat toko…</p> : null}
+        {loading ? (
+          <div className="mt-4 space-y-4">
+            <Skeleton className="h-40 w-full rounded-hero" />
+            <Skeleton className="h-8 w-56" />
+            <SkeletonGrid count={4} />
+          </div>
+        ) : null}
+
         {error ? (
           <div className={`${errorBoxClass} mt-4`} role="alert">
             {error}
@@ -74,9 +87,9 @@ export function ShopClient({ slug }: { slug: string }) {
 
         {shop ? (
           <>
-            <section className="mt-3 overflow-hidden rounded-hero bg-mint">
+            <section className="mt-3 overflow-hidden rounded-hero border border-garis bg-putih">
               <div className="h-20 bg-mint" />
-              <div className="bg-putih px-5 pb-5">
+              <div className="px-5 pb-5">
                 <div className="-mt-8 flex flex-wrap items-end justify-between gap-3">
                   <div className="flex items-end gap-3">
                     <span className="inline-flex h-16 w-16 items-center justify-center overflow-hidden rounded-pil border-4 border-putih bg-mint-muda text-xl font-bold text-teal-aksi">
@@ -97,13 +110,25 @@ export function ShopClient({ slug }: { slug: string }) {
                       <h1 className="font-display text-2xl font-bold text-tinta">
                         {shop.name}
                       </h1>
-                      <p className="text-base text-tinta-lembut">
-                        {shop.cityName} · ★ {shop.rating.toFixed(1).replace(".", ",")} ·{" "}
-                        {shop.productCount} barang
+                      <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-base text-tinta-lembut">
+                        <span className="inline-flex items-center gap-1">
+                          <Icon name="pin" size={16} className="text-tinta-lembut" />
+                          {shop.cityName}
+                        </span>
+                        <span aria-hidden="true">·</span>
+                        <span className="inline-flex items-center gap-1">
+                          <Icon name="star" size={16} className="text-perhatian" />
+                          {shop.rating.toFixed(1).replace(".", ",")}
+                        </span>
+                        <span aria-hidden="true">·</span>
+                        <span>{shop.productCount} barang</span>
                       </p>
                     </div>
                   </div>
-                  <p className="text-base text-tinta-lembut">Toko aktif</p>
+                  <span className="inline-flex min-h-8 items-center gap-1 rounded-pil bg-mint-muda px-3 text-base font-semibold text-teal-aksi">
+                    <Icon name="check" size={16} />
+                    Toko aktif
+                  </span>
                 </div>
                 {shop.description ? (
                   <p className="mt-3 text-base leading-6 text-tinta">{shop.description}</p>
@@ -111,24 +136,33 @@ export function ShopClient({ slug }: { slug: string }) {
               </div>
             </section>
 
-            {groups.size === 0 ? (
-              <div className="mt-6 rounded-kartu border border-garis bg-abu-kartu p-5">
-                <p className="text-base text-tinta-lembut">Toko ini belum punya barang.</p>
-              </div>
+            {entries.length === 0 ? (
+              <EmptyState
+                icon="store"
+                title="Toko ini belum punya barang"
+                description="Pedagangnya mungkin sedang menyiapkan dagangan. Lihat barang lain di katalog meanwhile."
+                action={{ label: "Cari barang lain", href: "/cari" }}
+                className="mt-6"
+              />
             ) : null}
 
-            {[...groups.entries()].map(([etalase, products]) => (
+            {entries.map(([etalase, products]) => (
               <section
                 key={etalase}
                 className="mt-8"
                 aria-labelledby={`etalase-${slugify(etalase)}`}
               >
-                <h2
-                  id={`etalase-${slugify(etalase)}`}
-                  className="font-display text-2xl font-bold text-tinta"
-                >
-                  {etalase}
-                </h2>
+                <div className="flex items-center gap-3">
+                  <h2
+                    id={`etalase-${slugify(etalase)}`}
+                    className="font-display text-2xl font-bold text-tinta"
+                  >
+                    {etalase}
+                  </h2>
+                  <span className="rounded-pil bg-abu-kartu px-3 py-1 text-base font-semibold text-tinta-lembut">
+                    {products.length} barang
+                  </span>
+                </div>
                 <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
                   {products.map((product) => (
                     <ProductCard key={product.id} product={product} />

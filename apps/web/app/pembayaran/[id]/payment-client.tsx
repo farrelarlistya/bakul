@@ -10,8 +10,12 @@ import {
 } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
+import { CopyButton } from "@/components/copy-button";
+import { Icon } from "@/components/icon";
 import { OrderStatusBadge } from "@/components/order-status";
 import { SiteFooter } from "@/components/site-footer";
+import { Skeleton } from "@/components/skeleton";
+import { StatusBanner } from "@/components/status-banner";
 import {
   cardClass,
   errorBoxClass,
@@ -39,7 +43,6 @@ export function PaymentClient({ paymentId }: { paymentId: string }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -88,19 +91,6 @@ export function PaymentClient({ paymentId }: { paymentId: string }) {
     return () => clearInterval(timer);
   }, [instruction, payment]);
 
-  async function salin(): Promise<void> {
-    if (!instruction) {
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(instruction.paymentCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setError("Kode belum bisa disalin. Tulis manual dari layar ini.");
-    }
-  }
-
   async function simulasiBayar(): Promise<void> {
     setBusy(true);
     setError(null);
@@ -116,6 +106,7 @@ export function PaymentClient({ paymentId }: { paymentId: string }) {
   }
 
   const paid = payment?.status === "PAID";
+  const hampirHabis = payment?.status === "PENDING" && remaining <= 5 * 60 * 1000;
 
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
@@ -137,7 +128,10 @@ export function PaymentClient({ paymentId }: { paymentId: string }) {
         ) : null}
 
         {loading && !payment ? (
-          <p className="mt-4 text-base text-tinta-lembut">Memuat tagihan…</p>
+          <div className="mt-4 space-y-3">
+            <Skeleton className="h-32 w-full rounded-kartu" />
+            <Skeleton className="h-56 w-full rounded-kartu" />
+          </div>
         ) : null}
 
         {error ? (
@@ -156,15 +150,46 @@ export function PaymentClient({ paymentId }: { paymentId: string }) {
                     {formatRupiah(payment.totalAmount)}
                   </p>
                 </div>
-                <span className="rounded-pil bg-abu-kartu px-3 text-base font-semibold text-tinta">
+                <span
+                  className={`inline-flex min-h-8 items-center gap-1 rounded-pil px-3 text-base font-semibold ${
+                    paid
+                      ? "bg-mint-muda text-teal-aksi"
+                      : payment.status === "PENDING"
+                        ? "bg-krem text-perhatian-tua"
+                        : "bg-abu-kartu text-tinta"
+                  }`}
+                >
+                  {paid ? (
+                    <Icon name="check" size={16} />
+                  ) : (
+                    <Icon name="clock" size={16} />
+                  )}
                   {PAYMENT_STATUS_LABEL[payment.status] ?? payment.status}
                 </span>
               </div>
 
               {payment.status === "PENDING" ? (
-                <div className="mt-4 rounded-kartu bg-krem p-3">
-                  <p className="text-base text-tinta-lembut">Bayar sebelum waktu habis</p>
-                  <p className="mt-1 text-2xl font-bold text-tinta">{sisaWaktu(remaining)}</p>
+                <div
+                  className={`mt-4 rounded-kartu border p-3 ${
+                    hampirHabis ? "border-bahaya bg-bahaya-muda" : "border-garis-kuat bg-krem"
+                  }`}
+                >
+                  <p
+                    className={`flex items-center gap-1 text-base ${
+                      hampirHabis ? "text-bahaya" : "text-tinta-lembut"
+                    }`}
+                  >
+                    <Icon name="clock" size={18} />
+                    Bayar sebelum waktu habis
+                  </p>
+                  <p
+                    aria-live="polite"
+                    className={`mt-1 font-display text-3xl font-bold ${
+                      hampirHabis ? "text-bahaya" : "text-tinta"
+                    }`}
+                  >
+                    {sisaWaktu(remaining)}
+                  </p>
                   {remaining <= 0 ? (
                     <p className="mt-1 text-base text-bahaya">
                       Waktu habis. Pesanan akan dibatalkan dan stok dikembalikan.
@@ -174,13 +199,10 @@ export function PaymentClient({ paymentId }: { paymentId: string }) {
               ) : null}
 
               {paid ? (
-                <div className="mt-4 rounded-kartu bg-mint-muda p-4">
-                  <p className="text-lg font-semibold text-teal-aksi">
-                    Uang kamu sudah ditahan aman.
-                  </p>
-                  <p className="mt-1 text-base text-tinta">
+                <div className="mt-4">
+                  <StatusBanner tone="sukses" title="Uang kamu sudah ditahan aman.">
                     Penjual sudah dikabari. Dana diteruskan setelah barang diterima.
-                  </p>
+                  </StatusBanner>
                 </div>
               ) : null}
 
@@ -206,20 +228,18 @@ export function PaymentClient({ paymentId }: { paymentId: string }) {
                     <p className="break-all text-2xl font-bold tracking-wide text-tinta">
                       {instruction.paymentCode}
                     </p>
-                    <button type="button" className={secondaryButtonClass} onClick={() => void salin()}>
-                      {copied ? "Tersalin" : "Salin kode"}
-                    </button>
+                    <CopyButton value={instruction.paymentCode} />
                   </div>
                 )}
               </div>
 
-              <ol className="mt-5 space-y-2">
+              <ol className="mt-5 space-y-3">
                 {instruction.steps.map((step, index) => (
                   <li key={step} className="flex gap-3 text-base text-tinta">
-                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-pil bg-mint text-teal-tua">
+                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-pil bg-mint text-base font-bold text-teal-tua">
                       {index + 1}
                     </span>
-                    {step}
+                    <span className="pt-1">{step}</span>
                   </li>
                 ))}
               </ol>
@@ -229,9 +249,17 @@ export function PaymentClient({ paymentId }: { paymentId: string }) {
                   type="button"
                   className={`${primaryButtonClass} mt-5 w-full`}
                   disabled={busy}
+                  aria-busy={busy}
                   onClick={() => void simulasiBayar()}
                 >
-                  {busy ? "Memeriksa pembayaran…" : "Saya sudah bayar (demo)"}
+                  {busy ? (
+                    <>
+                      <Icon name="refresh" size={18} className="animate-memuat" />
+                      Memeriksa pembayaran…
+                    </>
+                  ) : (
+                    "Saya sudah bayar (demo)"
+                  )}
                 </button>
               ) : null}
 

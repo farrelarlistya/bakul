@@ -5,9 +5,19 @@ import { useEffect, useMemo, useState } from "react";
 import { formatRupiah, type OrderInvoiceView } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
+import { EmptyState } from "@/components/empty-state";
+import { Icon } from "@/components/icon";
 import { OrderStatusBadge } from "@/components/order-status";
 import { SiteFooter } from "@/components/site-footer";
-import { cardClass, errorBoxClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui";
+import { SkeletonRow } from "@/components/skeleton";
+import {
+  cardClass,
+  chipActiveClass,
+  chipClass,
+  errorBoxClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+} from "@/components/ui";
 import { useAuth } from "@/lib/auth";
 
 const FILTERS = [
@@ -42,6 +52,25 @@ function tanggal(value: string): string {
   }).format(new Date(value));
 }
 
+function posisiUang(order: OrderInvoiceView): string {
+  if (order.escrowStatus === "FROZEN") {
+    return "Uang dibekukan selama komplain";
+  }
+  if (order.escrowStatus === "RELEASED") {
+    return "Dana sudah diteruskan ke penjual";
+  }
+  if (order.escrowStatus === "REFUNDED") {
+    return "Dana sudah dikembalikan";
+  }
+  if (order.escrowStatus === "HELD") {
+    return "Uang ditahan aman";
+  }
+  if (order.escrowStatus === "PENDING") {
+    return "Menunggu pembayaran";
+  }
+  return "Pesanan dibatalkan";
+}
+
 export default function PesananPage() {
   const { status, request } = useAuth();
   const [orders, setOrders] = useState<OrderInvoiceView[]>([]);
@@ -74,11 +103,21 @@ export default function PesananPage() {
     return orders.filter((order) => active.statuses.includes(order.orderStatus));
   }, [orders, filter]);
 
+  const activeFilter = FILTERS.find((item) => item.key === filter);
+  const emptyTitle =
+    filter === "semua"
+      ? "Belum ada pesanan"
+      : `Belum ada pesanan di bagian "${activeFilter?.label ?? ""}"`;
+  const emptyDescription =
+    filter === "semua"
+      ? "Cari barang dari pedagang kecil, lalu bayar dengan tenang."
+      : "Coba lihat tab lain untuk pesananmu yang sudah ada.";
+
   return (
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
       <AppHeader />
 
-      <div className="mx-auto max-w-5xl px-4 py-6">
+      <div className="mx-auto max-w-[1200px] px-4 py-6">
         <p className="text-base font-semibold text-teal-aksi">Belanjaanku</p>
         <h1 className="mt-1 font-display text-3xl font-bold text-tinta">Pesanan</h1>
         <p className="mt-1 text-base text-tinta-lembut">
@@ -86,12 +125,13 @@ export default function PesananPage() {
         </p>
 
         {status === "tamu" ? (
-          <div className={`${cardClass} mt-6`}>
-            <p className="text-base text-tinta-lembut">Masuk dulu untuk melihat pesanan.</p>
-            <Link href="/masuk" className={`${primaryButtonClass} mt-4 w-full`}>
-              Masuk
-            </Link>
-          </div>
+          <EmptyState
+            icon="user"
+            title="Masuk dulu untuk melihat pesanan"
+            description="Masuk dengan nomor HP, lalu riwayat pesananmu akan muncul di sini."
+            action={{ label: "Masuk", href: "/masuk" }}
+            className="mt-6"
+          />
         ) : null}
 
         {status === "masuk" ? (
@@ -103,11 +143,7 @@ export default function PesananPage() {
                   type="button"
                   aria-pressed={filter === item.key}
                   onClick={() => setFilter(item.key)}
-                  className={`inline-flex min-h-11 shrink-0 items-center rounded-pil px-4 text-base font-semibold ${
-                    filter === item.key
-                      ? "bg-teal-aksi text-putih"
-                      : "bg-abu-kartu text-tinta"
-                  }`}
+                  className={filter === item.key ? chipActiveClass : chipClass}
                 >
                   {item.label}
                 </button>
@@ -119,18 +155,22 @@ export default function PesananPage() {
                 {error}
               </div>
             ) : null}
-            {loading ? <p className="mt-4 text-base text-tinta-lembut">Memuat pesanan…</p> : null}
+
+            {loading ? (
+              <div className="mt-4 space-y-3">
+                <SkeletonRow />
+                <SkeletonRow />
+              </div>
+            ) : null}
 
             {!loading && filtered.length === 0 ? (
-              <div className={`${cardClass} mt-6 text-center`}>
-                <p className="text-lg font-semibold text-tinta">Belum ada pesanan di bagian ini.</p>
-                <p className="mt-1 text-base text-tinta-lembut">
-                  Cari barang dari pedagang kecil, lalu bayar dengan tenang.
-                </p>
-                <Link href="/cari" className={`${primaryButtonClass} mt-4`}>
-                  Cari barang
-                </Link>
-              </div>
+              <EmptyState
+                icon="receipt"
+                title={emptyTitle}
+                description={emptyDescription}
+                action={{ label: "Cari barang", href: "/cari" }}
+                className="mt-6"
+              />
             ) : null}
 
             <div className="mt-4 space-y-3">
@@ -170,20 +210,14 @@ export default function PesananPage() {
                       <p className="mt-1 text-lg font-bold text-tinta">
                         {formatRupiah(order.totalAmount)}
                       </p>
-                      <p className="text-base text-teal-aksi">
-                        {order.escrowStatus === "FROZEN"
-                          ? "Uang dibekukan selama komplain"
-                          : order.escrowStatus === "RELEASED"
-                            ? "Dana sudah diteruskan ke penjual"
-                            : order.escrowStatus === "REFUNDED"
-                              ? "Dana sudah dikembalikan"
-                              : order.escrowStatus === "HELD"
-                                ? "Uang ditahan aman"
-                                : order.escrowStatus === "PENDING"
-                                  ? "Menunggu pembayaran"
-                                  : "Pesanan dibatalkan"}
-                      </p>
                     </div>
+                  </div>
+
+                  <div className="mt-3 flex items-start gap-2 rounded-kartu bg-mint-muda p-3">
+                    <Icon name="shield" size={20} className="mt-0.5 shrink-0 text-teal-aksi" />
+                    <p className="text-base font-semibold leading-6 text-teal-tua">
+                      {posisiUang(order)}
+                    </p>
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-2">

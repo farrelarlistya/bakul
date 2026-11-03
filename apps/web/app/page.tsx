@@ -6,6 +6,7 @@ import { HomeGreeting } from "@/components/home-greeting";
 import { HomeProductCard } from "@/components/home-product-card";
 import { Icon, categoryIcon } from "@/components/icon";
 import { SiteFooter } from "@/components/site-footer";
+import { Skeleton, SkeletonGrid } from "@/components/skeleton";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +46,7 @@ function SectionHeading({
       <Link
         href={href}
         aria-label={`Lihat semua ${title.toLowerCase()}`}
-        className="inline-flex min-h-11 items-center gap-1 text-base font-semibold text-teal-aksi"
+        className="inline-flex min-h-11 items-center gap-1 rounded-tombol px-2 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
       >
         Lihat semua
         <Icon name="chevronRight" size={16} />
@@ -76,13 +77,13 @@ export default async function Page() {
       <AppHeader />
 
       <div className="bg-tinta text-mint">
-        <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-2">
+        <div className="mx-auto flex max-w-[1200px] items-center gap-2 px-4 py-2">
           <Icon name="shield" size={18} className="shrink-0" />
           <p className="text-base leading-6">Uang ditahan aman sampai barang diterima</p>
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl space-y-7 px-4 py-5">
+      <div className="mx-auto max-w-[1200px] space-y-8 px-4 py-5">
         <section aria-labelledby="sapaan">
           <div className="flex items-end justify-between gap-3">
             <div>
@@ -98,7 +99,7 @@ export default async function Page() {
           </div>
 
           <form action="/cari" method="get" role="search" aria-label="Cari barang" className="mt-3 flex gap-2 md:hidden">
-            <div className="flex min-h-12 flex-1 items-center gap-2 rounded-tombol border border-garis bg-abu-kartu px-3">
+            <div className="flex min-h-12 flex-1 items-center gap-2 rounded-tombol border border-garis bg-abu-kartu px-3 transition duration-cepat ease-standar focus-within:border-teal-aksi focus-within:bg-putih">
               <Icon name="search" size={20} className="shrink-0 text-tinta-lembut" />
               <label htmlFor="home-search" className="sr-only">
                 Cari barang
@@ -117,7 +118,7 @@ export default async function Page() {
             <Link
               href="/cari"
               aria-label="Buka pencarian dan filter"
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-tombol bg-teal-aksi text-putih"
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-tombol bg-teal-aksi text-putih transition duration-sedang ease-standar hover:bg-teal-tua active:scale-95"
             >
               <Icon name="sliders" size={22} />
             </Link>
@@ -144,7 +145,7 @@ export default async function Page() {
               </div>
               <a
                 href="#kategori"
-                className="mt-3 inline-flex min-h-11 w-fit items-center gap-2 rounded-tombol bg-teal-aksi px-3 text-base font-semibold text-putih"
+                className="mt-3 inline-flex min-h-11 w-fit items-center gap-2 rounded-tombol bg-teal-aksi px-3 text-base font-semibold text-putih transition duration-sedang ease-standar hover:bg-teal-tua active:scale-[0.98]"
               >
                 Jelajahi kategori
                 <Icon name="chevronRight" size={16} />
@@ -165,29 +166,42 @@ export default async function Page() {
           </div>
         </section>
 
-        <section aria-label="Janji Bakul" className="grid grid-cols-2 gap-3">
-          <div className="flex min-h-20 items-start gap-3 rounded-kartu border border-garis bg-putih p-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-tombol bg-mint-muda text-teal-aksi">
-              <Icon name="shield" size={22} />
-            </span>
-            <div>
-              <p className="text-base font-semibold text-tinta">Uang aman</p>
-              <p className="mt-0.5 text-base leading-5 text-tinta-lembut">
-                Sampai barang tiba
-              </p>
+        <section aria-label="Janji Bakul" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {[
+            {
+              icon: "shield" as const,
+              title: "Uang aman",
+              note: "Sampai barang tiba",
+              tone: "bg-mint-muda text-teal-aksi",
+            },
+            {
+              icon: "truck" as const,
+              title: "Dikirim",
+              note: "Resi bisa dilacak",
+              tone: "bg-krem text-perhatian-tua",
+            },
+            {
+              icon: "chat" as const,
+              title: "Komplain",
+              note: "Admin bantu",
+              tone: "bg-krem text-perhatian-tua",
+            },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="flex min-h-20 items-start gap-3 rounded-kartu border border-garis bg-putih p-3"
+            >
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-tombol ${item.tone}`}
+              >
+                <Icon name={item.icon} size={22} />
+              </span>
+              <div>
+                <p className="text-base font-semibold text-tinta">{item.title}</p>
+                <p className="mt-0.5 text-base leading-5 text-tinta-lembut">{item.note}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex min-h-20 items-start gap-3 rounded-kartu border border-garis bg-putih p-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-tombol bg-krem text-perhatian">
-              <Icon name="chat" size={22} />
-            </span>
-            <div>
-              <p className="text-base font-semibold text-tinta">Komplain</p>
-              <p className="mt-0.5 text-base leading-5 text-tinta-lembut">
-                Admin bantu
-              </p>
-            </div>
-          </div>
+          ))}
         </section>
 
         <section id="kategori" aria-labelledby="kategori-title" className="scroll-mt-24">
@@ -204,7 +218,7 @@ export default async function Page() {
                 <Link
                   key={category.id}
                   href={`/cari?category=${encodeURIComponent(category.slug)}`}
-                  className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-kartu border border-transparent p-2 text-center transition-colors hover:border-teal-aksi focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-aksi focus-visible:ring-offset-2 ${
+                  className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-kartu border border-transparent p-2 text-center transition duration-sedang ease-standar hover:border-garis-kuat hover:bg-putih active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-aksi focus-visible:ring-offset-2 ${
                     categoryTints[index % categoryTints.length]
                   }`}
                 >
@@ -218,9 +232,11 @@ export default async function Page() {
               ))}
             </div>
           ) : (
-            <p className="mt-3 rounded-kartu border border-garis bg-abu-kartu p-4 text-base text-tinta-lembut">
-              Kategori belum bisa dimuat. Coba muat ulang halaman ini.
-            </p>
+            <div className="mt-3 grid grid-cols-4 gap-2 md:grid-cols-8" aria-hidden="true">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <Skeleton key={index} className="min-h-28 w-full rounded-kartu" />
+              ))}
+            </div>
           )}
         </section>
 
@@ -239,10 +255,8 @@ export default async function Page() {
               ))}
             </div>
           ) : (
-            <div className="mt-3 rounded-kartu border border-garis bg-abu-kartu p-5">
-              <p className="text-base text-tinta-lembut">
-                Katalog belum bisa dimuat. Coba muat ulang halaman ini.
-              </p>
+            <div className="mt-3">
+              <SkeletonGrid count={4} />
             </div>
           )}
         </section>
@@ -264,7 +278,7 @@ export default async function Page() {
           </div>
           <Link
             href="/jualan"
-            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-tombol bg-teal-aksi px-5 text-base font-semibold text-putih md:mt-0 md:shrink-0"
+            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-tombol bg-teal-aksi px-5 text-base font-semibold text-putih transition duration-sedang ease-standar hover:bg-teal-tua active:scale-[0.98] md:mt-0 md:shrink-0"
           >
             Mulai jualan
             <Icon name="arrowRight" size={18} />

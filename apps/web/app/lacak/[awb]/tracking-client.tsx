@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import type { TrackingEvent } from "@bakul/shared";
 import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
+import { CopyButton } from "@/components/copy-button";
+import { EmptyState } from "@/components/empty-state";
+import { Icon } from "@/components/icon";
 import { SiteFooter } from "@/components/site-footer";
+import { Skeleton } from "@/components/skeleton";
+import { StatusBanner } from "@/components/status-banner";
 import { cardClass, errorBoxClass, primaryButtonClass } from "@/components/ui";
 
 type Tracking = {
@@ -70,12 +75,21 @@ export function TrackingClient({ awb }: { awb: string }) {
       <AppHeader />
 
       <div className="mx-auto max-w-2xl px-4 py-6">
-        <Link href="/pesanan" className="inline-flex min-h-11 items-center text-base font-semibold text-teal-aksi">
-          ← Kembali ke pesanan
+        <Link
+          href="/pesanan"
+          className="inline-flex min-h-11 items-center gap-1 rounded-tombol px-1 text-base font-semibold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda"
+        >
+          <Icon name="arrowLeft" size={18} />
+          Kembali ke pesanan
         </Link>
         <h1 className="mt-2 font-display text-3xl font-bold text-tinta">Lacak paket</h1>
 
-        {loading ? <p className="mt-4 text-base text-tinta-lembut">Memuat perjalanan paket…</p> : null}
+        {loading ? (
+          <div className="mt-4 space-y-3">
+            <Skeleton className="h-40 w-full rounded-kartu" />
+            <Skeleton className="h-64 w-full rounded-kartu" />
+          </div>
+        ) : null}
         {error ? (
           <div className={`${errorBoxClass} mt-4`} role="alert">
             {error}
@@ -86,56 +100,82 @@ export function TrackingClient({ awb }: { awb: string }) {
           <div className="mt-5 space-y-4">
             <section className={cardClass}>
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <div>
+                <div className="min-w-0">
                   <p className="text-base text-tinta-lembut">
                     {tracking.courierName} · {tracking.serviceType}
                   </p>
-                  <p className="mt-1 text-2xl font-bold tracking-wide text-tinta">{tracking.awb}</p>
+                  <p className="mt-1 break-all text-2xl font-bold tracking-wide text-tinta">
+                    {tracking.awb}
+                  </p>
                   <p className="mt-1 text-base text-tinta-lembut">
                     {tracking.shopName} → {tracking.destinationCity}
                   </p>
                 </div>
-                <span className="rounded-pil bg-mint px-3 py-1 text-base font-semibold text-teal-tua">
+                <span
+                  className={`inline-flex min-h-8 shrink-0 items-center gap-1 rounded-pil px-3 text-base font-semibold ${
+                    tracking.status === "DELIVERED"
+                      ? "bg-mint-muda text-teal-aksi"
+                      : "bg-krem text-perhatian-tua"
+                  }`}
+                >
+                  <Icon
+                    name={tracking.status === "DELIVERED" ? "check" : "truck"}
+                    size={16}
+                  />
                   {tracking.status === "DELIVERED" ? "Sudah sampai" : "Dalam perjalanan"}
                 </span>
               </div>
-              <p className="mt-2 text-base text-tinta-lembut">
+              <div className="mt-3">
+                <CopyButton value={tracking.awb} label="Salin resi" copiedLabel="Tersalin" />
+              </div>
+              <p className="mt-3 text-base text-tinta-lembut">
                 Penerima: {tracking.recipientName} · Pesanan {tracking.invoiceNumber}
               </p>
-              <p className="mt-3 rounded-kartu bg-krem p-3 text-base text-tinta">
-                Pengiriman ini simulasi. Tidak ada paket nyata yang bergerak.
-              </p>
+              <div className="mt-3">
+                <StatusBanner tone="info">
+                  Pengiriman ini simulasi. Tidak ada paket nyata yang bergerak.
+                </StatusBanner>
+              </div>
             </section>
 
             <section className={cardClass}>
               <h2 className="font-display text-2xl font-bold text-tinta">Perjalanan paket</h2>
               {tracking.events.length === 0 ? (
-                <p className="mt-2 text-base text-tinta-lembut">
-                  Resi sudah dibuat. Paket belum diambil kurir.
-                </p>
+                <EmptyState
+                  icon="truck"
+                  title="Paket belum diambil kurir"
+                  description="Resi sudah dibuat. Perjalanan paket akan muncul di sini."
+                  className="mt-3"
+                />
               ) : (
                 <ol className="mt-4 space-y-0">
-                  {tracking.events.map((event, index) => (
-                    <li key={`${event.status}-${event.at}`} className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        <span
-                          className={`mt-1 inline-block h-3 w-3 rounded-pil ${
-                            index === tracking.events.length - 1 ? "bg-teal-aksi" : "bg-mint"
-                          }`}
-                        />
-                        {index < tracking.events.length - 1 ? (
-                          <span className="h-16 w-0.5 bg-garis" />
-                        ) : null}
-                      </div>
-                      <div className="min-w-0 flex-1 pb-4">
-                        <p className="text-base font-semibold text-tinta">{event.label}</p>
-                        <p className="text-base text-tinta">{event.note}</p>
-                        <p className="text-base text-tinta-lembut">
-                          {event.location} · {waktu(event.at)}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
+                  {tracking.events.map((event, index) => {
+                    const terakhir = index === tracking.events.length - 1;
+                    return (
+                      <li key={`${event.status}-${event.at}`} className="flex gap-3">
+                        <div className="flex flex-col items-center">
+                          <span
+                            className={`mt-1 inline-block h-4 w-4 shrink-0 rounded-pil border-2 ${
+                              terakhir
+                                ? "border-teal-aksi bg-teal-aksi"
+                                : "border-garis-kuat bg-putih"
+                            }`}
+                          />
+                          {!terakhir ? (
+                            <span className="h-full min-h-12 w-0.5 flex-1 bg-garis" />
+                          ) : null}
+                        </div>
+                        <div className="min-w-0 flex-1 pb-5">
+                          <div className="flex flex-wrap items-baseline justify-between gap-2">
+                            <p className="text-base font-semibold text-tinta">{event.label}</p>
+                            <p className="text-base text-tinta-lembut">{waktu(event.at)}</p>
+                          </div>
+                          <p className="mt-0.5 text-base text-tinta">{event.note}</p>
+                          <p className="mt-0.5 text-base text-tinta-lembut">{event.location}</p>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ol>
               )}
             </section>

@@ -6,6 +6,13 @@ import { useEffect, useState } from "react";
 import { findWilayah, WILAYAH, type Address } from "@bakul/shared";
 import { AppHeader } from "@/components/app-header";
 import { BottomNav } from "@/components/bottom-nav";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { EmptyState } from "@/components/empty-state";
+import { Field } from "@/components/field";
+import { Icon } from "@/components/icon";
+import { SkeletonRow } from "@/components/skeleton";
+import { StatusBanner } from "@/components/status-banner";
+import { useToast } from "@/components/toast";
 import {
   cardClass,
   dangerButtonClass,
@@ -14,6 +21,7 @@ import {
   labelClass,
   primaryButtonClass,
   secondaryButtonClass,
+  selectClass,
 } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
 
@@ -54,19 +62,23 @@ function emptyAddress(userName: string, phone: string, isDefault = false): Addre
 export default function AkunPage() {
   const router = useRouter();
   const { status, user, request, refreshUser, logout } = useAuth();
+  const { notify } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileBusy, setProfileBusy] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [addressLoading, setAddressLoading] = useState(false);
   const [addressError, setAddressError] = useState<string | null>(null);
   const [addressMessage, setAddressMessage] = useState<string | null>(null);
+  const [addressFormError, setAddressFormError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AddressForm>(emptyAddress("", "", true));
   const [addressBusy, setAddressBusy] = useState(false);
+  const [hapusAlamatDialog, setHapusAlamatDialog] = useState<Address | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -119,6 +131,11 @@ export default function AkunPage() {
   }, [status, request]);
 
   async function simpanProfil(): Promise<void> {
+    if (name.trim().length < 2) {
+      setNameError("Nama perlu minimal 2 huruf.");
+      return;
+    }
+
     setProfileBusy(true);
     setProfileMessage(null);
     setProfileError(null);
@@ -133,6 +150,7 @@ export default function AkunPage() {
       });
       await refreshUser();
       setProfileMessage("Profil tersimpan.");
+      notify("Profil tersimpan.");
     } catch (caught: unknown) {
       setProfileError(caught instanceof Error ? caught.message : "Profil belum bisa disimpan.");
     } finally {
@@ -159,6 +177,7 @@ export default function AkunPage() {
     setEditingId(address.id);
     setAddressMessage(null);
     setAddressError(null);
+    setAddressFormError(null);
     setForm({
       label: address.label,
       recipientName: address.recipientName,
@@ -176,13 +195,32 @@ export default function AkunPage() {
   function batalUbah(): void {
     setEditingId(null);
     setAddressError(null);
+    setAddressFormError(null);
     setForm(emptyAddress(user?.name ?? "", user?.phone ?? "", addresses.length === 0));
   }
 
   async function simpanAlamat(): Promise<void> {
+    if (!form.label.trim()) {
+      setAddressFormError("Beri nama alamat, misalnya Rumah atau Kantor.");
+      return;
+    }
+    if (!form.recipientName.trim()) {
+      setAddressFormError("Tulis nama lengkap penerima.");
+      return;
+    }
+    if (!form.phone.trim()) {
+      setAddressFormError("Tulis nomor HP penerima.");
+      return;
+    }
+    if (!form.fullAddress.trim()) {
+      setAddressFormError("Tulis alamat lengkap beserta patokan.");
+      return;
+    }
+
     setAddressBusy(true);
     setAddressError(null);
     setAddressMessage(null);
+    setAddressFormError(null);
 
     try {
       if (editingId) {
@@ -200,6 +238,7 @@ export default function AkunPage() {
       const items = await request<Address[]>("/api/v1/me/addresses");
       setAddresses(items);
       setAddressMessage(editingId ? "Alamat diubah." : "Alamat ditambahkan.");
+      notify(editingId ? "Alamat diubah." : "Alamat ditambahkan.");
       setEditingId(null);
       setForm(emptyAddress(user?.name ?? "", user?.phone ?? "", items.length === 0));
     } catch (caught: unknown) {
@@ -210,10 +249,7 @@ export default function AkunPage() {
   }
 
   async function hapusAlamat(address: Address): Promise<void> {
-    if (!window.confirm(`Hapus alamat “${address.label}”?`)) {
-      return;
-    }
-
+    setHapusAlamatDialog(null);
     setAddressBusy(true);
     setAddressError(null);
     setAddressMessage(null);
@@ -223,6 +259,7 @@ export default function AkunPage() {
       const items = await request<Address[]>("/api/v1/me/addresses");
       setAddresses(items);
       setAddressMessage("Alamat dihapus.");
+      notify("Alamat dihapus.");
       if (editingId === address.id) {
         batalUbah();
       }
@@ -245,6 +282,7 @@ export default function AkunPage() {
       const items = await request<Address[]>("/api/v1/me/addresses");
       setAddresses(items);
       setAddressMessage("Alamat utama diganti.");
+      notify("Alamat utama diganti.");
     } catch (caught: unknown) {
       setAddressError(caught instanceof Error ? caught.message : "Alamat utama belum bisa diganti.");
     } finally {
@@ -260,7 +298,7 @@ export default function AkunPage() {
   return (
     <main className="min-h-screen bg-krem pb-24 md:pb-0">
       <AppHeader />
-      <div className="mx-auto max-w-5xl px-4 py-8">
+      <div className="mx-auto max-w-[1200px] px-4 py-8">
         <h1 className="font-display text-3xl font-bold text-tinta">Akun</h1>
         <p className="mt-2 text-base text-tinta-lembut">
           Profil, alamat, dan toko kamu dalam satu tempat.
@@ -273,15 +311,13 @@ export default function AkunPage() {
         ) : null}
 
         {status === "tamu" ? (
-          <div className={`${cardClass} mt-6`}>
-            <h2 className="font-display text-2xl font-bold text-tinta">Masuk dulu, ya</h2>
-            <p className="mt-2 text-base text-tinta-lembut">
-              Nomor HP dan kode 6 angka sudah cukup.
-            </p>
-            <Link href="/masuk" className={`${primaryButtonClass} mt-4 w-full`}>
-              Masuk
-            </Link>
-          </div>
+          <EmptyState
+            icon="user"
+            title="Masuk dulu, ya"
+            description="Nomor HP dan kode 6 angka sudah cukup."
+            action={{ label: "Masuk", href: "/masuk" }}
+            className="mt-6"
+          />
         ) : null}
 
         {status === "masuk" && user ? (
@@ -296,30 +332,33 @@ export default function AkunPage() {
                 </p>
 
                 <div className="mt-4 space-y-4">
-                  <div>
-                    <label className={labelClass} htmlFor="profile-name">
-                      Nama
-                    </label>
-                    <input
-                      id="profile-name"
-                      className={inputClass}
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass} htmlFor="profile-email">
-                      Email <span className="font-normal text-tinta-lembut">(opsional)</span>
-                    </label>
-                    <input
-                      id="profile-email"
-                      type="email"
-                      className={inputClass}
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      placeholder="Tidak wajib diisi"
-                    />
-                  </div>
+                  <Field label="Nama" htmlFor="profile-name" error={nameError}>
+                    {(props) => (
+                      <input
+                        {...props}
+                        className={inputClass}
+                        value={name}
+                        onChange={(event) => {
+                          setName(event.target.value);
+                          if (nameError) {
+                            setNameError(null);
+                          }
+                        }}
+                      />
+                    )}
+                  </Field>
+                  <Field label="Email" htmlFor="profile-email" hint="Tidak wajib diisi.">
+                    {(props) => (
+                      <input
+                        {...props}
+                        type="email"
+                        className={inputClass}
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        placeholder="Tidak wajib diisi"
+                      />
+                    )}
+                  </Field>
 
                   {profileError ? (
                     <div className={errorBoxClass} role="alert">
@@ -327,18 +366,26 @@ export default function AkunPage() {
                     </div>
                   ) : null}
                   {profileMessage ? (
-                    <p className="rounded-kartu bg-mint-muda p-3 text-base text-teal-aksi">
-                      {profileMessage}
-                    </p>
+                    <div role="status">
+                      <StatusBanner tone="sukses">{profileMessage}</StatusBanner>
+                    </div>
                   ) : null}
 
                   <button
                     type="button"
                     className={`${primaryButtonClass} w-full`}
                     disabled={profileBusy || name.trim().length < 2}
+                    aria-busy={profileBusy}
                     onClick={() => void simpanProfil()}
                   >
-                    {profileBusy ? "Menyimpan…" : "Simpan profil"}
+                    {profileBusy ? (
+                      <>
+                        <Icon name="refresh" size={18} className="animate-memuat" />
+                        Menyimpan…
+                      </>
+                    ) : (
+                      "Simpan profil"
+                    )}
                   </button>
                 </div>
               </section>
@@ -420,19 +467,23 @@ export default function AkunPage() {
               </p>
 
               {addressLoading ? (
-                <p className="mt-4 text-base text-tinta-lembut">Memuat alamat…</p>
+                <div className="mt-4 space-y-3">
+                  <SkeletonRow />
+                  <SkeletonRow />
+                </div>
               ) : null}
 
               <div className="mt-4 space-y-3">
                 {addresses.map((address) => (
                   <article
                     key={address.id}
-                    className="rounded-kartu border border-garis bg-abu-kartu p-4"
+                    className="rounded-kartu border border-garis bg-abu-kartu p-4 transition duration-sedang ease-standar hover:border-garis-kuat"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-lg font-semibold text-tinta">{address.label}</p>
                       {address.isDefault ? (
-                        <span className="inline-flex min-h-8 items-center rounded-pil bg-mint px-3 text-base font-semibold text-teal-tua">
+                        <span className="inline-flex min-h-8 items-center gap-1 rounded-pil bg-mint px-3 text-base font-semibold text-teal-tua">
+                          <Icon name="check" size={16} />
                           Utama
                         </span>
                       ) : null}
@@ -447,6 +498,7 @@ export default function AkunPage() {
                         className={secondaryButtonClass}
                         onClick={() => ubahAlamat(address)}
                       >
+                        <Icon name="edit" size={18} />
                         Ubah
                       </button>
                       {!address.isDefault ? (
@@ -463,15 +515,20 @@ export default function AkunPage() {
                         type="button"
                         className={dangerButtonClass}
                         disabled={addressBusy}
-                        onClick={() => void hapusAlamat(address)}
+                        onClick={() => setHapusAlamatDialog(address)}
                       >
+                        <Icon name="trash" size={18} />
                         Hapus
                       </button>
                     </div>
                   </article>
                 ))}
                 {!addressLoading && addresses.length === 0 ? (
-                  <p className="text-base text-tinta-lembut">Belum ada alamat tersimpan.</p>
+                  <EmptyState
+                    icon="pin"
+                    title="Belum ada alamat tersimpan"
+                    description="Tambahkan alamat supaya ongkir bisa dihitung saat bayar."
+                  />
                 ) : null}
               </div>
 
@@ -482,71 +539,67 @@ export default function AkunPage() {
 
                 <div className="mt-4 space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className={labelClass} htmlFor="address-label">
-                        Nama alamat
-                      </label>
-                      <input
-                        id="address-label"
-                        className={inputClass}
-                        value={form.label}
-                        onChange={(event) =>
-                          setForm((current) => ({ ...current, label: event.target.value }))
-                        }
-                        placeholder="Rumah atau Kantor"
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass} htmlFor="address-recipient">
-                        Nama penerima
-                      </label>
-                      <input
-                        id="address-recipient"
-                        className={inputClass}
-                        value={form.recipientName}
-                        onChange={(event) =>
-                          setForm((current) => ({
-                            ...current,
-                            recipientName: event.target.value,
-                          }))
-                        }
-                      />
-                    </div>
+                    <Field label="Nama alamat" htmlFor="address-label">
+                      {(props) => (
+                        <input
+                          {...props}
+                          className={inputClass}
+                          value={form.label}
+                          onChange={(event) =>
+                            setForm((current) => ({ ...current, label: event.target.value }))
+                          }
+                          placeholder="Rumah atau Kantor"
+                        />
+                      )}
+                    </Field>
+                    <Field label="Nama penerima" htmlFor="address-recipient">
+                      {(props) => (
+                        <input
+                          {...props}
+                          className={inputClass}
+                          value={form.recipientName}
+                          onChange={(event) =>
+                            setForm((current) => ({
+                              ...current,
+                              recipientName: event.target.value,
+                            }))
+                          }
+                        />
+                      )}
+                    </Field>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className={labelClass} htmlFor="address-phone">
-                        Nomor HP penerima
-                      </label>
-                      <input
-                        id="address-phone"
-                        type="tel"
-                        inputMode="tel"
-                        className={inputClass}
-                        value={form.phone}
-                        onChange={(event) =>
-                          setForm((current) => ({ ...current, phone: event.target.value }))
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass} htmlFor="address-city">
-                        Kota
-                      </label>
-                      <select
-                        id="address-city"
-                        className={inputClass}
-                        value={form.cityId}
-                        onChange={(event) => pilihKota(event.target.value)}
-                      >
-                        {WILAYAH.map((city) => (
-                          <option key={city.cityId} value={city.cityId}>
-                            {city.cityName}, {city.provinceName}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <Field label="Nomor HP penerima" htmlFor="address-phone">
+                      {(props) => (
+                        <input
+                          {...props}
+                          type="tel"
+                          inputMode="tel"
+                          className={inputClass}
+                          value={form.phone}
+                          onChange={(event) =>
+                            setForm((current) => ({ ...current, phone: event.target.value }))
+                          }
+                        />
+                      )}
+                    </Field>
+                    <Field label="Kota" htmlFor="address-city">
+                      {(props) => (
+                        <select
+                          {...props}
+                          className={selectClass}
+                          value={form.cityId}
+                          onChange={(event) => pilihKota(event.target.value)}
+                        >
+                          {WILAYAH.map((city) => (
+                            <option key={city.cityId} value={city.cityId}>
+                              {city.cityName}, {city.provinceName}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </Field>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -556,44 +609,49 @@ export default function AkunPage() {
                         {findWilayah(form.cityId)?.districtName ?? "Ikut kota"}
                       </p>
                     </div>
-                    <div>
-                      <label className={labelClass} htmlFor="address-postal">
-                        Kode pos
-                      </label>
-                      <input
-                        id="address-postal"
-                        inputMode="numeric"
-                        className={inputClass}
-                        value={form.postalCode}
+                    <Field label="Kode pos" htmlFor="address-postal">
+                      {(props) => (
+                        <input
+                          {...props}
+                          inputMode="numeric"
+                          className={inputClass}
+                          value={form.postalCode}
+                          onChange={(event) =>
+                            setForm((current) => ({
+                              ...current,
+                              postalCode: event.target.value.replace(/\D/g, "").slice(0, 5),
+                            }))
+                          }
+                        />
+                      )}
+                    </Field>
+                  </div>
+
+                  <Field
+                    label="Alamat lengkap"
+                    htmlFor="address-full"
+                    hint="Jalan, nomor rumah, dan patokan."
+                  >
+                    {(props) => (
+                      <textarea
+                        {...props}
+                        className={`${inputClass} min-h-24 py-3`}
+                        value={form.fullAddress}
                         onChange={(event) =>
                           setForm((current) => ({
                             ...current,
-                            postalCode: event.target.value.replace(/\D/g, "").slice(0, 5),
+                            fullAddress: event.target.value,
                           }))
                         }
+                        placeholder="Jalan, nomor rumah, patokan"
                       />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={labelClass} htmlFor="address-full">
-                      Alamat lengkap
-                    </label>
-                    <textarea
-                      id="address-full"
-                      className={`${inputClass} min-h-24 py-3`}
-                      value={form.fullAddress}
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, fullAddress: event.target.value }))
-                      }
-                      placeholder="Jalan, nomor rumah, patokan"
-                    />
-                  </div>
+                    )}
+                  </Field>
 
                   <label className="flex min-h-11 items-center gap-3 text-base text-tinta">
                     <input
                       type="checkbox"
-                      className="h-6 w-6 shrink-0 accent-[#0F6E66]"
+                      className="h-6 w-6 shrink-0 accent-teal-aksi"
                       checked={form.isDefault}
                       onChange={(event) =>
                         setForm((current) => ({
@@ -610,10 +668,15 @@ export default function AkunPage() {
                       {addressError}
                     </div>
                   ) : null}
+                  {addressFormError ? (
+                    <div className={errorBoxClass} role="alert">
+                      {addressFormError}
+                    </div>
+                  ) : null}
                   {addressMessage ? (
-                    <p className="rounded-kartu bg-mint-muda p-3 text-base text-teal-aksi">
-                      {addressMessage}
-                    </p>
+                    <div role="status">
+                      <StatusBanner tone="sukses">{addressMessage}</StatusBanner>
+                    </div>
                   ) : null}
 
                   <div className="flex flex-wrap gap-3">
@@ -621,9 +684,14 @@ export default function AkunPage() {
                       type="button"
                       className={primaryButtonClass}
                       disabled={addressBusy}
+                      aria-busy={addressBusy}
                       onClick={() => void simpanAlamat()}
                     >
-                      {addressBusy ? "Menyimpan…" : editingId ? "Simpan perubahan" : "Tambah alamat"}
+                      {addressBusy
+                        ? "Menyimpan…"
+                        : editingId
+                          ? "Simpan perubahan"
+                          : "Tambah alamat"}
                     </button>
                     {editingId ? (
                       <button
@@ -642,6 +710,25 @@ export default function AkunPage() {
         ) : null}
       </div>
       <BottomNav />
+
+      <ConfirmDialog
+        open={hapusAlamatDialog !== null}
+        title="Hapus alamat ini?"
+        description={
+          hapusAlamatDialog
+            ? `Alamat “${hapusAlamatDialog.label}” akan dihapus dari daftar.`
+            : undefined
+        }
+        confirmLabel="Ya, hapus"
+        cancelLabel="Batal"
+        danger
+        onConfirm={() => {
+          if (hapusAlamatDialog) {
+            void hapusAlamat(hapusAlamatDialog);
+          }
+        }}
+        onCancel={() => setHapusAlamatDialog(null)}
+      />
     </main>
   );
 }
