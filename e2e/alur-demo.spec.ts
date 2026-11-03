@@ -15,6 +15,34 @@ async function login(page: Page, phone: string): Promise<void> {
 
 test.describe.configure({ mode: "serial" });
 
+test("beranda: app bar ikon, kategori, produk, dan bottom nav", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Halo, Sobat Bakul" })).toBeVisible();
+  const header = page.locator("header");
+  await expect(header.getByRole("link", { name: "Cari barang" })).toBeVisible();
+  await expect(header.getByRole("link", { name: "Buka inbox" })).toBeVisible();
+  await expect(header.getByRole("link", { name: "Buka keranjang" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Navigasi bawah" })).toBeVisible();
+
+  expect(await page.locator('a[href^="/cari?category="]').count()).toBe(8);
+  expect(await page.locator('a[href^="/p/"]').count()).toBe(4);
+
+  const layout = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    innerWidth: window.innerWidth,
+    heroLoaded: [...document.images].some(
+      (image) => image.src.includes("hero.webp") && image.naturalWidth > 0,
+    ),
+  }));
+
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.innerWidth);
+  expect(layout.heroLoaded).toBe(true);
+  expect(errors).toEqual([]);
+});
+
 test("pembeli: cari barang, keranjang, bayar, dan lihat pesanan", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
