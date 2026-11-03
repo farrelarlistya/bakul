@@ -67,7 +67,7 @@ export function BottomNav() {
                   {showBadge ? (
                     <span
                       aria-hidden="true"
-                      className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-pil bg-perhatian px-1 text-sm font-bold leading-none text-putih"
+                      className="absolute -right-1 -top-1 inline-flex min-h-6 min-w-6 items-center justify-center rounded-pil bg-perhatian px-1 text-base font-bold leading-none text-putih"
                     >
                       {cartCount > 9 ? "9+" : cartCount}
                     </span>

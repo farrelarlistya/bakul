@@ -69,6 +69,7 @@ Aturan kerja:
 | 9 | Dompet & pencairan / M6 | **Selesai** | `m6-selesai` |
 | 10 | Pusat Resolusi & admin / M7 | **Selesai** | `m7-selesai` |
 | 11 | Poles, bukti, demo / M8 | **Selesai** | `m8-selesai` |
+| 12 | Poles UI/UX & Interaction Design / M9 | **Selesai** | `m9-selesai` |
 
 ---
 
@@ -484,6 +485,60 @@ Tailwind 4.x, TypeScript **5.9.x**. Jangan Prisma 8 RC atau TypeScript 7.
 
 ---
 
+## Sprint 12 — Poles UI/UX & Interaction Design (M9)
+
+**Status:** selesai · **Tag:** `m9-selesai`
+
+Audit Baseline terhadap 25 rute web menemukan 20 kelemahan: tidak ada sistem
+loading/skeleton, tidak ada toast, error selalu di atas halaman, 9 empty state
+tanpa jalan keluar, 11 `window.confirm`/`window.prompt`, mikro-interaksi nyaris
+tidak ada, hierarki tipografi dan spasi yang tidak seragam, lebar konten desktop
+1024 px (spesifikasi 1200 px), dan enam nilai warna lepas di luar token.
+
+**Keputusan yang dipakai**
+
+| Topik | Keputusan |
+| :--- | :--- |
+| Palet, tema, font | **Tidak diubah** — hanya token turunan dari hue yang sudah ada |
+| Gerak | Motion minimal: ≤180 ms, warna/opacity/transform, tanpa shadow/gradien, mati saat `prefers-reduced-motion` |
+| Cakupan | Seluruh halaman: pembeli, penjual, admin, demo console |
+| Dialog | In-app dan aksesibel (focus trap, Escape, fokus kembali ke pemicu) |
+| Logika bisnis | Nol perubahan — `apps/api` dan `packages/shared` tidak disentuh |
+
+**Pekerjaan**
+
+- 4 token turunan (`bahaya-muda`, `garis-kuat`, `garis-lembut`, `krem-terang`) dan
+  3 token gerak (`duration-*`, `ease-standar`, `animate-*`).
+- 14 komponen interaksi baru: skeleton, toast, empty state, modal, konfirmasi,
+  input dialog, field, banner status, stepper jumlah, bintang rating, salin,
+  kepala halaman, kartu metrik, dan provider badge bersama.
+- 28 ikon baru dan sekitar 30 kelas baru di `components/ui.ts`.
+- 20 halaman diperbarui: loading skeleton, validasi inline di field, empty state
+  informatif, tombol lengket di mobile, kartu radio untuk pilihan, dan dialog
+  konfirmasi menggantikan dialog browser.
+- `app/status-panel.tsx` dihapus karena tidak diimpor di mana pun.
+
+**Hasil uji**
+
+- `npm run build --workspace @bakul/web` lulus tanpa galat.
+- `npm run test` lulus (24 uji di `packages/shared`).
+- `npm run test:e2e` lulus (4 skenario Playwright).
+- Tidak ada `window.confirm`/`window.prompt`, tidak ada teks di bawah 16 px,
+  tidak ada nilai warna lepas di luar token.
+
+**Definisi selesai**
+
+- [x] Token turunan dan geraknya masuk ke `@theme` Tailwind.
+- [x] Pustaka komponen interaksi dibuat dan dipakai di seluruh halaman.
+- [x] Semua `window.confirm`/`window.prompt` diganti dialog in-app.
+- [x] Validasi error pindah dari atas halaman ke dekat field.
+- [x] Semua empty state punya ikon, penjelasan, dan jalan keluar.
+- [x] Palet, tema, dan font tidak berubah.
+- [x] `npm run build`, `npm run test`, `npm run test:e2e` lulus.
+- [x] Papan status diperbarui, commit, push, tag.
+
+---
+
 ## Lampiran A — Ritme commit, push, dan tag
 
 Setiap checkpoint:
@@ -566,3 +621,4 @@ git push
 | 3 Nov 2026 | Sprint 9 selesai: dompet toko, tarik saldo, approval, bukti transfer; tag `m6-selesai` |
 | 3 Nov 2026 | Sprint 10 selesai: komplain, mediasi, refund sebagian, dashboard admin, moderasi; tag `m7-selesai` |
 | 3 Nov 2026 | Sprint 11 selesai: seed 30 pesanan, demo console, Playwright E2E, docs arsitektur/state machine, bukti; tag `m8-selesai` |
+| 3 Nov 2026 | Sprint 12 selesai: audit 20 kelemahan UI/UX, token turunan, 14 komponen interaksi baru, dialog in-app menggantikan `window.confirm`/`window.prompt`, validasi inline, empty state, tombol lengket; tag `m9-selesai` |

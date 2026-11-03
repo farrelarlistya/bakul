@@ -79,7 +79,7 @@ export function SiteFooter() {
           </nav>
         </div>
 
-        <div className="mt-8 border-t border-[#3c4a43] pt-5 text-base text-mint">
+        <div className="mt-8 border-t border-white/20 pt-5 text-base text-mint">
           <p>Pembayaran dan pengiriman di Bakul adalah simulasi.</p>
           <p className="mt-1">Tidak ada uang nyata yang berpindah.</p>
         </div>

@@ -471,3 +471,130 @@ pembeli, penjual, admin, dan operator demo.
   berukuran lebih besar dari ukuran tampil.
 - Halaman penjual/admin belum memakai sidebar; header bersama dan menu akun adalah
   langkah antara sampai sidebar peran dikerjakan.
+
+---
+
+## 19. Poles UI/UX dan Interaction Design (November 2026)
+
+Bab ini mencatat lapisan interaksi yang ditambahkan setelah desain pertama.
+Palet, tema, dan jenis huruf **tidak diubah** — semua perubahan memakai fondasi
+warna yang sudah ada.
+
+### 19.1 Token turunan
+
+Empat token baru, semuanya turunan dari hue yang sudah ada. Tidak ada warna
+merek baru.
+
+| Token | Hex | Pemakaian |
+| :--- | :--- | :--- |
+| `bahaya-muda` | `#FBEAE8` | Latar badge "Stok habis", banner gagal, tombol "Buang" saat hover |
+| `garis-kuat` | `#CBD4D0` | Border kartu terangkat, hover kartu, garis tabel |
+| `garis-lembut` | `#F0F0F0` | Divider halus di dalam kartu, state nonaktif |
+| `krem-terang` | `#FAF6EF` | Latar subnavigasi peran di bawah header |
+
+Enam nilai warna lepas yang sebelumnya ditulis langsung di JSX (`#fbeae8`,
+`#3c4a43`, `accent-[#0F6E66]`) sekarang memakai token.
+
+### 19.2 Kebijakan gerak
+
+Gaya tetap datar: **tanpa drop shadow dan tanpa gradien**. Kedalaman visual
+dicapai lewat kombinasi border + latar, bukan bayangan.
+
+| Token | Nilai | Pemakaian |
+| :--- | :--- | :--- |
+| `duration-cepat` | 120 ms | Hover ikon, chip, kartu |
+| `duration-sedang` | 180 ms | Tombol, kartu produk, dialog |
+| `duration-lambat` | 240 ms | Transisi halaman |
+| `ease-standar` | `cubic-bezier(0.2, 0, 0, 1)` | Semua transisi |
+| `animate-memuat` | 1,6 s, opacity 1 → 0,45 → 1 | Placeholder skeleton |
+| `animate-muncul` | 180 ms, opacity + translateY 6 px | Dialog, toast |
+| `animate-masuk` | 180 ms, opacity + scale 0,97 | Panel masuk |
+
+Semua animasi dimatikan otomatis saat pengguna mengaktifkan
+`prefers-reduced-motion: reduce`.
+
+### 19.3 Komponen interaksi baru
+
+| Komponen | Berkas | Peran |
+| :--- | :--- | :--- |
+| `Skeleton`, `SkeletonText`, `SkeletonCard`, `SkeletonRow`, `SkeletonGrid`, `SkeletonTable` | `components/skeleton.tsx` | Placeholder loading tanpa gradien |
+| `ToastProvider`, `useToast` | `components/toast.tsx` | Notifikasi hasil aksi, `aria-live="polite"`, tutup otomatis 4 detik |
+| `EmptyState` | `components/empty-state.tsx` | Ikon + judul + penjelasan + jalan keluar |
+| `Modal` | `components/modal.tsx` | Dialog modal dengan focus trap, Escape, dan fokus kembali ke pemicu |
+| `ConfirmDialog`, `useConfirm` | `components/confirm-dialog.tsx` | Menggantikan `window.confirm` |
+| `PromptDialog` | `components/prompt-dialog.tsx` | Menggantikan `window.prompt` |
+| `Field` | `components/field.tsx` | Label + petunjuk + galat, `aria-describedby` dan `aria-invalid` otomatis |
+| `StatusBanner` | `components/status-banner.tsx` | Pesan status dalam konteks, bisa ditutup |
+| `QuantityStepper` | `components/quantity-stepper.tsx` | Pengatur jumlah 44 px, dipakai keranjang dan detail barang |
+| `RatingStars` | `components/rating-stars.tsx` | Rating dengan nilai terbaca pembaca layar |
+| `CopyButton` | `components/copy-button.tsx` | Salin kode pembayaran atau resi |
+| `PageHeader` | `components/page-header.tsx` | Kepala halaman seragam di semua rute |
+| `MetricCard` | `components/metric-card.tsx` | Kartu angka dengan hierarki nilai/label/konteks |
+| `AppBadgesProvider`, `useAppBadges` | `components/app-badges.tsx` | Satu pengambilan data untuk badge header dan navigasi bawah |
+
+Sekitar 30 kelas baru tersedia di `components/ui.ts`: `selectClass`,
+`textareaClass`, `fileInputClass`, `fieldErrorClass`, `hintClass`,
+`chipActiveClass`, `ghostButtonClass`, `quietButtonClass`, `iconButtonClass`,
+`containerClass`, `pageTitleClass`, `sectionTitleClass`, `eyebrowClass`,
+`successBoxClass`, `warningBoxClass`, `skeletonClass`, dan lainnya.
+
+### 19.4 Pola interaksi yang diterapkan
+
+| Pola | Halaman |
+| :--- | :--- |
+| Placeholder skeleton | Cari, Detail barang, Toko, Keranjang, Bayar, Pembayaran, Pesanan, Detail pesanan, Lacak, Komplain, Inbox, Akun, Kelola barang, Dompet, Pengaturan toko, Admin, Demo console |
+| Toast untuk hasil aksi | Profil, alamat, barang, etalase, pesanan, komplain, ulasan, tarik saldo, pencairan, reset demo |
+| Dialog konfirmasi in-app | Keluar akun, buang barang, hapus alamat, hapus barang, hapus etalase, ubah etalase, batalkan komplain, selesai pesanan, tolak pesanan, setujui uang kembali, simpan keputusan, setujui/tolak pencairan, reset data demo |
+| Dialog input teks | Ubah nama etalase, alasan menolak pesanan, catatan pencairan |
+| Validasi inline di field | Nomor HP, nama profil, nama toko, nama dan harga barang, cerita komplain, alamat pengiriman |
+| Empty state informatif | Keranjang, Cari, Toko, Pesanan, Pesanan masuk, Inbox, Akun, Kelola barang, Dompet, Admin (4), Demo console, Lacak, Komplain |
+| Tombol lengket di mobile | Detail barang (tambah keranjang), Bayar (bayar sekarang), Keranjang |
+| Kartu radio alih-alih `<select>` | Alamat kirim, pilihan kurir, cara bayar, kurir yang dilayani, keputusan dana |
+| Ikon 28 baru | `components/icon.tsx` |
+
+### 19.5 Penghapusan
+
+`app/status-panel.tsx` dihapus. Komponen `StatusPanel` tidak diimpor di mana pun
+dan sudah tidak lagi dipakai sejak halaman status internal M0 diganti Beranda.
+
+### 19.6 Aturan yang dijaga
+
+- Semua teks tetap ≥ 16 px. Badge "Stok habis" yang sebelumnya 14 px (`text-sm`)
+  sekarang 16 px.
+- Semua target sentuh tetap ≥ 44 px, termasuk tombol `−`/`+` pada stepper.
+- Tanpa harga coret, badge diskon, hitung mundur promo, atau kolom email.
+- Tanpa istilah teknis: escrow, checkout, invoice, VA, webhook, gateway,
+  idempotensi.
+- Tanpa drop shadow, gradien, atau mode gelap.
+- Angka rupiah tetap integer; tidak ada pembulatan baru.
+
+### 19.7 Hasil verifikasi
+
+| Pemeriksaan | Alat | Hasil |
+| :--- | :--- | :--- |
+| Build dan tipe | `npm run build --workspace @bakul/web` | Lulus, 26 rute |
+| Uji logika | `npm run test` | 24 uji lulus |
+| Alur ujung ke ujung | `npm run test:e2e` | 5 skenario lulus |
+| Aksesibilitas | axe-core 4.10.3, WCAG 2.1/2.2 AA + best practice | 0 pelanggaran di 20 tampilan (10 pembeli tanpa sesi, 5 pembeli dengan sesi, 5 admin/demo) |
+| Error konsol | 13 halaman dipotret Playwright | 0 error JavaScript |
+| Bukti visual | `docs/desain/ekspor/polish-*.png` | 12 tangkapan layar |
+
+Audit aksesibilitas berjalan otomatis pada `npm run test:e2e` dan harus tetap
+lulus 0 pelanggaran. Keputusan memakai `axe-core` sebagai dev dependency
+dicatat di `docs/adr/0007-audit-aksesibilitas-otomatis.md`.
+
+Skrip bukti visual dapat dijalankan ulang dengan:
+
+```bash
+npm run bukti:ui                          # menulis ke test-results/bukti/
+BAKUL_BUKTI_DIR=docs/desain/ekspor npm run bukti:ui
+```
+
+### 19.8 Catatan operasional
+
+- Kode OTP berlaku 10 menit pada jam demo. Dengan `DEMO_SPEED=60`, itu hanya
+  sekitar 10 detik waktu nyata. Jalankan E2E setelah server sudah hangat,
+  karena kompilasi halaman di `next dev` bisa memakan waktu tersebut.
+- `npm run test:e2e` butuh PostgreSQL dan API yang hidup.
+
+

@@ -147,7 +147,7 @@ export default function AdminPage() {
               />
             </div>
 
-            <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_1.2fr]">
+            <div className="mt-5 grid items-start gap-4 lg:grid-cols-[1fr_1.2fr]">
               <section className={cardClass}>
                 <h2 className="font-display text-2xl font-bold text-tinta">Pesanan per status</h2>
                 {metrics.ordersByStatus.length === 0 ? (

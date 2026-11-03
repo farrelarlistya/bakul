@@ -4,7 +4,7 @@ Pasar daring untuk pedagang kecil Indonesia. Janji utamanya: **uang aman sampai
 barang diterima**. Logika transaksi dibangun seperti produksi; perpindahan uang
 dan pihak ketiga disimulasikan sepenuhnya di laptop.
 
-Repo ini sudah mencapai **M8 — aplikasi lengkap untuk demo**. Tidak ada akun
+Repo ini sudah mencapai **M9 — aplikasi lengkap untuk demo**. Tidak ada akun
 vendor, API key, Docker, atau layanan cloud.
 
 ## Apa yang sudah jalan
@@ -133,7 +133,9 @@ npm run dev
 | `npm run dev` | Web :3000 + API :3001 |
 | `npm run build` | Build shared, API, web |
 | `npm test` | Unit test shared |
-| `npm run test:e2e` | Playwright alur pembeli/penjual/admin |
+| `npm run test:e2e` | Playwright alur pembeli/penjual/admin + audit aksesibilitas |
+| `npm run audit:a11y` | Audit WCAG 2.1/2.2 AA dengan axe-core, 0 pelanggaran |
+| `npm run bukti:ui` | Tangkapan layar bukti poles UI/UX |
 | `npm run db:generate` | Buat ulang Prisma Client |
 | `npm run db:migrate` | Buat/terapkan migrasi pengembangan |
 | `npm run db:deploy` | Terapkan migrasi yang ada |
