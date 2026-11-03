@@ -3,6 +3,46 @@ import { z } from "zod";
 export const PRODUCT_STATUSES = ["ACTIVE", "INACTIVE", "DELETED"] as const;
 export type ProductStatusValue = (typeof PRODUCT_STATUSES)[number];
 
+export const PRODUCT_STATUS_LABEL: Record<string, string> = {
+  ACTIVE: "Tampil",
+  INACTIVE: "Disembunyikan",
+  DELETED: "Dihapus",
+  DRAFT: "Draf",
+};
+
+export const SHOP_STATUS_LABEL: Record<string, string> = {
+  ACTIVE: "Aktif",
+  INACTIVE: "Nonaktif",
+  SUSPENDED: "Dibekukan",
+};
+
+export const SHOP_COURIER_VALUES = ["JNE", "JNT", "SICEPAT", "ANTERAJA", "POS"] as const;
+
+export const sellerShopUpdateSchema = z
+  .object({
+    name: z.string().trim().min(2, "Nama toko minimal 2 huruf.").max(120).optional(),
+    description: z.string().trim().max(1000).optional(),
+    bankName: z.string().trim().max(60).nullable().optional(),
+    bankAccountNumber: z
+      .string()
+      .trim()
+      .max(40)
+      .regex(/^[0-9]*$/, "Nomor rekening hanya angka.")
+      .nullable()
+      .optional(),
+    bankAccountHolder: z.string().trim().max(120).nullable().optional(),
+    supportedCouriers: z
+      .array(z.enum(SHOP_COURIER_VALUES))
+      .min(1, "Pilih minimal satu kurir.")
+      .max(5)
+      .optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "Isi setidaknya satu bagian.",
+  });
+
+export type SellerShopUpdateInput = z.infer<typeof sellerShopUpdateSchema>;
+
 export const etalaseInputSchema = z.object({
   name: z.string().trim().min(1, "Nama etalase wajib diisi.").max(80),
 });

@@ -61,3 +61,34 @@ export function calculateTotals({ subtotalItems, shippingCost }: OrderTotalsInpu
     totalAmount: subtotalItems + shippingCost + serviceFee,
   };
 }
+
+/**
+ * Satu pembayaran dapat berisi beberapa pesanan toko. Setiap toko punya
+ * biaya layanan sendiri (flat Rp1.000 per toko), sesuai invoice per toko.
+ */
+export function sumOrderTotals(
+  rows: { subtotalItems: number; shippingCost: number }[],
+): OrderTotals {
+  return rows.reduce<OrderTotals>(
+    (total, row) => {
+      const next = calculateTotals(row);
+      return {
+        subtotalItems: total.subtotalItems + next.subtotalItems,
+        shippingCost: total.shippingCost + next.shippingCost,
+        serviceFee: total.serviceFee + next.serviceFee,
+        platformFee: total.platformFee + next.platformFee,
+        netSellerAmount: total.netSellerAmount + next.netSellerAmount,
+        totalAmount: total.totalAmount + next.totalAmount,
+      };
+    },
+    {
+      subtotalItems: 0,
+      shippingCost: 0,
+      serviceFee: 0,
+      platformFee: 0,
+      netSellerAmount: 0,
+      totalAmount: 0,
+    },
+  );
+}
+

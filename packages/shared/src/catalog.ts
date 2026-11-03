@@ -62,6 +62,7 @@ export type ReviewItem = {
   buyerName: string;
   rating: number;
   comment: string | null;
+  mediaUrls: string[];
   createdAt: string;
 };
 
@@ -85,6 +86,7 @@ export type ProductDetail = ProductCard & {
     name: string;
     slug: string;
     cityName: string;
+    logoUrl: string | null;
   };
 };
 
@@ -93,6 +95,7 @@ export type ShopDetail = {
   name: string;
   slug: string;
   description: string | null;
+  logoUrl: string | null;
   cityName: string;
   productCount: number;
   rating: number;
