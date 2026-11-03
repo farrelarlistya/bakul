@@ -1,0 +1,4 @@
+PASS T-08: komplain membekukan escrow, ruang diskusi terbuka, balasan penjual tercatat, eskalasi ke admin tersimpan.
+PASS T-09: refund sebagian Rp 20000 dan hak penjual dicatat dalam satu jurnal seimbang Rp 45912.
+PASS T-12: pembeli tidak bisa membuka pesanan pembeli lain atau menu penjual/admin; penjual tidak bisa membuka admin (403/404).
+PASS: ledger tetap seimbang setelah komplain dan refund sebagian.

@@ -1,0 +1,3 @@
+PASS T-01: 1 pembayaran (98873) untuk 2 pesanan toko; kirim ulang kunci yang sama tidak menggandakan tagihan.
+PASS T-02: 100 checkout paralel pada stok 1 -> 1 sukses, 1 ditolak stok, 98 keranjang kosong dalam 368 ms.
+PASS T-05 awal: tagihan uji kedaluwarsa mengembalikan stok 1 -> 0 -> 1.

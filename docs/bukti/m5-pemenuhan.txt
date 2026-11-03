@@ -1,0 +1,4 @@
+PASS T-06: penjual tidak merespons 48 jam -> pesanan batal otomatis, stok kembali, jurnal refund dibuat.
+PASS SHP-4: resi 00092862669312 dan label PDF A6 3 KB dibuat; timeline mulai bergerak.
+PASS ORD-1: timeline pengiriman mencapai DELIVERED dengan 6 kejadian dan batas selesai otomatis.
+PASS T-07: auto-complete tepat waktu, escrow dilepas Rp 48160, saldo toko bertambah, ledger tetap seimbang.

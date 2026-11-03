@@ -377,6 +377,43 @@ penjual yang lebih lengkap tetap dijadwalkan sebelum Sprint 8–10.
 
 Foto produk memakai WebP target 32 KB dan `loading="lazy"`. Berat Beranda produksi
 pada 390 px tercatat **488 KB**, di bawah batas 500 KB. Tombol keranjang pada detail
-barang sengaja dinonaktifkan karena keranjang baru dibuat pada Sprint 6.
+barang sudah aktif sejak Sprint 6.
+
+---
+
+## 17. Implementasi M3–M8
+
+Alur transaksi memakai token dan komponen yang sama dengan M2.
+
+| Layar | Route | Catatan |
+| :--- | :--- | :--- |
+| Keranjang | `/keranjang` | Kelompok per toko, pilih item, ubah jumlah |
+| Bayar | `/bayar` | Alamat, kurir per toko, cara bayar, rincian |
+| Instruksi bayar | `/pembayaran/:id` | Kode VA/QRIS, hitung mundur, simulasi bayar |
+| Pesanan | `/pesanan` | Filter status, "uang saya di mana" |
+| Detail pesanan | `/pesanan/:id` | Rincian, lacak, selesai, ulasan + foto |
+| Komplain | `/pesanan/:id/komplain` | Bukti, diskusi, eskalasi |
+| Lacak | `/lacak/:awb` | Timeline publik |
+| Pesanan penjual | `/jualan/pesanan` | Terima/tolak, resi, label |
+| Dompet | `/jualan/dompet` | Saldo, mutasi, tarik saldo |
+| Pengaturan toko | `/jualan/toko` | Logo, bank, kurir |
+| Admin | `/admin` | GMV, escrow, antrean |
+| Resolusi | `/admin/komplain` | Keputusan dana |
+| Pencairan | `/admin/pencairan` | Setujui/tolak |
+| Toko & barang | `/admin/toko` | Moderasi |
+| Demo console | `/dev` | Waktu, pembayaran, reset |
+
+Aturan tampilan yang dijaga:
+
+- Setiap status pesanan memakai label Bahasa Indonesia; tidak ada `WAITING_...`
+  yang tampil ke pengguna.
+- Tombol utama ada di bawah dan memenuhi target sentuh 44 px.
+- Tidak ada promo, harga coret, hitung mundur promo, atau kolom email.
+- Label PDF dan bukti transfer diberi tanda simulasi.
+- Warna aksi tetap `#0F6E66`; tidak ada gradien atau drop shadow.
+
+Galeri implementasi (390 x 844) ada di `docs/desain/ekspor/implementasi-m8-*.png`.
+GIF ringkas 30 detik ada di `docs/bukti/demo-bakul.gif`; dibuat dari sepuluh
+tangkapan layar alur pembeli, penjual, admin, dan demo console.
 
 

@@ -4,7 +4,7 @@
 | :--- | :--- |
 | Versi dokumen | 1.0 |
 | Tanggal | 3 November 2026 |
-| Status | Sprint 0–5 selesai · Sprint 6 berikutnya |
+| Status | Sprint 0–11 selesai · M8 selesai |
 | Sumber kebenaran produk | `docs/prd/bakul-v0.2.md` |
 | Sumber kebenaran visual | `docs/desain/design.md` + `docs/desain/referensi/referensiStyleDesign.jpg` |
 | Berkas lokal (tidak di Git) | `AGENTS.md`, `bakul.figcraft` |
@@ -63,12 +63,12 @@ Aturan kerja:
 | 3 | Fondasi teknis / M0 | **Selesai** | `m0-selesai` |
 | 4 | Akun & onboarding / M1 | **Selesai** | `m1-selesai` |
 | 5 | Katalog & toko / M2 | **Selesai** | `m2-selesai` |
-| 6 | Keranjang & checkout / M3 | Berikutnya | `m3-selesai` |
-| 7 | Pembayaran, escrow, ledger / M4 | Belum | `m4-selesai` |
-| 8 | Pemenuhan & pengiriman / M5 | Belum | `m5-selesai` |
-| 9 | Dompet & pencairan / M6 | Belum | `m6-selesai` |
-| 10 | Pusat Resolusi & admin / M7 | Belum | `m7-selesai` |
-| 11 | Poles, bukti, demo / M8 | Belum | `m8-selesai` |
+| 6 | Keranjang & checkout / M3 | **Selesai** | `m3-selesai` |
+| 7 | Pembayaran, escrow, ledger / M4 | **Selesai** | `m4-selesai` |
+| 8 | Pemenuhan & pengiriman / M5 | **Selesai** | `m5-selesai` |
+| 9 | Dompet & pencairan / M6 | **Selesai** | `m6-selesai` |
+| 10 | Pusat Resolusi & admin / M7 | **Selesai** | `m7-selesai` |
+| 11 | Poles, bukti, demo / M8 | **Selesai** | `m8-selesai` |
 
 ---
 
@@ -312,72 +312,175 @@ Tailwind 4.x, TypeScript **5.9.x**. Jangan Prisma 8 RC atau TypeScript 7.
 
 ## Sprint 6 — Keranjang & checkout (M3)
 
-**Status:** belum · **Estimasi:** ± 1,5 minggu · **Tag:** `m3-selesai`
+**Status:** selesai · **Tag:** `m3-selesai`
 
-- Keranjang multi-toko, quote ongkir per toko, pembuatan `payments` + N `order_invoices`.
-- Kunci stok `SELECT ... FOR UPDATE` + `stock_reserved`.
-- Idempotency-Key pada `POST /checkout`.
-- Uji: T-01 (1 payment + N invoice), T-02 (100 paralel stok 1 → 1 sukses).
+- Keranjang database per pengguna, dikelompokkan per toko, item bisa dipilih.
+- Quote ongkir per toko memakai zona kota/provinsi/pulau, berat, kurir, dan layanan.
+- Checkout mengunci varian dengan `SELECT ... FOR UPDATE`, menurunkan stok tersedia,
+  menaikkan stok ditahan, lalu membuat 1 `payments` + N `order_invoices`.
+- `Idempotency-Key` wajib; kunci yang sama mengembalikan tagihan yang sama.
+- Snapshot nama, pilihan, harga, berat, dan foto disimpan di `order_items`.
+- Halaman `/keranjang`, `/bayar`, dan `/pembayaran/:id` sudah terhubung ke API.
+
+**Hasil uji**
+
+- `docs/bukti/m3-keranjang-checkout.txt`
+- T-01: 1 pembayaran untuk 2 pesanan toko; kirim ulang kunci tidak menggandakan.
+- T-02: 100 checkout paralel pada stok 1 → 1 sukses, 99 gagal bersih.
+- Tagihan kedaluwarsa mengembalikan stok.
+
+**Definisi selesai**
+
+- [x] Keranjang multi-toko dan pilihan item.
+- [x] Quote ongkir per toko dan total gabungan.
+- [x] 1 payment + N invoice dengan snapshot.
+- [x] Kunci stok dan idempotensi checkout.
+- [x] T-01 dan T-02 lulus.
+- [x] Build, test, dokumentasi, commit, push, tag.
 
 ---
 
 ## Sprint 7 — Pembayaran, escrow, ledger (M4)
 
-**Status:** belum · **Estimasi:** ± 1,5 minggu · **Tag:** `m4-selesai`
+**Status:** selesai · **Tag:** `m4-selesai`
 
-- Mock PG: charge, VA/QRIS, expire, signature HMAC, retry.
-- Webhook idempoten + `webhook_events`.
-- Escrow `PENDING → HELD → FROZEN/RELEASED/REFUNDED`.
-- Ledger double-entry + akun standar PRD Bab 11.3.
-- `npm run ledger:check` → 0 selisih.
-- Uji: T-03 (webhook 5× = 1 mutasi), T-04 (signature salah 401), T-05 (kedaluwarsa
-  mengembalikan stok), T-11 (ledger seimbang setelah 30 pesanan).
+- `MockPgService` membuat kode VA/QRIS, kedaluwarsa, dan tanda tangan HMAC.
+- Webhook mentah diverifikasi, `webhook_events` unik, dan duplikat diabaikan.
+- Escrow `PENDING → HELD → FROZEN/RELEASED/REFUNDED/PARTIALLY_REFUNDED`.
+- Ledger double-entry dengan akun `CASH`, `ESCROW_LIABILITY`,
+  `SELLER_PAYABLE:{shop}`, `PLATFORM_REVENUE`, `PG_FEE_EXPENSE`.
+- Trigger database menolak update/delete `ledger_entries`.
+- `npm run ledger:check` dan scheduler kedaluwarsa.
+
+**Hasil uji**
+
+- `docs/bukti/m4-pembayaran-escrow.txt`
+- T-03: webhook 5× = 1 baris event, 1 jurnal bayar, 1 biaya PG.
+- T-04: signature salah → 401 tanpa mutasi.
+- T-05: QRIS kedaluwarsa, stok kembali, pesanan batal.
+- T-11: 40+ pesanan, seluruh jurnal seimbang, escrow cocok, 0 selisih dompet.
+
+**Definisi selesai**
+
+- [x] Mock PG, VA/QRIS, HMAC, webhook idempoten.
+- [x] Escrow dan ledger double-entry.
+- [x] `ledger:check` → 0 selisih.
+- [x] T-03, T-04, T-05, T-11 lulus.
+- [x] Build, test, dokumentasi, commit, push, tag.
 
 ---
 
 ## Sprint 8 — Pemenuhan & pengiriman (M5)
 
-**Status:** belum · **Estimasi:** ± 1,5 minggu · **Tag:** `m5-selesai`
+**Status:** selesai · **Tag:** `m5-selesai`
 
-- Penjual terima/tolak, SLA 48 jam.
-- AWB mock deterministik, shipment, label PDF A6 + barcode Code128 + watermark DEMO.
-- Timeline tracking + scheduler in-process.
-- Uji: T-06 (SLA lewat → batal + refund), T-07 (auto-complete tepat waktu).
+- Penjual menerima/menolak, SLA 48 jam, dan pembatalan otomatis + refund.
+- AWB deterministik, shipment, timeline 6 kejadian, dan scheduler in-process.
+- Label PDF A6 dengan barcode Code128, QR, dan watermark DEMO.
+- Halaman pesanan masuk, detail penjual, pelacakan publik, dan unduh label.
+
+**Hasil uji**
+
+- `docs/bukti/m5-pemenuhan.txt`
+- T-06: penjual lewat SLA → batal, stok kembali, refund dijurnal.
+- SHP-4: resi dan label PDF dibuat.
+- T-07: auto-complete 72 jam, escrow dilepas, saldo bertambah.
+
+**Definisi selesai**
+
+- [x] Terima/tolak dan SLA.
+- [x] AWB, label PDF, dan tracking.
+- [x] T-06 dan T-07 lulus.
+- [x] Build, test, dokumentasi, commit, push, tag.
 
 ---
 
 ## Sprint 9 — Dompet & pencairan (M6)
 
-**Status:** belum · **Estimasi:** ± 1 minggu · **Tag:** `m6-selesai`
+**Status:** selesai · **Tag:** `m6-selesai`
 
-- Saldo toko dari pelepasan escrow, mutasi, pengajuan tarik saldo.
-- Minimum Rp50.000; validasi saldo; approval admin; bukti transfer palsu.
-- Jurnal pencairan tetap seimbang.
-- Uji: T-10 (tarik melebihi saldo ditolak).
+- Saldo toko dari pelepasan escrow dan mutasi ledger.
+- Pengajuan tarik saldo dengan minimum Rp50.000, validasi saldo, dan
+  `Idempotency-Key`.
+- Admin menyetujui/menolak; persetujuan membuat jurnal dan bukti transfer
+  simulasi. Saldo tertahan dipakai selama pengajuan belum diputuskan.
+
+**Hasil uji**
+
+- `docs/bukti/m6-dompet.txt`
+- T-10: tarik melebihi saldo dan di bawah minimum ditolak.
+- Pengajuan ganda tidak menggandakan saldo.
+- Jurnal pencairan seimbang dan bukti transfer tersedia.
+
+**Definisi selesai**
+
+- [x] Saldo, mutasi, dan pengajuan tarik saldo.
+- [x] Minimum, validasi saldo, approval admin.
+- [x] Jurnal pencairan seimbang.
+- [x] T-10 lulus.
+- [x] Build, test, dokumentasi, commit, push, tag.
 
 ---
 
 ## Sprint 10 — Pusat Resolusi & admin (M7)
 
-**Status:** belum · **Estimasi:** ± 1,5 minggu · **Tag:** `m7-selesai`
+**Status:** selesai · **Tag:** `m7-selesai`
 
-- Komplain + bukti, ruang diskusi, eskalasi, keputusan admin.
-- Refund penuh/sebagian/retur dalam satu jurnal.
-- Dashboard admin: GMV, escrow, antrean, moderasi toko/produk.
-- Uji: T-08 (komplain membekukan escrow), T-09 (refund sebagian), T-12 (403).
+- Komplain dengan bukti foto/video, ruang diskusi, eskalasi, refund penuh,
+  refund sebagian, dan retur.
+- Keputusan admin dalam satu jurnal seimbang.
+- Dashboard admin: GMV, dana ditahan, pesanan per status, antrean komplain,
+  antrean pencairan, moderasi toko, dan moderasi barang.
+- Otorisasi per peran di server.
+
+**Hasil uji**
+
+- `docs/bukti/m7-resolusi.txt`
+- T-08: komplain membekukan escrow dan membuka diskusi.
+- T-09: refund sebagian Rp20.000 tercatat dalam satu jurnal Rp45.912.
+- T-12: akses lintas peran ditolak 403/404.
+
+**Definisi selesai**
+
+- [x] Komplain, bukti, diskusi, eskalasi.
+- [x] Refund penuh/sebagian/retur.
+- [x] Dashboard admin dan moderasi.
+- [x] T-08, T-09, T-12 lulus.
+- [x] Build, test, dokumentasi, commit, push, tag.
 
 ---
 
 ## Sprint 11 — Poles, bukti, demo (M8)
 
-**Status:** belum · **Estimasi:** ± 1 minggu · **Tag:** `m8-selesai`
+**Status:** selesai · **Tag:** `m8-selesai`
 
-- Seed 30 pesanan historis + data demo deterministik.
-- Demo console: time machine, simulator PG, simulator logistik, reset.
-- Playwright E2E alur demo 10 menit (Lampiran B PRD).
-- `docs/bukti/ledger-check.txt`, `oversell-test.txt`, diagram, ADR.
-- GIF 30 detik, `docs/demo.md`, README final.
-- Uji: T-14 (teks sesuai panduan bahasa), T-07 (alur demo lulus).
+- Seed 30 pesanan historis dengan status beragam, dompet, dan satu antrean
+  pencairan; tetap deterministik dan aman dijalankan ulang.
+- Demo Console `/dev`: time machine, kecepatan waktu, simulator pembayaran,
+  pemeriksaan SLA, dan reset transaksi.
+- Playwright E2E memakai Chrome terpasang, viewport 390×844:
+  pembeli (cari → keranjang → bayar), penjual, dan admin.
+- `docs/bukti/ledger-check.txt`, `m3`–`m8`, `oversell-test.txt`.
+- `docs/arsitektur.md`, `docs/model-data.md`, `docs/state-machine.md`,
+  `docs/demo.md`, ADR 0006, README final, dan galeri tangkapan layar.
+
+**Hasil uji**
+
+- `docs/bukti/m8-demo.txt`
+- T-14: 8 halaman utama bebas 16 istilah teknis terlarang.
+- `npm run test:e2e`: 3 skenario lulus.
+- `npm run ledger:check`: 0 selisih.
+- Seed: 12 pengguna, 5 toko, 100 produk, 30+ pesanan historis.
+
+**Definisi selesai**
+
+- [x] Seed pesanan historis dan data demo deterministik.
+- [x] Demo console lengkap.
+- [x] E2E Playwright alur demo.
+- [x] Ledger check, oversell test, diagram, ADR, demo.md, README.
+- [x] Galeri tangkapan layar dan GIF ringkas.
+- [x] T-14 lulus.
+- [x] Build, test, dokumentasi, commit, push, tag.
 
 ---
 
@@ -457,3 +560,9 @@ git push
 | 3 Nov 2026 | Perbaikan pasca-M0: hidrasi dev di `127.0.0.1`, timeout health check, ikon aplikasi |
 | 3 Nov 2026 | Sprint 4 selesai: OTP, sesi aman, profil/alamat, buka toko, produk pertama + foto; tag `m1-selesai` |
 | 3 Nov 2026 | Sprint 5 selesai: katalog, pencarian/filter, detail, toko, etalase, ulasan, kelola barang, foto WebP; tag `m2-selesai` |
+| 3 Nov 2026 | Sprint 6 selesai: keranjang multi-toko, quote ongkir, checkout 1 payment + N invoice, kunci stok, idempotensi; tag `m3-selesai` |
+| 3 Nov 2026 | Sprint 7 selesai: mock PG, webhook HMAC idempoten, escrow, ledger append-only, `ledger:check`; tag `m4-selesai` |
+| 3 Nov 2026 | Sprint 8 selesai: SLA penjual, AWB, label PDF, tracking, auto-complete; tag `m5-selesai` |
+| 3 Nov 2026 | Sprint 9 selesai: dompet toko, tarik saldo, approval, bukti transfer; tag `m6-selesai` |
+| 3 Nov 2026 | Sprint 10 selesai: komplain, mediasi, refund sebagian, dashboard admin, moderasi; tag `m7-selesai` |
+| 3 Nov 2026 | Sprint 11 selesai: seed 30 pesanan, demo console, Playwright E2E, docs arsitektur/state machine, bukti; tag `m8-selesai` |

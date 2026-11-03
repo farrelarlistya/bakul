@@ -1,0 +1,13 @@
+Uji anti-overselling T-02
+Skenario: satu varian dengan stok 1, 100 checkout paralel, masing-masing memakai
+Idempotency-Key berbeda.
+
+Harness: apps/api/scripts/verify-m3.ts
+Perintah: npm run verify:m3
+Hasil terakhir:
+PASS T-02: 100 checkout paralel pada stok 1 -> 1 sukses, 98 gagal karena keranjang
+sudah dikosongkan checkout pemenang, 1 ditolak karena stok habis.
+Stok akhir sebelum tagihan kedaluwarsa: stock_available=0, stock_reserved=1.
+Setelah tagihan kedaluwarsa: stock_available=1, stock_reserved=0.
+
+Bukti lengkap ada di docs/bukti/m3-keranjang-checkout.txt.

@@ -1,0 +1,9 @@
+Playwright E2E — Chrome terpasang, viewport 390 x 844
+Perintah: npm run test:e2e
+Hasil: 3 passed (11.9s)
+
+PASS pembeli: masuk OTP -> detail Nastar -> tambah keranjang -> lanjut bayar -> bayar -> halaman pembayaran berhasil -> daftar pesanan menampilkan uang ditahan aman.
+PASS penjual: masuk -> pesanan masuk -> dompet toko menampilkan saldo siap ditarik.
+PASS admin: masuk -> dashboard -> pusat resolusi -> pencairan -> demo console.
+
+Tidak ada page error di ketiga skenario.

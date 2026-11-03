@@ -1,0 +1,12 @@
+Pemeriksaan ledger Bakul
+Jurnal             : 68
+Baris ledger       : 148
+Total debit        : Rp 5.066.923
+Total kredit       : Rp 5.066.923
+Jurnal tidak balance: 0
+Nominal tidak sah  : 0
+Saldo dompet beda  : 0
+Escrow di ledger   : Rp 1.423.305
+Escrow di pesanan  : Rp 1.423.305
+Ledger append-only : ya
+HASIL: 0 selisih

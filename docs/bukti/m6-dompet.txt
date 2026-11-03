@@ -1,0 +1,3 @@
+PASS WDR-2: tarik saldo melebihi saldo dan di bawah Rp50.000 ditolak dengan pesan jelas.
+PASS WDR-2: pengajuan Rp50.000 mengunci saldo, kirim ulang kunci yang sama tidak menggandakan pengajuan.
+PASS WDR-1: admin menyetujui pencairan, jurnal seimbang, saldo dompet cocok, bukti transfer simulasi tersedia.

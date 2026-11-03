@@ -1,0 +1,3 @@
+PASS T-14: 8 halaman utama tidak menampilkan istilah teknis terlarang (16 istilah diperiksa).
+PASS DMO: demo console aktif (60x), 1 tagihan menunggu, 30 pesanan, escrow Rp 1423305.
+PASS M8: seed 12 pengguna, 5 toko, 100 produk, 30 pesanan, 68 jurnal ledger; halaman lacak publik dan inbox berfungsi.
