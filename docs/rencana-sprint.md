@@ -4,7 +4,7 @@
 | :--- | :--- |
 | Versi dokumen | 1.0 |
 | Tanggal | 3 November 2026 |
-| Status | Sprint 0–1 selesai · Sprint 2 berikutnya |
+| Status | Sprint 0–2 selesai · Sprint 3 berikutnya |
 | Sumber kebenaran produk | `docs/prd/bakul-v0.2.md` |
 | Sumber kebenaran visual | `docs/desain/design.md` + `docs/desain/referensi/referensiStyleDesign.jpg` |
 | Berkas lokal (tidak di Git) | `AGENTS.md`, `bakul.figcraft` |
@@ -59,8 +59,8 @@ Aturan kerja:
 | :--- | :--- | :--- | :--- |
 | 0 | Fondasi repo + sistem desain + Beranda | **Selesai** | `desain-d1-rev1` |
 | 1 | Desain alur pembeli inti (D2) | **Selesai** | `desain-d2` |
-| 2 | Desain pesanan, onboarding penjual, inbox (D3) | Berikutnya | `desain-v1` |
-| 3 | Fondasi teknis / M0 | Belum | `m0-selesai` |
+| 2 | Desain pesanan, onboarding penjual, inbox (D3) | **Selesai** | `desain-v1` |
+| 3 | Fondasi teknis / M0 | Berikutnya | `m0-selesai` |
 | 4 | Akun & onboarding / M1 | Belum | `m1-selesai` |
 | 5 | Katalog & toko / M2 | Belum | `m2-selesai` |
 | 6 | Keranjang & checkout / M3 | Belum | `m3-selesai` |
@@ -143,7 +143,7 @@ dan melihat instruksi pembayaran — semuanya dalam desain yang bisa diklik mata
 
 ## Sprint 2 — Desain pesanan, onboarding penjual, inbox (D3)
 
-**Status:** belum · **Estimasi:** 1–2 sesi · **Tag:** `desain-v1`
+**Status:** selesai · **Tag:** `desain-v1`
 
 | Layar | Route | Requirement | Isi wajib |
 | :--- | :--- | :--- | :--- |
@@ -158,10 +158,21 @@ dan melihat instruksi pembayaran — semuanya dalam desain yang bisa diklik mata
 
 **Definisi selesai**
 
-- [ ] Tujuh layar (onboarding dihitung empat frame) selesai dan konsisten dengan D1.
-- [ ] Alur onboarding bisa diselesaikan tanpa email.
-- [ ] Setiap status pesanan menjawab "uang saya di mana?".
-- [ ] Update dokumen, commit, push, tag `desain-v1`.
+- [x] Delapan frame (tiga layar pembeli + onboarding empat frame + inbox) selesai dan konsisten dengan D1.
+- [x] Alur onboarding bisa diselesaikan tanpa email.
+- [x] Setiap status pesanan menjawab "uang saya di mana?".
+- [x] Update dokumen, commit, push, tag `desain-v1`.
+
+**Hasil**
+
+- Berkas: `b8-pesanan.png`, `b9-lacak-paket.png`, `b10-komplain.png`,
+  `n1-inbox.png`, `s1-buka-toko-nomor-hp.png`, `s2-buka-toko-otp.png`,
+  `s3-buka-toko-nama.png`, `s4-produk-pertama.png`.
+- Pesanan memakai tiga status: menunggu bayar, dikirim, selesai — masing-masing
+  dengan penjelasan posisi uang.
+- Onboarding: nomor HP → OTP (`123456` saat demo) → nama toko → produk pertama.
+- Inbox bergaya WhatsApp dengan pesan OTP di urutan teratas.
+- Desain tahap pertama selesai. Berikutnya Sprint 3 (fondasi kode).
 
 **Setelah sprint ini desain berhenti.** Dashboard penjual, dompet, dan admin dibuat
 menjelang sprint 8–10 agar tidak basi.
@@ -359,3 +370,4 @@ git push
 | :--- | :--- |
 | 3 Nov 2026 | Dokumen dibuat; Sprint 0 selesai, Sprint 1 disiapkan |
 | 3 Nov 2026 | Sprint 1 selesai (12 layar termasuk state); tag `desain-d2` |
+| 3 Nov 2026 | Sprint 2 selesai (8 frame); desain tahap pertama selesai; tag `desain-v1` |
