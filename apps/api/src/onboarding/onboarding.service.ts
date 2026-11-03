@@ -127,6 +127,11 @@ export class OnboardingService {
     }
 
     const slug = await this.uniqueProductSlug(input.name);
+    const etalase = await this.prisma.shopEtalase.findFirst({
+      where: { shopId: user.shop.id },
+      orderBy: { sortOrder: "asc" },
+      select: { id: true },
+    });
     const photoUrl = await this.storage.saveProductPhoto(file);
 
     try {
@@ -134,6 +139,7 @@ export class OnboardingService {
         data: {
           shopId: user.shop.id,
           categoryId: category.id,
+          etalaseId: etalase?.id ?? null,
           name: input.name,
           slug,
           description:

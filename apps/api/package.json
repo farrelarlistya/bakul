@@ -12,7 +12,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "verify:m1": "tsx scripts/verify-m1.ts"
+    "verify:m1": "tsx scripts/verify-m1.ts",
+    "verify:m2": "tsx scripts/verify-m2.ts"
   },
   "dependencies": {
     "@bakul/shared": "0.1.0",
@@ -26,7 +27,8 @@
     "@prisma/client": "7.10.1",
     "pg": "8.23.1",
     "reflect-metadata": "0.2.2",
-    "rxjs": "7.8.2"
+    "rxjs": "7.8.2",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@types/express": "5.0.6",

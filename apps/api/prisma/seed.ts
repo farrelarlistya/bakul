@@ -1,7 +1,11 @@
 import { config } from "dotenv";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import sharp from "sharp";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { ProductStatus, ShopStatus, UserRole } from "../src/generated/prisma/enums";
+import { productPhotoDir } from "../src/common/storage/storage.paths";
 
 config({ path: "../../.env", quiet: true });
 config({ quiet: true });
@@ -48,6 +52,14 @@ type SeedCategory = {
   sortOrder: number;
 };
 
+type SeedEtalase = {
+  id: string;
+  shopId: string;
+  name: string;
+  slug: string;
+  sortOrder: number;
+};
+
 type SeedAddress = {
   id: string;
   userId: string;
@@ -66,6 +78,8 @@ type SeedProduct = {
   id: string;
   shopId: string;
   categoryId: string;
+  etalaseId: string | null;
+  photoKey: string;
   name: string;
   slug: string;
   description: string;
@@ -264,6 +278,24 @@ const shops: SeedShop[] = [
     supportedCouriers: ["JNE", "SICEPAT"],
   },
 ];
+
+const etalaseNamesByShop = [
+  ["Kue Lebaran", "Sembako"],
+  ["Camilan Pedas", "Camilan Gurih"],
+  ["Kopi", "Minuman"],
+  ["Batik", "Tenun"],
+  ["Anyaman", "Perawatan & Rumah"],
+];
+
+const etalases: SeedEtalase[] = shops.flatMap((shop, shopIndex) =>
+  (etalaseNamesByShop[shopIndex] ?? ["Semua Barang"]).map((name, index) => ({
+    id: seedId(8, shopIndex * 2 + index + 1),
+    shopId: shop.id,
+    name,
+    slug: slugify(name),
+    sortOrder: index + 1,
+  })),
+);
 
 const categories: SeedCategory[] = [
   { id: seedId(6, 1), name: "Makanan Ringan", slug: "makanan-ringan", sortOrder: 1 },
@@ -666,11 +698,24 @@ for (let shopIndex = 0; shopIndex < shops.length; shopIndex += 1) {
 
     const productId = seedId(3, globalIndex);
     const price = basePrice + (productIndex % 5) * priceStep + shopIndex * 500;
+    const etalase = etalases[shopIndex * 2 + (productIndex % 2)];
 
     products.push({
       id: productId,
       shopId: shop.id,
       categoryId: category.id,
+      etalaseId: etalase?.id ?? null,
+      photoKey:
+        {
+          "kue-kering": "nastar",
+          "makanan-ringan": "keripik",
+          sembako: "keripik",
+          minuman: "kopi",
+          fashion: "batik",
+          kerajinan: "anyaman",
+          "perawatan-diri": "anyaman",
+          "rumah-tangga": "anyaman",
+        }[categorySlug] ?? "nastar",
       name,
       slug: `${slugify(name)}-${globalIndex.toString().padStart(3, "0")}`,
       description: `${name} buatan ${shop.name} di ${shop.cityName}. Dikirim langsung dari toko.`,
@@ -703,7 +748,69 @@ for (let shopIndex = 0; shopIndex < shops.length; shopIndex += 1) {
   }
 }
 
+const seedPhotoDefs = [
+  { key: "nastar", source: "produk-nastar.jpg", filename: "seed-nastar.webp" },
+  { key: "keripik", source: "produk-keripik.jpg", filename: "seed-keripik.webp" },
+  { key: "kopi", source: "produk-kopi.jpg", filename: "seed-kopi.webp" },
+  { key: "batik", source: "produk-batik.jpg", filename: "seed-batik.webp" },
+  { key: "anyaman", source: "hero-tas-anyaman.jpg", filename: "seed-anyaman.webp" },
+];
+
+const reviewComments = [
+  "Barangnya sesuai foto dan dikemas rapi.",
+  "Rasanya enak, keluarga suka.",
+  "Pengiriman cepat, penjual ramah.",
+  "Kualitas bagus untuk harga segini.",
+  "Sudah dua kali beli di toko ini.",
+  "Packing aman, tidak ada yang rusak.",
+  "Cocok untuk oleh-oleh.",
+  "Barang baru, wangi, dan bersih.",
+  "Ukurannya pas dan bahannya nyaman.",
+  "Akan beli lagi kalau stok tersedia.",
+];
+
+async function prepareSeedPhotos(): Promise<Record<string, string>> {
+  const directory = productPhotoDir();
+  await mkdir(directory, { recursive: true });
+  const urls: Record<string, string> = {};
+
+  for (const def of seedPhotoDefs) {
+    const source = path.resolve(process.cwd(), "../../docs/desain/gambar", def.source);
+    let output: Buffer | null = null;
+
+    for (const width of [900, 700, 500, 400, 300]) {
+      for (const quality of [78, 66, 56, 46, 38]) {
+        const candidate = await sharp(source)
+          .rotate()
+          .resize({ width, height: width, fit: "inside", withoutEnlargement: true })
+          .webp({ quality })
+          .toBuffer();
+
+        output = candidate;
+        if (candidate.length <= 32 * 1024) {
+          break;
+        }
+      }
+
+      if (output && output.length <= 32 * 1024) {
+        break;
+      }
+    }
+
+    if (!output) {
+      throw new Error(`Gagal membuat foto seed ${def.filename}.`);
+    }
+
+    await writeFile(path.join(directory, def.filename), output);
+    urls[def.key] = `/api/v1/files/products/${def.filename}`;
+  }
+
+  return urls;
+}
+
 async function seed(): Promise<void> {
+  const seedImageUrls = await prepareSeedPhotos();
+
   for (const user of users) {
     const { id, ...data } = user;
     await prisma.user.upsert({
@@ -731,6 +838,15 @@ async function seed(): Promise<void> {
     });
   }
 
+  for (const etalase of etalases) {
+    const { id, ...data } = etalase;
+    await prisma.shopEtalase.upsert({
+      where: { id },
+      update: data,
+      create: { id, ...data },
+    });
+  }
+
   for (const address of addresses) {
     const { id, ...data } = address;
     await prisma.userAddress.upsert({
@@ -741,7 +857,7 @@ async function seed(): Promise<void> {
   }
 
   for (const product of products) {
-    const { id, ...data } = product;
+    const { id, photoKey: _photoKey, ...data } = product;
     await prisma.product.upsert({
       where: { id },
       update: data,
@@ -758,23 +874,90 @@ async function seed(): Promise<void> {
     });
   }
 
-  const [userCount, shopCount, categoryCount, productCount, addressCount, variantCount] =
-    await Promise.all([
-      prisma.user.count(),
-      prisma.shop.count(),
-      prisma.category.count(),
-      prisma.product.count(),
-      prisma.userAddress.count(),
-      prisma.productVariant.count(),
-    ]);
+  for (let index = 0; index < products.length; index += 1) {
+    const product = products[index];
+    const url = product ? seedImageUrls[product.photoKey] : undefined;
+    if (!product || !url) {
+      continue;
+    }
+
+    const imageId = seedId(7, index + 1);
+    await prisma.productImage.upsert({
+      where: { id: imageId },
+      update: { productId: product.id, url, position: 0 },
+      create: { id: imageId, productId: product.id, url, position: 0 },
+    });
+  }
+
+  for (let index = 0; index < products.length; index += 1) {
+    const product = products[index];
+    if (!product) {
+      continue;
+    }
+
+    for (let reviewIndex = 0; reviewIndex < 2; reviewIndex += 1) {
+      const buyer = buyers[(index + reviewIndex) % buyers.length];
+      if (!buyer) {
+        continue;
+      }
+
+      const reviewId = seedId(9, index * 2 + reviewIndex + 1);
+      await prisma.review.upsert({
+        where: { id: reviewId },
+        update: {
+          productId: product.id,
+          buyerId: buyer.id,
+          rating: reviewIndex === 0 ? 5 : 4,
+          comment: reviewComments[(index + reviewIndex) % reviewComments.length] ?? null,
+        },
+        create: {
+          id: reviewId,
+          productId: product.id,
+          buyerId: buyer.id,
+          rating: reviewIndex === 0 ? 5 : 4,
+          comment: reviewComments[(index + reviewIndex) % reviewComments.length] ?? null,
+        },
+      });
+    }
+  }
+
+  const [
+    userCount,
+    shopCount,
+    categoryCount,
+    productCount,
+    addressCount,
+    variantCount,
+    etalaseCount,
+    imageCount,
+    reviewCount,
+  ] = await Promise.all([
+    prisma.user.count(),
+    prisma.shop.count(),
+    prisma.category.count(),
+    prisma.product.count(),
+    prisma.userAddress.count(),
+    prisma.productVariant.count(),
+    prisma.shopEtalase.count(),
+    prisma.productImage.count(),
+    prisma.review.count(),
+  ]);
 
   console.log(
     `Seed selesai: ${userCount} pengguna, ${shopCount} toko, ${categoryCount} kategori, ` +
-      `${productCount} produk, ${variantCount} varian, ${addressCount} alamat.`,
+      `${productCount} produk, ${variantCount} varian, ${addressCount} alamat, ` +
+      `${etalaseCount} etalase, ${imageCount} foto, ${reviewCount} ulasan.`,
   );
 
-  if (productCount !== 100 || shopCount !== 5 || categoryCount !== 8) {
-    throw new Error("Jumlah data seed tidak sesuai target M0.");
+  if (
+    productCount !== 100 ||
+    shopCount !== 5 ||
+    categoryCount !== 8 ||
+    etalaseCount !== 10 ||
+    imageCount !== 100 ||
+    reviewCount !== 200
+  ) {
+    throw new Error("Jumlah data seed tidak sesuai target M2.");
   }
 }
 

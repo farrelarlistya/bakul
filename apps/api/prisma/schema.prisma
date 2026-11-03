@@ -51,6 +51,7 @@ model User {
   shop          Shop?
   sessions      Session[]
   notifications Notification[]
+  reviews       Review[]
 
   @@map("users")
 }
@@ -92,8 +93,9 @@ model Shop {
   createdAt          DateTime   @default(now()) @map("created_at")
   updatedAt          DateTime   @updatedAt @map("updated_at")
 
-  owner    User      @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  owner    User          @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
   products Product[]
+  etalases ShopEtalase[]
 
   @@index([cityId])
   @@index([status])
@@ -117,6 +119,7 @@ model Product {
   id          String        @id @default(uuid()) @db.Uuid
   shopId      String        @map("shop_id") @db.Uuid
   categoryId  String        @map("category_id") @db.Uuid
+  etalaseId   String?       @map("etalase_id") @db.Uuid
   name        String        @db.VarChar(140)
   slug        String        @unique @db.VarChar(180)
   description String        @db.Text
@@ -129,12 +132,48 @@ model Product {
 
   shop     Shop             @relation(fields: [shopId], references: [id], onDelete: Restrict)
   category Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  etalase  ShopEtalase?     @relation(fields: [etalaseId], references: [id], onDelete: SetNull)
   variants ProductVariant[]
   images   ProductImage[]
+  reviews  Review[]
 
   @@index([shopId, status])
   @@index([categoryId])
+  @@index([etalaseId])
   @@map("products")
+}
+
+model ShopEtalase {
+  id        String   @id @default(uuid()) @db.Uuid
+  shopId    String   @map("shop_id") @db.Uuid
+  name      String   @db.VarChar(80)
+  slug      String   @db.VarChar(100)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  shop     Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([shopId, slug])
+  @@index([shopId])
+  @@map("shop_etalases")
+}
+
+model Review {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  buyerId   String   @map("buyer_id") @db.Uuid
+  rating    Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  buyer   User    @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, buyerId])
+  @@index([productId, createdAt])
+  @@map("reviews")
 }
 
 model ProductVariant {

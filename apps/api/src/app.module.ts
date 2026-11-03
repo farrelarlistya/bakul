@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AdminModule } from "./admin/admin.module";
 import { AuthModule } from "./auth/auth.module";
+import { CatalogModule } from "./catalog/catalog.module";
 import { ClockModule } from "./common/clock/clock.module";
 import { StorageModule } from "./common/storage/storage.module";
 import { validateEnv } from "./config/env";
@@ -25,6 +26,7 @@ import { SellerModule } from "./seller/seller.module";
     ClockModule,
     StorageModule,
     AuthModule,
+    CatalogModule,
     MeModule,
     OnboardingModule,
     SellerModule,
