@@ -14,6 +14,9 @@ coverage/
 # Prisma client (dibuat ulang oleh npm install)
 apps/api/src/generated/
 
+# Tipe Next.js (dibuat ulang oleh next dev/build)
+apps/web/next-env.d.ts
+
 # Lingkungan & rahasia
 .env
 .env.*
