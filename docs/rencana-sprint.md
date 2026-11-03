@@ -4,7 +4,7 @@
 | :--- | :--- |
 | Versi dokumen | 1.0 |
 | Tanggal | 3 November 2026 |
-| Status | Sprint 0 selesai · Sprint 1 belum dimulai |
+| Status | Sprint 0–1 selesai · Sprint 2 berikutnya |
 | Sumber kebenaran produk | `docs/prd/bakul-v0.2.md` |
 | Sumber kebenaran visual | `docs/desain/design.md` + `docs/desain/referensi/referensiStyleDesign.jpg` |
 | Berkas lokal (tidak di Git) | `AGENTS.md`, `bakul.figcraft` |
@@ -58,8 +58,8 @@ Aturan kerja:
 | Sprint | Fokus | Status | Tag |
 | :--- | :--- | :--- | :--- |
 | 0 | Fondasi repo + sistem desain + Beranda | **Selesai** | `desain-d1-rev1` |
-| 1 | Desain alur pembeli inti (D2) | Berikutnya | `desain-d2` |
-| 2 | Desain pesanan, onboarding penjual, inbox (D3) | Belum | `desain-v1` |
+| 1 | Desain alur pembeli inti (D2) | **Selesai** | `desain-d2` |
+| 2 | Desain pesanan, onboarding penjual, inbox (D3) | Berikutnya | `desain-v1` |
 | 3 | Fondasi teknis / M0 | Belum | `m0-selesai` |
 | 4 | Akun & onboarding / M1 | Belum | `m1-selesai` |
 | 5 | Katalog & toko / M2 | Belum | `m2-selesai` |
@@ -96,7 +96,7 @@ Aturan kerja:
 
 ## Sprint 1 — Desain alur pembeli inti (D2)
 
-**Status:** berikutnya · **Estimasi:** 1–2 sesi · **Tag:** `desain-d2`
+**Status:** selesai · **Tag:** `desain-d2`
 
 **Tujuan:** pembeli bisa mencari, memilih, memasukkan keranjang, checkout multi-toko,
 dan melihat instruksi pembayaran — semuanya dalam desain yang bisa diklik mata.
@@ -127,6 +127,17 @@ dan melihat instruksi pembayaran — semuanya dalam desain yang bisa diklik mata
 - [ ] Update papan status, commit, push, tag `desain-d2`.
 
 **Di luar lingkup:** versi desktop, ulasan (hanya tampil), promo, chat penjual.
+
+**Hasil**
+
+- Enam layar normal + enam state khusus selesai di halaman `01 · Pembeli`.
+- Ekspor: `b2-cari.png` … `b7-bayar.png` (2×) dan enam berkas state (1×) di
+  `docs/desain/ekspor/`.
+- State khusus: hasil kosong, stok habis, toko kosong, keranjang kosong, kurir
+  tidak tersedia, kode pembayaran kedaluwarsa.
+- Rincian biaya checkout memakai angka nyata: subtotal Rp70.000, ongkir Rp17.000,
+  biaya layanan Rp1.609, total Rp88.609.
+- Catatan: foto produk dipakai ulang lintas layar. Versi desktop belum dibuat.
 
 ---
 
@@ -347,3 +358,4 @@ git push
 | Tanggal | Perubahan |
 | :--- | :--- |
 | 3 Nov 2026 | Dokumen dibuat; Sprint 0 selesai, Sprint 1 disiapkan |
+| 3 Nov 2026 | Sprint 1 selesai (12 layar termasuk state); tag `desain-d2` |
