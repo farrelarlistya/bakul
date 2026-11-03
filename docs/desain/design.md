@@ -3,7 +3,7 @@
 | Atribut | Nilai |
 | :--- | :--- |
 | Versi | 0.1 |
-| Status | D2 selesai — menunggu review |
+| Status | Desain selesai (D1–D3) — menunggu review |
 | Sumber produk | `docs/prd/bakul-v0.2.md` |
 | Sumber gaya | `docs/desain/referensi/referensiStyleDesign.jpg` |
 | Berkas desain | `bakul.figcraft` |
@@ -113,14 +113,13 @@ terpisah saat implementasi. Header atas dan bubble chat menyusul di D2–D3.
 | B5 | Keranjang multi-toko | `/cart` | CART-1 | D2 | Selesai (normal + kosong) |
 | B6 | Checkout | `/checkout` | CART-2 | D2 | Selesai (normal + error kurir) |
 | B7 | Instruksi pembayaran | `/pay/:id` | PAY-1 | D2 | Selesai (normal + kedaluwarsa) |
-| B8 | Pesanan saya | `/orders` | ORD-1 | D3 | Belum |
-| B9 | Lacak paket | `/lacak/:awb` | ORD-1 | D3 | Belum |
-| B10 | Komplain | `/orders/:id/komplain` | DSP-1 | D3 | Belum |
-| S1–S4 | Buka toko 3 langkah | `/jualan` | ONB-1, ONB-2 | D3 | Belum |
-| N1 | Inbox gaya WhatsApp | `/inbox` | NTF-1 | D3 | Belum |
+| B8 | Pesanan saya | `/orders` | ORD-1 | D3 | Selesai |
+| B9 | Lacak paket | `/lacak/:awb` | ORD-1 | D3 | Selesai |
+| B10 | Komplain | `/orders/:id/komplain` | DSP-1 | D3 | Selesai |
+| S1–S4 | Buka toko 3 langkah | `/jualan` | ONB-1, ONB-2 | D3 | Selesai (4 frame) |
+| N1 | Inbox gaya WhatsApp | `/inbox` | NTF-1 | D3 | Selesai |
 
-Layar penjual lanjutan (dashboard, pesanan, dompet) dan admin didesain setelah
-alur pembeli disetujui.
+Dashboard penjual, dompet, dan admin belum dibuat; dijadwalkan sebelum Sprint 8–10.
 
 ---
 
@@ -254,5 +253,52 @@ Ekspor normal 2×, state khusus 1×. Semua di `docs/desain/ekspor/`.
 3. Checkout: pilihan kurir per toko sudah terbaca, atau terlalu padat?
 4. Instruksi bayar: 3 langkah sudah cukup, atau perlu tombol bantuan?
 5. Halaman toko: tab Produk/Ulasan/Info sudah pas?
+
+---
+
+## 12. Hasil D3
+
+Delapan frame terakhir, tersebar di dua halaman:
+
+| Layar | Berkas | Halaman |
+| :--- | :--- | :--- |
+| B8 Pesanan | `b8-pesanan.png` | `01 · Pembeli` |
+| B9 Lacak paket | `b9-lacak-paket.png` | `01 · Pembeli` |
+| B10 Komplain | `b10-komplain.png` | `01 · Pembeli` |
+| N1 Inbox | `n1-inbox.png` | `01 · Pembeli` |
+| S1 Nomor HP | `s1-buka-toko-nomor-hp.png` | `02 · Penjual` |
+| S2 OTP | `s2-buka-toko-otp.png` | `02 · Penjual` |
+| S3 Nama toko | `s3-buka-toko-nama.png` | `02 · Penjual` |
+| S4 Produk pertama | `s4-produk-pertama.png` | `02 · Penjual` |
+
+**Keputusan yang diambil**
+
+- Kartu pesanan selalu menjawab "uang saya di mana?": menunggu bayar, ditahan aman,
+  atau sudah diteruskan ke penjual.
+- Lacak paket memakai timeline lima langkah dengan status aktif yang jelas.
+- Komplain menampilkan "Dana ditahan sampai komplain selesai" dan pilihan solusi.
+- Onboarding hanya butuh nomor HP, OTP, nama toko, dan produk pertama. Tidak ada
+  email, KTP, atau kata "verifikasi identitas".
+- Inbox bergaya WhatsApp; pesan OTP menampilkan kode `123456` (mode demo).
+- Semua ekspor 2×.
+
+**Yang perlu diputuskan saat review D3**
+
+1. Kartu pesanan: tiga status yang ditampilkan sudah mewakili kebutuhan?
+2. Lacak paket: timeline sudah cukup, atau perlu peta/proof of delivery?
+3. Komplain: pilihan alasan dan solusi sudah masuk akal untuk Ibu Sri?
+4. Onboarding: empat langkah terasa cepat, atau ada yang bisa digabung?
+5. Inbox: apakah pesan OTP di daftar sudah cukup jelas?
+
+---
+
+## 13. Status desain
+
+Desain tahap pertama **selesai**: 9 layar inti + 6 state khusus + 4 frame onboarding.
+Berikutnya masuk Sprint 3 (fondasi kode). Dashboard penjual, dompet, dan admin
+didesain menjelang Sprint 8–10.
+
+Berkas sumber `bakul.figcraft` hanya ada di komputer pemilik (tidak di-push).
+Repositori menyimpan PNG ekspor sebagai bukti dan acuan implementasi.
 
 
