@@ -3,8 +3,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { ProductStatus, ShopStatus, UserRole } from "../src/generated/prisma/enums";
 
-config({ path: "../../.env" });
-config();
+config({ path: "../../.env", quiet: true });
+config({ quiet: true });
 
 const connectionString = process.env["DATABASE_URL"];
 

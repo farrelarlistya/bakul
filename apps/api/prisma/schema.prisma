@@ -31,6 +31,11 @@ enum ProductStatus {
   DELETED
 }
 
+enum OtpPurpose {
+  REGISTER
+  LOGIN
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   phone        String   @unique @db.VarChar(20)
@@ -42,8 +47,10 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  addresses UserAddress[]
-  shop      Shop?
+  addresses     UserAddress[]
+  shop          Shop?
+  sessions      Session[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -123,6 +130,7 @@ model Product {
   shop     Shop             @relation(fields: [shopId], references: [id], onDelete: Restrict)
   category Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   variants ProductVariant[]
+  images   ProductImage[]
 
   @@index([shopId, status])
   @@index([categoryId])
@@ -144,4 +152,61 @@ model ProductVariant {
 
   @@index([productId])
   @@map("product_variants")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  url       String   @db.Text
+  position  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+model OtpCode {
+  id         String     @id @default(uuid()) @db.Uuid
+  phone      String     @db.VarChar(20)
+  purpose    OtpPurpose
+  codeHash   String     @map("code_hash") @db.VarChar(64)
+  attempts   Int        @default(0)
+  expiresAt  DateTime   @map("expires_at")
+  consumedAt DateTime?  @map("consumed_at")
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  @@index([phone, createdAt])
+  @@map("otp_codes")
+}
+
+model Session {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  refreshTokenHash String    @unique @map("refresh_token_hash") @db.VarChar(64)
+  expiresAt        DateTime  @map("expires_at")
+  revokedAt        DateTime? @map("revoked_at")
+  lastUsedAt       DateTime? @map("last_used_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  channel   String   @default("IN_APP") @db.VarChar(20)
+  template  String   @db.VarChar(60)
+  payload   Json
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("notifications")
 }

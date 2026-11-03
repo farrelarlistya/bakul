@@ -22,6 +22,7 @@
     "db:studio": "npm run db:studio --workspace @bakul/api",
     "db:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-start.ps1",
     "db:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-stop.ps1",
+    "verify:m1": "npm run verify:m1 --workspace @bakul/api",
     "postinstall": "npm run db:generate"
   },
   "devDependencies": {
