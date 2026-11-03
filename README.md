@@ -1,10 +1,10 @@
-# Bakul
+﻿# Bakul
 
 Pasar daring untuk pedagang kecil Indonesia. Janji utamanya: **uang aman sampai
 barang diterima**. Logika transaksi dibangun seperti produksi; perpindahan uang
 dan pihak ketiga disimulasikan sepenuhnya di laptop.
 
-Repo ini sudah mencapai **M9 — aplikasi lengkap untuk demo**. Tidak ada akun
+Repo ini sudah mencapai **M9 â€” aplikasi lengkap untuk demo**. Tidak ada akun
 vendor, API key, Docker, atau layanan cloud.
 
 ## Apa yang sudah jalan
@@ -20,7 +20,7 @@ vendor, API key, Docker, atau layanan cloud.
   pembuatan 1 `payments` + N `order_invoices`.
 - Mock payment gateway: VA/QRIS, tanda tangan HMAC, webhook idempoten, dan
   kedaluwarsa yang mengembalikan stok.
-- Escrow dan ledger double-entry append-only; `npm run ledger:check` → 0 selisih.
+- Escrow dan ledger double-entry append-only; `npm run ledger:check` â†’ 0 selisih.
 - Penjual terima/tolak, SLA 48 jam, AWB mock, label PDF A6 Code128, dan timeline
   pengiriman.
 - Konfirmasi terima, auto-complete 72 jam, saldo toko, tarik saldo, approval
@@ -30,7 +30,7 @@ vendor, API key, Docker, atau layanan cloud.
 - Dashboard admin: GMV, dana ditahan, pesanan per status, moderasi toko/barang,
   antrean komplain dan pencairan.
 - Demo console: time machine, simulator pembayaran, pemeriksaan SLA, reset data.
-- Seed 12 pengguna, 5 toko, 100 produk, 30 pesanan historis, dan jurnal ledger.
+- Seed 10 pengguna (1 admin, 8 penjual satu per kategori, 1 pembeli), 8 toko, 32 produk dengan foto masing-masing. Riwayat transaksi sengaja kosong.
 
 ## Halaman
 
@@ -139,7 +139,7 @@ npm run dev
 | `npm run db:generate` | Buat ulang Prisma Client |
 | `npm run db:migrate` | Buat/terapkan migrasi pengembangan |
 | `npm run db:deploy` | Terapkan migrasi yang ada |
-| `npm run db:seed` | Seed katalog + 30 pesanan historis |
+| `npm run db:seed` | Seed katalog: 8 toko, 32 produk, tanpa transaksi |
 | `npm run db:studio` | Prisma Studio |
 | `npm run ledger:check` | Periksa invariant ledger |
 | `npm run demo:reset` | Kosongkan transaksi lalu isi ulang riwayat demo |
@@ -166,7 +166,7 @@ Hasil uji disimpan di `docs/bukti/`. Skrip verifikasi membutuhkan API hidup.
 | `docs/state-machine.md` | Semua transisi status |
 | `docs/demo.md` | Skrip demo 10 menit |
 | `docs/adr/` | Alasan keputusan teknis |
-| `docs/bukti/` | Output uji T-01…T-14 |
+| `docs/bukti/` | Output uji T-01â€¦T-14 |
 | `docs/bukti/demo-bakul.gif` | GIF ringkas 30 detik dari alur demo |
 | `docs/desain/ekspor/implementasi-m8-*.png` | Tangkapan layar implementasi 390 px |
 
@@ -199,7 +199,7 @@ docs/         PRD, desain, ADR, bukti, demo
 - Satu instance, satu PostgreSQL, tanpa Redis/queue/microservices.
 - Tanpa promo, COD, email wajib, live shopping, chat bebas, dark mode, animasi
   berat, atau multi-bahasa.
-- Pencarian mengurutkan 100 produk di memori; batas ini dicatat di ADR 0005.
+- Pencarian mengurutkan 32 produk di memori; batas ini dicatat di ADR 0005.
 - Label pengiriman dan bukti transfer adalah dokumen simulasi.
 - Ledger tidak bisa diubah/dihapus; `demo:reset` mengosongkan tabel transaksi
   secara sengaja dan hanya boleh saat `DEMO_MODE=true`.

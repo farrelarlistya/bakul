@@ -60,9 +60,9 @@ async function main(): Promise<void> {
     pendingWithdrawals: number;
   }>("/admin/metrics", { token: admin });
   assert.equal(metrics.status, 200);
-  assert.ok(metrics.body.orderCount >= 30);
-  assert.ok(metrics.body.gmv > 0);
-  assert.ok(metrics.body.escrowHeld >= 0);
+  assert.equal(metrics.body.orderCount, 0);
+  assert.equal(metrics.body.gmv, 0);
+  assert.equal(metrics.body.escrowHeld, 0);
 
   const counts = await Promise.all([
     prisma.user.count(),
@@ -71,11 +71,11 @@ async function main(): Promise<void> {
     prisma.orderInvoice.count(),
     prisma.ledgerJournal.count(),
   ]);
-  assert.equal(counts[0], 12);
-  assert.equal(counts[1], 5);
-  assert.equal(counts[2], 100);
-  assert.ok(counts[3] >= 30);
-  assert.ok(counts[4] >= 30);
+  assert.equal(counts[0], 10);
+  assert.equal(counts[1], 8);
+  assert.equal(counts[2], 32);
+  assert.equal(counts[3], 0);
+  assert.equal(counts[4], 0);
 
   const shipment = await prisma.shipment.findFirst({
     where: { shippingStatus: "DELIVERED" },
@@ -95,7 +95,7 @@ async function main(): Promise<void> {
   assert.equal(orders.status, 200);
   const notifications = await api<unknown[]>("/notifications", { token: buyer.token });
   assert.equal(notifications.status, 200);
-  assert.ok((notifications.body as unknown[]).length > 0);
+  assert.ok(Array.isArray(notifications.body));
 
   const pages = [
     "/",
@@ -128,7 +128,8 @@ async function main(): Promise<void> {
     `PASS DMO: demo console aktif (${status.body.speed}x), ${pending.body.length} tagihan menunggu, ${metrics.body.orderCount} pesanan, escrow Rp ${metrics.body.escrowHeld}.`,
   );
   console.log(
-    `PASS M8: seed 12 pengguna, 5 toko, 100 produk, ${counts[3]} pesanan, ${counts[4]} jurnal ledger; halaman lacak publik dan inbox berfungsi.`,
+    `PASS M8: seed 10 pengguna (1 admin, 8 penjual, 1 pembeli), 8 toko, 32 produk, ` +
+      `0 pesanan, 0 jurnal ledger; halaman lacak publik dan inbox berfungsi.`,
   );
 }
 

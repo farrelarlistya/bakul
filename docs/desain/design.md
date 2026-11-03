@@ -171,17 +171,23 @@ Foto yang dipakai adalah **foto asli dari Wikimedia Commons**, bukan ilustrasi.
 Tujuannya agar mockup terasa seperti etalase sungguhan: penjual memang memakai foto
 dengan latar dan kualitas yang berbeda-beda.
 
+Sejak M9 katalog demo memakai **32 foto**, satu untuk setiap produk. Semuanya
+berkas `katalog-*.jpg` di `docs/desain/gambar/`. Foto lama tetap disimpan untuk
+Beranda dan arsip desain:
+
 | Kebutuhan | Berkas | Lisensi |
 | :--- | :--- | :--- |
-| Hero | `hero-tas-anyaman.jpg` | CC0 |
-| Nastar | `produk-nastar.jpg` | CC0 |
-| Keripik | `produk-keripik.jpg` | CC BY-SA 4.0 |
-| Kopi | `produk-kopi.jpg` | CC BY 4.0 |
-| Batik | `produk-batik.jpg` | CC BY-SA 3.0 nl |
+| Hero Beranda | `hero-tas-anyaman.jpg` | CC0 |
+| Arsip: nastar | `produk-nastar.jpg` | CC0 |
+| Arsip: keripik | `produk-keripik.jpg` | CC BY-SA 4.0 |
+| Arsip: kopi | `produk-kopi.jpg` | CC BY 4.0 |
+| Arsip: batik | `produk-batik.jpg` | CC BY-SA 3.0 nl |
 
-Atribusi lengkap ada di `docs/desain/gambar/CREDITS.md`. Foto diperkecil (maksimal
-1200 px) agar berkas desain tidak terlalu besar, lalu dipotong di dalam frame.
-Pada produksi, foto diganti dengan unggahan penjual.
+Atribusi lengkap 37 berkas ada di `docs/desain/gambar/CREDITS.md`. Foto katalog
+dikumpulkan lewat `scripts/fetch-product-photos.mjs`, yang menolak lisensi di luar
+CC0, Public domain, CC BY, dan CC BY-SA. Foto diperkecil dan dipotong di dalam
+frame; seed mengubahnya menjadi WebP target ≤ 32 KB. Pada produksi, foto diganti
+dengan unggahan penjual.
 
 ---
 
@@ -596,5 +602,71 @@ BAKUL_BUKTI_DIR=docs/desain/ekspor npm run bukti:ui
   sekitar 10 detik waktu nyata. Jalankan E2E setelah server sudah hangat,
   karena kompilasi halaman di `next dev` bisa memakan waktu tersebut.
 - `npm run test:e2e` butuh PostgreSQL dan API yang hidup.
+
+---
+
+## 20. Seed katalog bersih (November 2026)
+
+Seed demo diubah supaya aplikasi dimulai dari etalase yang bersih tanpa riwayat
+transaksi. Ini memudahkan demo: setiap alur dimulai dari nol.
+
+| Aspek | Sebelum | Sesudah |
+| :--- | :--- | :--- |
+| Pengguna | 12 (1 admin, 1 operator demo, 5 penjual, 5 pembeli) | **10** (1 admin, 8 penjual, 1 pembeli) |
+| Toko | 5 | **8**, satu toko untuk satu kategori |
+| Produk | 100, foto dipakai ulang 5 berkas | **32**, masing-masing punya foto sendiri |
+| Foto | 5 berkas | **32 berkas** `katalog-*.jpg` + 5 arsip |
+| Ulasan | 200 | **64** (2 per produk, dari pembeli demo) |
+| Pesanan | 30+ | **0** |
+| Jurnal ledger | 30+ | **0** |
+| Dompet toko | ada | **0** |
+
+### 20.1 Peta akun demo
+
+| Peran | Nomor HP | Nama | Toko / fokus |
+| :--- | :--- | :--- | :--- |
+| Admin | `081200000001` | Admin Bakul | Dashboard, resolusi, pencairan, demo console |
+| Penjual | `081200000011` | Sri Rahayu | Dapur Bu Sri — Kue Kering |
+| Penjual | `081200000012` | Nah Rowiyah | Keripik Mbok Nah — Makanan Ringan |
+| Penjual | `081200000013` | Asep Hidayat | Sembako Asep Jaya — Sembako |
+| Penjual | `081200000014` | Yanto Wibowo | Kopi Lereng Tangsi — Minuman |
+| Penjual | `081200000015` | Sekar Arum | Batik Sekar Arum — Fashion |
+| Penjual | `081200000016` | Bagus Setiawan | Anyaman Nusantara — Kerajinan |
+| Penjual | `081200000017` | Lestari Ningsih | Rempah Ayu — Perawatan Diri |
+| Penjual | `081200000018` | Dian Puspita | Rumah Tangga Sejahtera — Rumah Tangga |
+| Pembeli | `081200000021` | Sri Wahyuni | Dua alamat: Rumah (Sleman), Kantor (Bandung) |
+
+Semua akun memakai kode demo `123456`.
+
+### 20.2 Daftar 32 produk
+
+| Toko | Produk |
+| :--- | :--- |
+| Dapur Bu Sri | Nastar Premium, Kastengel Keju, Putri Salju, Lidah Kucing Keju |
+| Keripik Mbok Nah | Keripik Singkong Balado, Keripik Tempe, Kerupuk Udang, Kacang Goreng Bawang |
+| Sembako Asep Jaya | Beras Organik Putih, Gula Aren, Minyak Kelapa, Telur Asin |
+| Kopi Lereng Tangsi | Kopi Robusta Bubuk, Kopi Arabika Biji, Teh Melati, Sirup Markisa |
+| Batik Sekar Arum | Kemeja Batik Tiga Negeri, Kebaya Nusantara, Selendang Batik, Kain Tenun Ikat |
+| Anyaman Nusantara | Tas Anyaman Pandan, Bakul Rotan, Keranjang Bambu, Hiasan Dinding Anyaman |
+| Rempah Ayu | Sabun Herbal, Lulur Kopi, Minyak Kelapa Wangi, Sikat Gigi Bambu |
+| Rumah Tangga Sejahtera | Tikar Pandan, Keset Sabut, Tempat Tisu, Kap Lampu Bambu |
+
+### 20.3 Beranda tanpa blok janji
+
+Tiga kartu janji ("Uang aman", "Dikirim", "Komplain") dan baris gelap
+"Uang ditahan aman sampai barang diterima" dihapus dari Beranda. Alasan: blok
+itu mengulang pesan yang sudah ada di halaman pesanan dan pembayaran, dan
+membuat Beranda lebih padat daripada yang dibutuhkan. Etalase langsung dimulai
+dari sapaan, hero, dan kategori.
+
+### 20.4 Perintah pemeliharaan
+
+| Perintah | Fungsi |
+| :--- | :--- |
+| `npm run db:seed` | Menulis ulang katalog dan **mengosongkan seluruh transaksi** |
+| `npm run demo:reset` | Mengosongkan transaksi saja; katalog tetap |
+
+`seed-history.ts` dihapus karena tidak ada lagi riwayat transaksi yang dibuat
+otomatis.
 
 

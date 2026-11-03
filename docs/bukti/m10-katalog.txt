@@ -1,0 +1,60 @@
+BUKTI SPRINT 13 (M10) — Katalog bersih
+Tanggal: 4 November 2026
+
+== Seed ==
+10 pengguna:
+  - 1 admin   : 081200000001 Admin Bakul
+  - 8 penjual : 081200000011 Sri Rahayu        (Kue Kering)
+                081200000012 Nah Rowiyah       (Makanan Ringan)
+                081200000013 Asep Hidayat      (Sembako)
+                081200000014 Yanto Wibowo      (Minuman)
+                081200000015 Sekar Arum        (Fashion)
+                081200000016 Bagus Setiawan    (Kerajinan)
+                081200000017 Lestari Ningsih   (Perawatan Diri)
+                081200000018 Dian Puspita      (Rumah Tangga)
+  - 1 pembeli : 081200000021 Sri Wahyuni
+
+8 toko, satu toko untuk satu kategori.
+32 produk (4 per toko), 77 pilihan, 8 etalase, 2 alamat, 32 foto, 64 ulasan.
+0 pesanan, 0 jurnal ledger, 0 dompet toko.
+
+Kode OTP demo untuk semua akun: 123456
+
+== Foto ==
+32 berkas katalog-*.jpg diambil dari Wikimedia Commons.
+Lisensi yang diterima: CC0, Public domain, CC BY, CC BY-SA.
+Atribusi lengkap: docs/desain/gambar/CREDITS.md (32 foto katalog + 5 foto lama).
+Turunan WebP oleh seed: 11-32 KB per berkas (target <= 32 KB).
+
+== Katalog ==
+Dapur Bu Sri (Sleman) — Kue Kering
+  Nastar Premium, Kastengel Keju, Putri Salju, Lidah Kucing Keju
+Keripik Mbok Nah (Bantul) — Makanan Ringan
+  Keripik Singkong Balado, Keripik Tempe, Kerupuk Udang, Kacang Goreng Bawang
+Sembako Asep Jaya (Bandung) — Sembako
+  Beras Organik Putih, Gula Aren, Minyak Kelapa, Telur Asin
+Kopi Lereng Tangsi (Bandung) — Minuman
+  Kopi Robusta Bubuk, Kopi Arabika Biji, Teh Melati, Sirup Markisa
+Batik Sekar Arum (Solo) — Fashion
+  Kemeja Batik Tiga Negeri, Kebaya Nusantara, Selendang Batik, Kain Tenun Ikat
+Anyaman Nusantara (Surabaya) — Kerajinan
+  Tas Anyaman Pandan, Bakul Rotan, Keranjang Bambu, Hiasan Dinding Anyaman
+Rempah Ayu (Sleman) — Perawatan Diri
+  Sabun Herbal, Lulur Kopi, Minyak Kelapa Wangi, Sikat Gigi Bambu
+Rumah Tangga Sejahtera (Semarang) — Rumah Tangga
+  Tikar Pandan, Keset Sabut, Tempat Tisu, Kap Lampu Bambu
+
+== Beranda ==
+Kartu "Uang aman", "Dikirim", dan "Komplain" dihapus.
+Baris "Uang ditahan aman sampai barang diterima" dihapus.
+
+== Verifikasi ==
+npm run build --workspace @bakul/api   : lulus
+npm run build --workspace @bakul/web   : lulus
+npm run test                           : 24 uji lulus (6 berkas)
+npm run test:e2e                       : 7 skenario lulus
+npm run audit:a11y                     : 0 pelanggaran axe-core di 20 tampilan
+
+== Perintah pemeliharaan ==
+npm run db:seed      Menulis ulang katalog dan mengosongkan seluruh transaksi.
+npm run demo:reset   Mengosongkan transaksi saja; katalog tetap.

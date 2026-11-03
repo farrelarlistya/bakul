@@ -70,6 +70,7 @@ Aturan kerja:
 | 10 | Pusat Resolusi & admin / M7 | **Selesai** | `m7-selesai` |
 | 11 | Poles, bukti, demo / M8 | **Selesai** | `m8-selesai` |
 | 12 | Poles UI/UX & Interaction Design / M9 | **Selesai** | `m9-selesai` |
+| 13 | Katalog bersih: 8 penjual, 32 foto, tanpa transaksi | **Selesai** | `m10-selesai` |
 
 ---
 
@@ -539,6 +540,46 @@ tidak ada, hierarki tipografi dan spasi yang tidak seragam, lebar konten desktop
 
 ---
 
+## Sprint 13 — Katalog bersih (M10)
+
+**Status:** selesai · **Tag:** `m10-selesai`
+
+**Tujuan:** demo dimulai dari etalase bersih. Setiap toko punya satu kategori,
+setiap produk punya foto sendiri, dan tidak ada riwayat transaksi yang
+membingungkan saat memulai demo.
+
+| Aspek | Perubahan |
+| :--- | :--- |
+| Pengguna | 10 akun: 1 admin, 8 penjual (satu per kategori), 1 pembeli |
+| Toko | 8 toko, masing-masing fokus pada satu kategori |
+| Produk | 32 produk, 4 per toko, dengan foto sendiri |
+| Foto | 32 foto `katalog-*.jpg` dari Wikimedia Commons, lisensi jelas, tercatat di `CREDITS.md` |
+| Transaksi | 0 pesanan, 0 pembayaran, 0 jurnal, 0 dompet |
+| Beranda | Tiga kartu janji dan baris "Uang ditahan aman sampai barang diterima" dihapus |
+
+**Pekerjaan**
+
+- `scripts/fetch-product-photos.mjs` — pengumpul foto dari Commons yang menolak
+  lisensi di luar CC0, Public domain, CC BY, dan CC BY-SA.
+- `scripts/write-credits.mjs` — menulis ulang `CREDITS.md` dari `sumber.json`.
+- `prisma/seed.ts` ditulis ulang: 8 toko x 4 produk, pembersihan transaksi di
+  awal seed, dan pembersihan baris lama dari struktur sebelumnya.
+- `prisma/seed-history.ts` dihapus. `demo:reset` sekarang hanya mengosongkan,
+  tidak lagi mengisi riwayat.
+- `apps/web/app/page.tsx`: blok janji dihapus.
+
+**Definisi selesai**
+
+- [x] 32 foto dengan lisensi jelas dan tercatat di `CREDITS.md`.
+- [x] Setiap foto cocok dengan nama produknya.
+- [x] 10 akun: 1 admin, 8 penjual satu per kategori, 1 pembeli.
+- [x] 0 transaksi setelah seed.
+- [x] Kartu janji dan baris "uang ditahan" hilang dari Beranda.
+- [x] `npm run build`, `npm run test`, `npm run test:e2e` lulus.
+- [x] Papan status diperbarui, commit, push, tag.
+
+---
+
 ## Lampiran A — Ritme commit, push, dan tag
 
 Setiap checkpoint:
@@ -622,3 +663,4 @@ git push
 | 3 Nov 2026 | Sprint 10 selesai: komplain, mediasi, refund sebagian, dashboard admin, moderasi; tag `m7-selesai` |
 | 3 Nov 2026 | Sprint 11 selesai: seed 30 pesanan, demo console, Playwright E2E, docs arsitektur/state machine, bukti; tag `m8-selesai` |
 | 3 Nov 2026 | Sprint 12 selesai: audit 20 kelemahan UI/UX, token turunan, 14 komponen interaksi baru, dialog in-app menggantikan `window.confirm`/`window.prompt`, validasi inline, empty state, tombol lengket; tag `m9-selesai` |
+| 4 Nov 2026 | Sprint 13 selesai: 32 foto katalog dari Wikimedia Commons, 8 toko satu kategori, 10 akun demo, seed tanpa riwayat transaksi, blok janji di Beranda dihapus; tag `m10-selesai` |

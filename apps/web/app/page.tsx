@@ -76,13 +76,6 @@ export default async function Page() {
     <main className="min-h-screen bg-putih pb-20 md:pb-0">
       <AppHeader />
 
-      <div className="bg-tinta text-mint">
-        <div className="mx-auto flex max-w-[1200px] items-center gap-2 px-4 py-2">
-          <Icon name="shield" size={18} className="shrink-0" />
-          <p className="text-base leading-6">Uang ditahan aman sampai barang diterima</p>
-        </div>
-      </div>
-
       <div className="mx-auto max-w-[1200px] space-y-8 px-4 py-5">
         <section aria-labelledby="sapaan">
           <div className="flex items-end justify-between gap-3">
@@ -164,44 +157,6 @@ export default async function Page() {
               />
             </div>
           </div>
-        </section>
-
-        <section aria-label="Janji Bakul" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {[
-            {
-              icon: "shield" as const,
-              title: "Uang aman",
-              note: "Sampai barang tiba",
-              tone: "bg-mint-muda text-teal-aksi",
-            },
-            {
-              icon: "truck" as const,
-              title: "Dikirim",
-              note: "Resi bisa dilacak",
-              tone: "bg-krem text-perhatian-tua",
-            },
-            {
-              icon: "chat" as const,
-              title: "Komplain",
-              note: "Admin bantu",
-              tone: "bg-krem text-perhatian-tua",
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="flex min-h-20 items-start gap-3 rounded-kartu border border-garis bg-putih p-3"
-            >
-              <span
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-tombol ${item.tone}`}
-              >
-                <Icon name={item.icon} size={22} />
-              </span>
-              <div>
-                <p className="text-base font-semibold text-tinta">{item.title}</p>
-                <p className="mt-0.5 text-base leading-5 text-tinta-lembut">{item.note}</p>
-              </div>
-            </div>
-          ))}
         </section>
 
         <section id="kategori" aria-labelledby="kategori-title" className="scroll-mt-24">
