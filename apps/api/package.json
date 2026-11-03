@@ -1,0 +1,40 @@
+{
+  "name": "@bakul/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API Bakul: NestJS, Prisma, PostgreSQL.",
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names tsc,api --prefix-colors yellow,blue \"tsc -p tsconfig.build.json --watch --preserveWatchOutput\" \"wait-on dist/main.js && node --watch dist/main.js\"",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@bakul/shared": "0.1.0",
+    "@nestjs/common": "12.3.2",
+    "@nestjs/config": "12.0.1",
+    "@nestjs/core": "12.3.2",
+    "@nestjs/platform-express": "12.3.2",
+    "@nestjs/swagger": "12.1.0",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "pg": "8.23.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.6",
+    "@types/node": "24.19.2",
+    "@types/pg": "8.23.1",
+    "concurrently": "10.0.6",
+    "dotenv": "18.0.9",
+    "prisma": "7.10.1",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "wait-on": "9.5.1"
+  }
+}

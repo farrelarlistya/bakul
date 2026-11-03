@@ -1,0 +1,147 @@
+// Skema fondasi M0. Tabel pesanan, pembayaran, escrow, dan ledger
+// menyusul di sprint 6–9 sesuai docs/prd/bakul-v0.2.md Bab 11.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+  OPERATOR_DEMO
+}
+
+enum ShopStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  DELETED
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  phone        String   @unique @db.VarChar(20)
+  email        String?  @unique @db.VarChar(190)
+  passwordHash String?  @map("password_hash") @db.VarChar(255)
+  name         String   @db.VarChar(120)
+  role         UserRole @default(BUYER)
+  isVerified   Boolean  @default(false) @map("is_verified")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  addresses UserAddress[]
+  shop      Shop?
+
+  @@map("users")
+}
+
+model UserAddress {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  label         String   @db.VarChar(40)
+  recipientName String   @map("recipient_name") @db.VarChar(120)
+  phone         String   @db.VarChar(20)
+  provinceId    String   @map("province_id") @db.VarChar(10)
+  cityId        String   @map("city_id") @db.VarChar(10)
+  districtId    String   @map("district_id") @db.VarChar(10)
+  postalCode    String   @map("postal_code") @db.VarChar(10)
+  fullAddress   String   @map("full_address") @db.Text
+  isDefault     Boolean  @default(false) @map("is_default")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_addresses")
+}
+
+model Shop {
+  id                 String     @id @default(uuid()) @db.Uuid
+  ownerUserId        String     @unique @map("owner_user_id") @db.Uuid
+  name               String     @db.VarChar(120)
+  slug               String     @unique @db.VarChar(140)
+  description        String?    @db.Text
+  status             ShopStatus @default(ACTIVE)
+  cityId             String     @map("city_id") @db.VarChar(10)
+  cityName           String     @map("city_name") @db.VarChar(80)
+  bankName           String?    @map("bank_name") @db.VarChar(60)
+  bankAccountNumber  String?    @map("bank_account_number") @db.VarChar(40)
+  bankAccountHolder  String?    @map("bank_account_holder") @db.VarChar(120)
+  supportedCouriers  String[]   @default([]) @map("supported_couriers")
+  createdAt          DateTime   @default(now()) @map("created_at")
+  updatedAt          DateTime   @updatedAt @map("updated_at")
+
+  owner    User      @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  products Product[]
+
+  @@index([cityId])
+  @@index([status])
+  @@map("shops")
+}
+
+model Category {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(80)
+  slug      String   @unique @db.VarChar(100)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String        @id @default(uuid()) @db.Uuid
+  shopId      String        @map("shop_id") @db.Uuid
+  categoryId  String        @map("category_id") @db.Uuid
+  name        String        @db.VarChar(140)
+  slug        String        @unique @db.VarChar(180)
+  description String        @db.Text
+  weightGram  Int           @map("weight_gram")
+  status      ProductStatus @default(DRAFT)
+  avgRating   Decimal       @default(0) @map("avg_rating") @db.Decimal(3, 2)
+  soldCount   Int           @default(0) @map("sold_count")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  shop     Shop             @relation(fields: [shopId], references: [id], onDelete: Restrict)
+  category Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  variants ProductVariant[]
+
+  @@index([shopId, status])
+  @@index([categoryId])
+  @@map("products")
+}
+
+model ProductVariant {
+  id             String   @id @default(uuid()) @db.Uuid
+  productId      String   @map("product_id") @db.Uuid
+  sku            String   @unique @db.VarChar(60)
+  name           String   @db.VarChar(80)
+  price          Int
+  stockAvailable Int      @default(0) @map("stock_available")
+  stockReserved  Int      @default(0) @map("stock_reserved")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_variants")
+}
