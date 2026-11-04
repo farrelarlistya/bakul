@@ -44,7 +44,6 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
   const menuRef = useRef<HTMLDivElement>(null);
   const accountButtonRef = useRef<HTMLButtonElement>(null);
   const roleActiveRef = useRef<HTMLAnchorElement>(null);
-  const isHome = pathname === "/";
   const isCari =
     pathname.startsWith("/cari") ||
     pathname.startsWith("/p/") ||
@@ -147,21 +146,6 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
         >
           bakul
         </Link>
-
-        {!roleNav && !isHome ? (
-          <nav
-            className="ml-1 hidden items-center gap-0.5 md:flex"
-            aria-label="Navigasi utama"
-          >
-            <Link
-              href="/cari"
-              aria-current={isCari ? "page" : undefined}
-              className="inline-flex min-h-11 items-center rounded-tombol px-3 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-abu-kartu aria-[current=page]:text-teal-aksi"
-            >
-              Cari
-            </Link>
-          </nav>
-        ) : null}
 
         <form
           action="/cari"
