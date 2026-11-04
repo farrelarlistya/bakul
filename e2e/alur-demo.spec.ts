@@ -114,3 +114,26 @@ test("admin: dashboard, komplain, pencairan, dan demo console", async ({ page })
   await expect(page.getByRole("heading", { name: "Demo console" })).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("pembeli baru: daftar tanpa diminta membuat toko", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  await page.goto("/masuk");
+  await page.getByRole("button", { name: "Daftar", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Daftar ke Bakul" })).toBeVisible();
+
+  await page.locator("#phone").fill("081299990077");
+  await page.getByRole("button", { name: "Kirim kode" }).click();
+  const boxes = page.locator('input[aria-label^="Angka"]');
+  await boxes.first().waitFor();
+  for (let index = 0; index < 6; index += 1) {
+    await boxes.nth(index).fill("123456"[index] ?? "");
+  }
+  await page.getByRole("button", { name: "Buat akun", exact: true }).click();
+
+  await expect(page).toHaveURL(/\/akun$/);
+  await expect(page.getByRole("heading", { name: "Akun", exact: true })).toBeVisible();
+  await expect(page.getByText("Belum punya toko", { exact: false })).toBeVisible();
+  expect(errors).toEqual([]);
+});

@@ -62,6 +62,10 @@ vendor, API key, Docker, atau layanan cloud.
 
 Kode OTP selalu **123456** saat `DEMO_MODE=true`.
 
+Pembeli baru bisa mendaftar lewat `/masuk` → **Daftar**. Registrasi ini hanya
+membuat akun pembeli tanpa toko; untuk berjualan, buka `/jualan` setelah punya
+akun.
+
 | Peran | Nomor HP |
 | :--- | :--- |
 | Admin | `081200000001` |
@@ -191,8 +195,9 @@ Catatan:
 - Fonnte adalah gateway WhatsApp, bukan WhatsApp Business API resmi. Kualitas
   dan kuota pengiriman mengikuti layanan mereka.
 - Untuk kembali ke mode demo: `OTP_DELIVERY=demo` dan `NOTIFIER_PROVIDER=mock`.
-- Halaman Masuk hanya untuk nomor yang sudah terdaftar. Nomor baru harus lewat
-  alur "Buka toko" di `/jualan`.
+- Halaman Masuk hanya untuk nomor yang sudah terdaftar. Nomor baru bisa mendaftar
+  lewat tombol **Daftar** di `/masuk`; untuk berjualan, buka `/jualan` setelah
+  punya akun.
 
 ## Perintah penting
 

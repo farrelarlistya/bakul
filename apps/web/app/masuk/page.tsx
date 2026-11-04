@@ -2,15 +2,20 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { PhoneOtpForm } from "@/components/phone-otp-form";
 import { AppHeader } from "@/components/app-header";
 import { Icon } from "@/components/icon";
 import { cardClass, primaryButtonClass, secondaryButtonClass } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
 
+type MasukMode = "login" | "register";
+
 export default function MasukPage() {
   const router = useRouter();
   const { status, user, login } = useAuth();
+  const [mode, setMode] = useState<MasukMode>("login");
+  const isRegister = mode === "register";
 
   return (
     <main className="min-h-screen bg-krem">
@@ -20,10 +25,16 @@ export default function MasukPage() {
           <span className="inline-flex h-12 w-12 items-center justify-center rounded-pil bg-mint-muda text-teal-aksi">
             <Icon name="phone" size={24} />
           </span>
-          <p className="mt-4 text-base font-semibold text-teal-aksi">Selamat datang kembali</p>
-          <h1 className="mt-2 font-display text-3xl font-bold text-tinta">Masuk ke Bakul</h1>
+          <p className="mt-4 text-base font-semibold text-teal-aksi">
+            {isRegister ? "Akun baru" : "Selamat datang kembali"}
+          </p>
+          <h1 className="mt-2 font-display text-3xl font-bold text-tinta">
+            {isRegister ? "Daftar ke Bakul" : "Masuk ke Bakul"}
+          </h1>
           <p className="mt-2 text-base text-tinta-lembut">
-            Cukup nomor HP dan kode 6 angka. Tanpa email, tanpa password.
+            {isRegister
+              ? "Cukup nomor HP dan kode 6 angka. Akun pembeli, tanpa email dan tanpa password."
+              : "Cukup nomor HP dan kode 6 angka. Tanpa email, tanpa password."}
           </p>
 
           {status === "memuat" ? (
@@ -43,18 +54,37 @@ export default function MasukPage() {
           ) : (
             <div className="mt-6">
               <PhoneOtpForm
-                mode="login"
+                key={mode}
+                mode={mode}
                 onSuccess={(session) => {
                   login(session);
-                  router.push("/");
+                  router.push(isRegister ? "/akun" : "/");
                 }}
               />
+
+              <p className="mt-4 text-center text-base text-tinta-lembut">
+                {isRegister ? "Sudah punya akun? " : "Belum punya akun? "}
+                <button
+                  type="button"
+                  onClick={() => setMode(isRegister ? "login" : "register")}
+                  className="inline-flex min-h-11 items-center font-semibold text-teal-aksi underline"
+                >
+                  {isRegister ? "Masuk" : "Daftar"}
+                </button>
+              </p>
+
+              {isRegister ? (
+                <p className="mt-4 rounded-kartu border border-garis bg-mint-muda p-3 text-base text-tinta-lembut">
+                  Daftar di sini membuat akun pembeli. Tidak ada kewajiban membuka
+                  toko; kamu bisa berjualan kapan saja lewat Buka toko.
+                </p>
+              ) : null}
             </div>
           )}
         </div>
 
         <p className="mt-6 text-center text-base text-tinta-lembut">
-          Belum punya toko?{" "}
+          Mau berjualan?{" "}
           <Link href="/jualan" className="font-semibold text-teal-aksi underline">
             Buka toko gratis
           </Link>

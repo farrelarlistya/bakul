@@ -275,7 +275,7 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
                 Memeriksa…
               </>
             ) : (
-              "Masuk"
+              mode === "register" ? "Buat akun" : "Masuk"
             )}
           </button>
 

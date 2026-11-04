@@ -86,7 +86,7 @@ export class AuthService {
     if (purpose === "LOGIN" && !user) {
       throw new NotFoundException({
         code: "PHONE_NOT_FOUND",
-        message: "Nomor ini belum terdaftar. Buka toko dulu, ya.",
+        message: "Nomor ini belum terdaftar. Daftar dulu, ya.",
       });
     }
 
@@ -231,7 +231,7 @@ export class AuthService {
       if (otp.purpose !== "REGISTER") {
         throw new NotFoundException({
           code: "PHONE_NOT_FOUND",
-          message: "Nomor ini belum terdaftar. Buka toko dulu, ya.",
+          message: "Nomor ini belum terdaftar. Daftar dulu, ya.",
         });
       }
 
