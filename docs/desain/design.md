@@ -678,7 +678,13 @@ Beranda dirapikan supaya tidak ada tautan yang hanya menggulir halaman sendiri.
 | Navbar kiri: **Kategori** dan **Lagi laris** (anchor ke bawah halaman) | Dihapus. Keduanya tautan semu: halaman yang sama, hanya bergulir |
 | **Pesanan** sebagai teks di navbar kiri | Pindah ke deret ikon kanan kolom cari, dengan ikon struk dan `aria-current` |
 | **Kategori**: "Lihat semua" → `/cari` | Dihapus. Tautan itu berakhir di tempat yang sama dengan "Lihat semua" milik Lagi laris |
+| Tautan teks **Cari** di kiri navbar, tepat di kanan logo | Dihapus. Kolom pencarian di sebelahnya sudah menjadi jalan masuk yang sama |
 | **Lagi laris**: 4 barang (1 baris di desktop) | **16 barang**: 4 baris di desktop, 8 baris di mobile |
+
+Setelah perubahan, navbar kiri hanya berisi logo di semua halaman pembeli. Tidak
+ada lagi tautan teks di antara logo dan kolom pencarian; satu-satunya jalan ke
+halaman Cari adalah kolom pencarian itu sendiri (desktop) dan ikon kaca pembesar
+(mobile).
 
 Urutan ikon kanan setelah perubahan: cari (khusus mobile), pesanan, inbox,
 keranjang, lalu menu akun. Di mobile ikon pesanan disembunyikan karena
