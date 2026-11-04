@@ -20,7 +20,11 @@ test("beranda: app bar ikon, kategori, produk, dan bottom nav", async ({ page })
   page.on("pageerror", (error) => errors.push(error.message));
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Halo, Sobat Bakul" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "Belanja dari tetangga, sampai ke rumah.",
+    }),
+  ).toBeVisible();
   await expect(page).toHaveTitle("Beranda · Bakul");
   const header = page.locator("header");
   await expect(header.getByRole("link", { name: "Cari barang" })).toBeVisible();
@@ -34,18 +38,19 @@ test("beranda: app bar ikon, kategori, produk, dan bottom nav", async ({ page })
   await expect(page.getByRole("link", { name: "Lewati ke konten" })).toBeVisible();
 
   expect(await page.locator('a[href^="/cari?category="]').count()).toBe(8);
-  expect(await page.locator('a[href^="/p/"]').count()).toBe(16);
+  expect(await page.locator('a[href^="/p/"]').count()).toBe(17);
 
   const layout = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
     innerWidth: window.innerWidth,
-    heroLoaded: [...document.images].some(
-      (image) => image.src.includes("hero.webp") && image.naturalWidth > 0,
+    fotoUtamaLoaded: [...document.images].some(
+      (image) =>
+        image.getAttribute("loading") === "eager" && image.naturalWidth > 0,
     ),
   }));
 
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.innerWidth);
-  expect(layout.heroLoaded).toBe(true);
+  expect(layout.fotoUtamaLoaded).toBe(true);
   expect(errors).toEqual([]);
 });
 

@@ -17,7 +17,10 @@ const ROLE_LABEL: Record<UserRole, string> = {
 };
 
 const iconLinkClass =
-  "relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-tombol text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda active:scale-95";
+  "relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-pil text-putih transition duration-cepat ease-standar hover:bg-putih/10 aria-[current=page]:bg-putih/15 aria-[current=page]:text-kuning active:scale-95 focus-visible:outline-putih";
+
+const navLinkClass =
+  "inline-flex min-h-11 shrink-0 items-center rounded-pil px-3 text-base font-semibold text-putih/90 transition duration-cepat ease-standar hover:bg-putih/10 hover:text-putih aria-[current=page]:bg-putih/15 aria-[current=page]:text-kuning focus-visible:outline-putih";
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) {
@@ -27,7 +30,7 @@ function CountBadge({ count }: { count: number }) {
   return (
     <span
       aria-hidden="true"
-      className="absolute -right-0.5 -top-0.5 inline-flex min-h-6 min-w-6 items-center justify-center rounded-pil bg-perhatian px-1 text-base font-bold leading-none text-putih"
+      className="absolute -right-0.5 -top-0.5 inline-flex min-h-6 min-w-6 items-center justify-center rounded-pil bg-kuning px-1 text-base font-bold leading-none text-tinta"
     >
       {count > 99 ? "99+" : count}
     </span>
@@ -138,11 +141,11 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
     "flex min-h-11 w-full items-center gap-3 rounded-tombol px-3 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-abu-kartu";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-garis bg-putih">
-      <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-1 px-4">
+    <header className="sticky top-0 z-40 border-b border-hutan-tua bg-hutan">
+      <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-1 px-4 md:h-[72px]">
         <Link
           href="/"
-          className="mr-1 inline-flex min-h-11 shrink-0 items-center font-display text-2xl font-bold text-tinta transition duration-cepat ease-standar hover:text-teal-aksi"
+          className="mr-1 inline-flex min-h-11 shrink-0 items-center font-display text-2xl font-bold text-putih transition duration-cepat ease-standar hover:text-kuning focus-visible:outline-putih md:text-[26px]"
         >
           bakul
         </Link>
@@ -151,7 +154,7 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
           action="/cari"
           method="get"
           role="search"
-          className="ml-3 hidden min-h-11 flex-1 items-center gap-2 rounded-tombol border border-garis bg-abu-kartu px-3 transition duration-cepat ease-standar hover:border-garis-kuat focus-within:border-teal-aksi focus-within:bg-putih md:flex"
+          className="ml-2 hidden min-h-12 flex-1 items-center gap-1 rounded-pil bg-putih p-0.5 pl-4 md:flex md:max-w-[560px]"
         >
           <Icon
             name="search"
@@ -170,6 +173,12 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
             placeholder="Cari nastar, kopi, batik..."
             className="min-h-11 w-full bg-transparent text-base text-tinta outline-none placeholder:text-tinta-lembut"
           />
+          <button
+            type="submit"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-pil bg-kuning px-4 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:bg-kuning-tua active:scale-95"
+          >
+            Cari
+          </button>
         </form>
 
         <div className="ml-auto flex items-center gap-0.5">
@@ -184,7 +193,7 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
           <Link
             href="/pesanan"
             aria-current={isPesanan ? "page" : undefined}
-            className={`${iconLinkClass} hidden md:inline-flex`}
+            className={`${iconLinkClass} max-md:hidden`}
             aria-label="Pesanan"
           >
             <Icon name="receipt" size={22} />
@@ -220,13 +229,13 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
                 aria-label={`Menu akun ${user.name}`}
                 aria-expanded={menuOpen}
                 onClick={() => setMenuOpen((value) => !value)}
-                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-pil bg-krem font-display text-base font-bold text-teal-aksi transition duration-cepat ease-standar hover:bg-mint-muda active:scale-95"
+                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-pil bg-kuning font-display text-base font-bold text-tinta transition duration-cepat ease-standar hover:bg-kuning-tua active:scale-95 focus-visible:outline-putih"
               >
                 {user.name.slice(0, 1).toUpperCase()}
               </button>
 
               {menuOpen ? (
-                <div className="animate-muncul absolute right-0 top-[calc(100%+0.5rem)] z-50 w-64 rounded-kartu border border-garis bg-putih p-2">
+                <div className="animate-muncul absolute right-0 top-[calc(100%+0.5rem)] z-50 w-64 rounded-kartu-besar border border-garis-kuat bg-putih p-2">
                   <div className="px-3 py-2">
                     <p className="text-base font-semibold text-tinta">{user.name}</p>
                     <p className="text-base text-tinta-lembut">
@@ -275,7 +284,7 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
           ) : (
             <Link
               href="/masuk"
-              className="ml-0.5 inline-flex min-h-11 shrink-0 items-center rounded-tombol bg-teal-aksi px-3 text-base font-semibold text-putih transition duration-sedang ease-standar hover:bg-teal-tua active:scale-[0.98]"
+              className="ml-0.5 inline-flex min-h-11 shrink-0 items-center rounded-pil bg-kuning px-4 text-base font-semibold text-tinta transition duration-sedang ease-standar hover:bg-kuning-tua active:scale-[0.98] focus-visible:outline-putih"
             >
               Masuk
             </Link>
@@ -283,8 +292,47 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
         </div>
       </div>
 
+      {!roleNav ? (
+        <div className="hidden border-t border-putih/10 bg-hutan-tua md:block">
+          <nav
+            aria-label="Jelajahi katalog"
+            className="mx-auto flex max-w-[1200px] items-center gap-1 px-4 py-1"
+          >
+            <Link
+              href="/cari"
+              aria-current={isCari ? "page" : undefined}
+              className={navLinkClass}
+            >
+              Semua barang
+            </Link>
+            <Link href="/cari?sort=terlaris" className={navLinkClass}>
+              Terlaris
+            </Link>
+            <Link href="/cari?sort=harga-asc" className={navLinkClass}>
+              Termurah
+            </Link>
+            <Link
+              href="/jualan"
+              aria-current={
+                pathname.startsWith("/jualan") ? "page" : undefined
+              }
+              className={navLinkClass}
+            >
+              Buka toko
+            </Link>
+            <Link
+              href="/lacak"
+              aria-current={isPesanan ? "page" : undefined}
+              className={navLinkClass}
+            >
+              Lacak pesanan
+            </Link>
+          </nav>
+        </div>
+      ) : null}
+
       {roleNav ? (
-        <div className="border-t border-garis bg-krem-terang">
+        <div className="border-t border-putih/10 bg-hutan-tua">
           <nav
             aria-label="Navigasi peran"
             className="mx-auto flex max-w-[1200px] gap-1 overflow-x-auto px-4 py-1"
@@ -297,10 +345,10 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
                   ref={active ? roleActiveRef : undefined}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`inline-flex min-h-11 shrink-0 items-center rounded-tombol px-3 text-base font-semibold transition duration-cepat ease-standar ${
+                  className={`inline-flex min-h-11 shrink-0 items-center rounded-pil px-3 text-base font-semibold transition duration-cepat ease-standar focus-visible:outline-putih ${
                     active
-                      ? "bg-mint-muda text-teal-aksi"
-                      : "text-tinta hover:bg-abu-kartu"
+                      ? "bg-putih text-hutan"
+                      : "text-putih/90 hover:bg-putih/10 hover:text-putih"
                   }`}
                 >
                   {item.label}

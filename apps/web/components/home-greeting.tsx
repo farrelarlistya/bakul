@@ -2,17 +2,10 @@
 
 import { useAuth } from "@/lib/auth";
 
-export function HomeGreeting() {
+export function HomeGreeting({ className = "" }: { className?: string }) {
   const { status, user } = useAuth();
   const name =
     status === "masuk" && user ? user.name.split(" ")[0] : "Sobat Bakul";
 
-  return (
-    <h1
-      id="sapaan"
-      className="mt-1 font-display text-2xl font-bold leading-8 text-tinta"
-    >
-      Halo, {name}
-    </h1>
-  );
+  return <p className={className}>Halo, {name}</p>;
 }

@@ -31,7 +31,11 @@ test("bukti tangkapan layar polish UI/UX", async ({ page }) => {
   // 1. Beranda pembeli (390 px)
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await page.getByRole("heading", { name: "Halo, Sobat Bakul" }).waitFor();
+  await page
+    .getByRole("heading", {
+      name: "Belanja dari tetangga, sampai ke rumah.",
+    })
+    .waitFor();
   await page.waitForTimeout(600);
   await page.screenshot({ path: `${OUT}/polish-01-beranda-mobile.png`, fullPage: true });
 

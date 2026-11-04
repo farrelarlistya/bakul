@@ -20,12 +20,26 @@
   --color-bahaya: #b42318;
   --color-bahaya-muda: #fbeae8;
 
+  /* Palet Beranda 2026, mengikuti referensiRedesign.webp. */
+  --color-hutan: #1f5c4a;
+  --color-hutan-tua: #17473a;
+  --color-kuning: #f4d24b;
+  --color-kuning-tua: #e6be2f;
+  --color-krem-halaman: #f7f4ec;
+  --color-lavender: #e9e5fb;
+  --color-mint-pastel: #e3f2e5;
+  --color-kuning-pastel: #faf3c8;
+  --color-biru-pastel: #dceff6;
+  --color-garis-hangat: #e7e0d2;
+
   --font-display: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   --radius-tombol: 8px;
   --radius-kartu: 12px;
   --radius-hero: 16px;
+  --radius-kartu-besar: 18px;
+  --radius-panel: 24px;
   --radius-pil: 999px;
 
   /* Gerak minimal: hanya warna, opacity, dan transform. Tanpa shadow, tanpa gradien. */

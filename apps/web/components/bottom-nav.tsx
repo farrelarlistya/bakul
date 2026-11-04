@@ -60,7 +60,7 @@ export function BottomNav() {
               >
                 <span
                   className={`relative flex h-8 w-12 items-center justify-center rounded-[10px] transition duration-cepat ease-standar ${
-                    active ? "bg-mint-muda text-teal-aksi" : "text-tinta-lembut"
+                    active ? "bg-kuning-pastel text-hutan" : "text-tinta-lembut"
                   }`}
                 >
                   <Icon name={item.icon} size={22} />
@@ -75,7 +75,7 @@ export function BottomNav() {
                 </span>
                 <span
                   className={`text-base leading-5 ${
-                    active ? "font-semibold text-teal-aksi" : "text-tinta-lembut"
+                    active ? "font-semibold text-hutan" : "text-tinta-lembut"
                   }`}
                 >
                   {item.label}

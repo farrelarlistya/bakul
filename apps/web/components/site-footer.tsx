@@ -1,16 +1,16 @@
 import Link from "next/link";
 
 const linkClass =
-  "inline-flex min-h-11 items-center rounded-tombol px-2 text-base text-mint transition duration-cepat ease-standar hover:bg-putih/10 hover:underline";
+  "inline-flex min-h-11 items-center rounded-pil px-2 text-base text-putih/80 transition duration-cepat ease-standar hover:bg-putih/10 hover:text-putih hover:underline";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-12 border-t border-garis-kuat bg-tinta text-putih">
+    <footer className="mt-12 border-t border-putih/10 bg-hutan-tua text-putih">
       <div className="mx-auto max-w-[1200px] px-4 py-10">
         <div className="grid gap-8 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <p className="font-display text-2xl font-bold">bakul</p>
-            <p className="mt-3 max-w-sm text-base leading-6 text-mint">
+            <p className="mt-3 max-w-sm text-base leading-6 text-putih/75">
               Pasar daring untuk pedagang kecil Indonesia. Uang aman sampai barang
               diterima.
             </p>
@@ -79,7 +79,7 @@ export function SiteFooter() {
           </nav>
         </div>
 
-        <div className="mt-8 border-t border-white/20 pt-5 text-base text-mint">
+        <div className="mt-8 border-t border-white/15 pt-5 text-base text-putih/75">
           <p>Pembayaran dan pengiriman di Bakul adalah simulasi.</p>
           <p className="mt-1">Tidak ada uang nyata yang berpindah.</p>
         </div>
