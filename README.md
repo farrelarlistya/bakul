@@ -126,11 +126,45 @@ npm run dev
 - Lewat satu origin: <http://localhost:3000/api/v1/health>
 - Swagger: <http://localhost:3001/api/docs>
 
+## 5. Buka dari perangkat lain
+
+Cara tercepat: **Cloudflare Quick Tunnel**. Tidak perlu akun Cloudflare dan
+tidak perlu membuka port router. Aplikasi tetap berjalan di laptop ini.
+
+1. Nyalakan aplikasi seperti biasa di terminal pertama:
+
+   ```bash
+   npm run dev
+   ```
+
+2. Di terminal kedua, buka tunnel:
+
+   ```bash
+   npm run share
+   ```
+
+3. Tunggu baris `https://....trycloudflare.com`, lalu buka tautan itu di HP,
+   tablet, atau laptop lain.
+
+Yang perlu diketahui:
+
+- Tautan **publik**: siapa pun yang memegangnya bisa membuka Bakul, termasuk
+  `/dev` dan akun admin demo. Bagikan hanya selama demo, lalu tutup dengan
+  `Ctrl+C`.
+- Tautan **berganti** setiap kali `npm run share` dijalankan. Untuk tautan tetap,
+  pakai named tunnel Cloudflare dengan domain sendiri (perlu akun Cloudflare).
+- Laptop harus tetap menyala dan terhubung internet; tunnel hanya meneruskan
+  lalu lintas ke `http://127.0.0.1:3000`.
+- `cloudflared` diunduh otomatis ke `%LOCALAPPDATA%\bakul` saat pertama dipakai.
+- Tidak ada deploy ke Cloudflare Pages: API NestJS dan PostgreSQL tetap lokal,
+  sesuai ADR 0002 dan ADR 0008.
+
 ## Perintah penting
 
 | Perintah | Fungsi |
 | :--- | :--- |
 | `npm run dev` | Web :3000 + API :3001 |
+| `npm run share` | Buka tautan publik sementara lewat Cloudflare Quick Tunnel |
 | `npm run build` | Build shared, API, web |
 | `npm test` | Unit test shared |
 | `npm run test:e2e` | Playwright alur pembeli/penjual/admin + audit aksesibilitas |

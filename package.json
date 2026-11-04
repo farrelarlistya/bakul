@@ -13,6 +13,7 @@
   ],
   "scripts": {
     "dev": "npm run build --workspace @bakul/shared && concurrently --kill-others-on-fail --names api,web --prefix-colors blue,green \"npm run dev --workspace @bakul/api\" \"npm run dev --workspace @bakul/web\"",
+    "share": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/share.ps1",
     "build": "npm run build --workspace @bakul/shared && npm run build --workspace @bakul/api && npm run build --workspace @bakul/web",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "playwright test",
