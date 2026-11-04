@@ -8,6 +8,7 @@ import { AppHeader } from "@/components/app-header";
 import { BottomNav } from "@/components/bottom-nav";
 import { HomeGreeting } from "@/components/home-greeting";
 import { HomeProductCard } from "@/components/home-product-card";
+import { HomeShopCard, type HomeShop } from "@/components/home-shop-card";
 import { Icon, categoryIcon } from "@/components/icon";
 import { SiteFooter } from "@/components/site-footer";
 import { Skeleton, SkeletonGrid } from "@/components/skeleton";
@@ -46,13 +47,44 @@ const sortLinks = [
 ];
 
 export default async function Page() {
-  const [categories, products] = await Promise.all([
+  const [categories, products, newest] = await Promise.all([
     getJson<CategorySummary[]>("/api/v1/categories"),
     getJson<CatalogPage>("/api/v1/products?sort=terlaris&limit=16"),
+    getJson<CatalogPage>("/api/v1/products?sort=terbaru&limit=8"),
   ]);
 
   const featured = products?.products[0] ?? null;
   const orbs = products?.products.slice(1, 4) ?? [];
+
+  const bestIds = new Set((products?.products ?? []).map((product) => product.id));
+  const freshProducts = (newest?.products ?? []).filter(
+    (product) => !bestIds.has(product.id),
+  );
+  const newArrivals = freshProducts.slice(0, 4);
+
+  const shopSource = [...(products?.products ?? []), ...(newest?.products ?? [])];
+  const shops: HomeShop[] = [];
+  const seenShops = new Set<string>();
+
+  for (const product of shopSource) {
+    if (seenShops.has(product.shopSlug)) {
+      continue;
+    }
+
+    seenShops.add(product.shopSlug);
+    shops.push({
+      slug: product.shopSlug,
+      name: product.shopName,
+      city: product.city,
+      imageUrl: product.imageUrl,
+    });
+
+    if (shops.length === 4) {
+      break;
+    }
+  }
+
+  const cities = [...new Set(shopSource.map((product) => product.city))].slice(0, 6);
 
   return (
     <main className="min-h-screen bg-krem-halaman pb-20 md:pb-0">
@@ -307,6 +339,73 @@ export default async function Page() {
         )}
       </section>
 
+      {shops.length > 0 ? (
+        <section
+          aria-labelledby="toko-title"
+          className="mt-8 bg-mint-pastel md:mt-12"
+        >
+          <div className="mx-auto max-w-[1200px] px-4 py-9 md:py-12">
+            <div>
+              <p className="text-base font-semibold text-hutan">Kenalan dulu</p>
+              <h2
+                id="toko-title"
+                className="mt-1 font-display text-2xl font-bold text-tinta md:text-3xl"
+              >
+                Toko pilihan
+              </h2>
+              <p className="mt-2 max-w-xl text-base leading-6 text-tinta/80">
+                Kenali pedagang di balik barang yang kamu lihat.
+              </p>
+            </div>
+
+            <ul className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {shops.map((shop) => (
+                <li key={shop.slug}>
+                  <HomeShopCard shop={shop} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
+
+      {newArrivals.length > 0 ? (
+        <section
+          aria-labelledby="baru-title"
+          className="mt-8 bg-krem md:mt-12"
+        >
+          <div className="mx-auto max-w-[1200px] px-4 py-9 md:py-12">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-base font-semibold text-hutan">Baru datang</p>
+                <h2
+                  id="baru-title"
+                  className="mt-1 font-display text-2xl font-bold text-tinta md:text-3xl"
+                >
+                  Baru di Bakul
+                </h2>
+                <p className="mt-2 max-w-xl text-base leading-6 text-tinta/80">
+                  Barang yang baru diunggah pedagang sekitar.
+                </p>
+              </div>
+              <Link
+                href="/cari?sort=terbaru"
+                className="inline-flex min-h-11 items-center gap-2 rounded-pil border border-hutan/30 px-4 text-base font-semibold text-hutan transition duration-cepat ease-standar hover:bg-mint-muda focus-visible:outline-hutan"
+              >
+                Lihat semua
+                <Icon name="chevronRight" size={18} />
+              </Link>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {newArrivals.map((product) => (
+                <HomeProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section
         id="produk"
         aria-labelledby="produk-title"
@@ -387,6 +486,51 @@ export default async function Page() {
           )}
         </div>
       </section>
+
+      {cities.length > 0 ? (
+        <section
+          aria-labelledby="kota-title"
+          className="mx-auto mt-8 max-w-[1200px] px-4 md:mt-12"
+        >
+          <div className="rounded-panel bg-putih p-5 md:p-8">
+            <div className="md:grid md:grid-cols-[0.9fr_1.5fr] md:items-center md:gap-8">
+              <div>
+                <p className="text-base font-semibold text-hutan">Sekitar kamu</p>
+                <h2
+                  id="kota-title"
+                  className="mt-1 font-display text-2xl font-bold text-tinta md:text-3xl"
+                >
+                  Jelajahi kota
+                </h2>
+                <p className="mt-2 max-w-md text-base leading-6 text-tinta/80">
+                  Barang dari pedagang di kota lain, langsung ke rumah.
+                </p>
+                <Link
+                  href="/cari"
+                  className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-pil bg-hutan px-5 text-base font-semibold text-putih transition duration-cepat ease-standar hover:bg-hutan-tua focus-visible:outline-hutan"
+                >
+                  Buka katalog
+                  <Icon name="arrowRight" size={18} />
+                </Link>
+              </div>
+
+              <ul className="mt-5 flex flex-wrap gap-2 md:mt-0 md:justify-end">
+                {cities.map((city) => (
+                  <li key={city}>
+                    <Link
+                      href={`/cari?city=${encodeURIComponent(city)}`}
+                      className="inline-flex min-h-12 items-center gap-2 rounded-pil border border-garis bg-krem-terang px-4 text-base font-semibold text-tinta transition duration-cepat ease-standar hover:border-hutan hover:bg-mint-muda active:scale-[0.98] focus-visible:outline-hutan"
+                    >
+                      <Icon name="pin" size={16} className="shrink-0 text-hutan" />
+                      {city}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section
         aria-labelledby="jualan-title"

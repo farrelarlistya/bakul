@@ -5,7 +5,7 @@
 | Versi | 0.1 |
 | Status | Desain selesai (D1–D3) — menunggu review |
 | Sumber produk | `docs/prd/bakul-v0.2.md` |
-| Sumber gaya | `docs/desain/referensi/referensiStyleDesign.jpg` (dasar) dan `docs/desain/referensi/referensiRedesign.webp` (Beranda dan header) |
+| Sumber gaya | `docs/desain/referensi/referensiStyleDesign.jpg` (dasar), `docs/desain/referensi/referensiRedesign.webp` (Beranda dan header), dan `docs/desain/referensi/referensiSectionTambahan.webp` (section tambahan Beranda) |
 | Berkas desain | `bakul.figcraft` |
 | Rencana sprint | `docs/rencana-sprint.md` |
 | Ekspor tinjauan | `docs/desain/ekspor/` |
@@ -149,21 +149,22 @@ Urutan dari atas ke bawah (mobile):
 
 1. Header: merek `bakul`, ikon cari, ikon chat/Inbox dengan badge, ikon keranjang
    dengan badge, dan menu akun.
-2. Baris kepercayaan gelap: "Uang ditahan aman sampai barang diterima".
-3. Sapaan pembeli, kolom cari besar, dan tombol filter.
-4. Hero mint: judul "Belanja dari tetangga, sampai ke rumah", subjudul, tombol
-   "Jelajahi kategori", foto tas anyaman.
-5. Dua kartu kepercayaan: "Uang aman" dan "Komplain".
-6. Kategori: 8 kartu ikon, gulir horizontal di layar sempit.
-7. Lagi laris: grid 2 kolom, foto asli, harga tanpa coretan, kota + rating,
-   nama toko.
+2. Bento hero: kartu lavender berisi sapaan, judul, CTA, dan tiga foto produk;
+   kartu mint berisi satu barang unggulan; kartu kuning "Semua kategori" dan
+   kartu biru "Lacak pesanan".
+3. Kategori: 8 kartu ikon, gulir horizontal di layar sempit.
+4. Toko pilihan: 4 kartu toko dengan foto barang, nama, dan kota.
+5. Baru di Bakul: 4 barang terbaru yang belum muncul di Lagi laris.
+6. Lagi laris: grid 2 kolom, foto asli, harga tanpa coretan, kota + rating,
+   nama toko, chip urutan Terlaris/Terbaru/Termurah/Termahal.
+7. Jelajahi kota: pintasan filter kota dari data katalog.
 8. Ajakan "Punya dagangan? Buka toko gratis".
-9. Navigasi bawah: Beranda, Cari, Keranjang, Pesanan, Akun.
+9. Footer dan navigasi bawah: Beranda, Cari, Keranjang, Pesanan, Akun.
 
-Desktop menambahkan: menu atas, kolom pencarian, empat kategori sejajar, empat produk
-sejajar (kota, rating, jumlah terjual), blok ajakan "Punya dagangan? Buka toko gratis",
-dan footer hitam berisi tautan, metode pembayaran simulasi, serta keterangan
-"tidak ada uang nyata yang berpindah".
+Desktop menambahkan: menu atas, kolom pencarian, delapan kategori sejajar, empat
+toko dan empat barang sejajar, grid Lagi laris empat kolom, blok ajakan
+"Punya dagangan? Buka toko gratis", dan footer berisi tautan, keterangan
+pembayaran simulasi, serta "tidak ada uang nyata yang berpindah".
 
 ---
 
@@ -745,5 +746,26 @@ mematikan outline bawaan input agar tidak muncul kotak di dalam pil.
 
 Semua tautan filter mengarah ke `/cari` dengan parameter nyata. Tidak ada elemen
 promo atau angka penjualan palsu; rating berasal dari ulasan seed.
+
+### 20.7 Section tambahan Beranda (referensiSectionTambahan.webp)
+
+Referensi menambah variasi section. Yang diadopsi hanya pola tata letaknya;
+elemen promo tetap dilarang.
+
+| Section | Isi | Sumber data |
+| :--- | :--- | :--- |
+| **Toko pilihan** | 4 toko unik, masing-masing dengan foto barang, nama, kota, dan tautan toko | Katalog terlaris + terbaru |
+| **Baru di Bakul** | 4 barang terbaru yang belum muncul di Lagi laris | `GET /products?sort=terbaru` |
+| **Jelajahi kota** | Enam kota dari katalog, masing-masing menuju `/cari?city=` | Katalog |
+
+Posisi: Toko pilihan dan Baru di Bakul berada setelah Kategori, sebelum band
+Lagi laris, supaya halaman tidak langsung didominasi grid 16 barang. Jelajahi
+kota berada setelah Lagi laris. Tidak ada badge diskon, harga coret, hitung
+mundur, atau newsletter yang disalin dari referensi.
+
+Toko diambil dari urutan barang yang sedang tampil, lalu dideduplikasi per
+`shopSlug`. Tidak ada klaim "toko terbaik" atau jumlah terjual palsu; label
+hanya "Toko pilihan". Barang baru difilter terhadap 16 barang Lagi laris agar
+kedua section tidak menampilkan kartu yang sama.
 
 
