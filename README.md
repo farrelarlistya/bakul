@@ -1,15 +1,21 @@
-﻿# Bakul
+# Bakul
 
 Pasar daring untuk pedagang kecil Indonesia. Janji utamanya: **uang aman sampai
 barang diterima**. Logika transaksi dibangun seperti produksi; perpindahan uang
 dan pihak ketiga disimulasikan sepenuhnya di laptop.
 
-Repo ini sudah mencapai **M9 â€” aplikasi lengkap untuk demo**. Tidak ada akun
-vendor, API key, Docker, atau layanan cloud.
+Repo ini sudah mencapai **M10 — aplikasi lengkap untuk demo**. Versi paket
+`0.1.0`. Tidak ada akun vendor wajib, API key, Docker, atau layanan cloud.
 
 ## Apa yang sudah jalan
 
 - Login nomor HP + OTP, tanpa email/KTP; sesi aman dengan refresh cookie.
+- OTP WhatsApp asli sebagai opsi demo internal lewat Fonnte; default tetap kode
+  demo `123456`.
+- Daftar akun pembeli tanpa diminta membuka toko; buka toko terpisah di
+  `/jualan`.
+- Beranda dengan hero, kategori, toko pilihan, barang baru, jelajahi kota, dan
+  katalog terlaris.
 - Buka toko, kelola profil/logo/kurir/rekening, etalase, barang, pilihan, stok,
   foto WebP, dan soft delete.
 - Katalog dengan pencarian, filter kategori/kota/harga/rating, urutan, detail
@@ -20,7 +26,7 @@ vendor, API key, Docker, atau layanan cloud.
   pembuatan 1 `payments` + N `order_invoices`.
 - Mock payment gateway: VA/QRIS, tanda tangan HMAC, webhook idempoten, dan
   kedaluwarsa yang mengembalikan stok.
-- Escrow dan ledger double-entry append-only; `npm run ledger:check` â†’ 0 selisih.
+- Escrow dan ledger double-entry append-only; `npm run ledger:check` → 0 selisih.
 - Penjual terima/tolak, SLA 48 jam, AWB mock, label PDF A6 Code128, dan timeline
   pengiriman.
 - Konfirmasi terima, auto-complete 72 jam, saldo toko, tarik saldo, approval
@@ -30,6 +36,7 @@ vendor, API key, Docker, atau layanan cloud.
 - Dashboard admin: GMV, dana ditahan, pesanan per status, moderasi toko/barang,
   antrean komplain dan pencairan.
 - Demo console: time machine, simulator pembayaran, pemeriksaan SLA, reset data.
+- Berbagi demo ke perangkat lain lewat Cloudflare Quick Tunnel (`npm run share`).
 - Seed 10 pengguna (1 admin, 8 penjual satu per kategori, 1 pembeli), 8 toko, 32 produk dengan foto masing-masing. Riwayat transaksi sengaja kosong.
 
 ## Halaman
@@ -37,6 +44,7 @@ vendor, API key, Docker, atau layanan cloud.
 | Halaman | Route |
 | :--- | :--- |
 | Beranda katalog | `/` |
+| Masuk dan daftar pembeli | `/masuk` |
 | Cari dan filter | `/cari` |
 | Detail barang | `/p/:slug` |
 | Halaman toko | `/toko/:slug` |
@@ -60,7 +68,8 @@ vendor, API key, Docker, atau layanan cloud.
 
 ## Akun demo
 
-Kode OTP selalu **123456** saat `DEMO_MODE=true`.
+Kode OTP selalu **123456** saat `OTP_DELIVERY=demo` (nilai default bila
+`DEMO_MODE=true`).
 
 Pembeli baru bisa mendaftar lewat `/masuk` → **Daftar**. Registrasi ini hanya
 membuat akun pembeli tanpa toko; untuk berjualan, buka `/jualan` setelah punya
@@ -68,19 +77,23 @@ akun.
 
 | Peran | Nomor HP |
 | :--- | :--- |
-| Admin | `081200000001` |
-| Operator demo | `081200000002` |
-| Penjual Dapur Bu Sri | `081200000011` |
-| Penjual Keripik Mbok Nah | `081200000012` |
-| Pembeli Sri Wahyuni | `081200000021` |
-| Pembeli Dian Puspita | `081200000022` |
+| Admin Bakul | `081200000001` |
+| Sri Rahayu — Dapur Bu Sri | `081200000011` |
+| Nah Rowiyah — Keripik Mbok Nah | `081200000012` |
+| Asep Hidayat — Sembako Asep Jaya | `081200000013` |
+| Yanto Wibowo — Kopi Lereng Tangsi | `081200000014` |
+| Sekar Arum — Batik Sekar Arum | `081200000015` |
+| Bagus Setiawan — Anyaman Nusantara | `081200000016` |
+| Lestari Ningsih — Rempah Ayu | `081200000017` |
+| Dian Puspita — Rumah Tangga Sejahtera | `081200000018` |
+| Sri Wahyuni — pembeli | `081200000021` |
 
 ## Prasyarat
 
 - Node.js 24 dan npm 11
 - PostgreSQL 17 native (bukan Docker), satu instance lokal
 - Windows PowerShell untuk skrip database
-- Chrome terpasang jika ingin menjalankan E2E
+- Opsional: akun Fonnte jika ingin OTP WhatsApp sungguhan
 
 ## 1. Siapkan PostgreSQL
 
@@ -107,9 +120,10 @@ cp .env.example .env
 Isi `DATABASE_URL`, `AUTH_JWT_ACCESS_SECRET`, `OTP_PEPPER`, dan `MOCK_PG_SECRET`
 dengan nilai lokal. Jangan commit `.env`.
 
-`DEMO_MODE=true` menyalakan OTP demo, Demo Console, dan jam simulasi.
+`DEMO_MODE=true` menyalakan Demo Console dan jam simulasi.
 `DEMO_SPEED=60` berarti 1 menit nyata = 1 jam simulasi; ubah lewat `/dev` atau
-`.env`.
+`.env`. Pengiriman OTP diatur terpisah lewat `OTP_DELIVERY` (`demo` atau
+`whatsapp`).
 
 ## 3. Pasang, migrasi, seed
 
@@ -206,17 +220,14 @@ Catatan:
 | `npm run dev` | Web :3000 + API :3001 |
 | `npm run share` | Buka tautan publik sementara lewat Cloudflare Quick Tunnel |
 | `npm run build` | Build shared, API, web |
-| `npm test` | Unit test shared |
-| `npm run test:e2e` | Playwright alur pembeli/penjual/admin + audit aksesibilitas |
-| `npm run audit:a11y` | Audit WCAG 2.1/2.2 AA dengan axe-core, 0 pelanggaran |
-| `npm run bukti:ui` | Tangkapan layar bukti poles UI/UX |
+| `npm test` | Unit test Vitest (shared) |
 | `npm run db:generate` | Buat ulang Prisma Client |
 | `npm run db:migrate` | Buat/terapkan migrasi pengembangan |
 | `npm run db:deploy` | Terapkan migrasi yang ada |
 | `npm run db:seed` | Seed katalog: 8 toko, 32 produk, tanpa transaksi |
 | `npm run db:studio` | Prisma Studio |
 | `npm run ledger:check` | Periksa invariant ledger |
-| `npm run demo:reset` | Kosongkan transaksi lalu isi ulang riwayat demo |
+| `npm run demo:reset` | Kosongkan transaksi, sesi, dan OTP; katalog/akun tetap |
 | `npm run otp:test -- 08xxx` | Kirim pesan uji WhatsApp lewat Fonnte |
 | `npm run verify:m1` | T-12/T-13 auth dan onboarding |
 | `npm run verify:m2` | Katalog, foto, etalase, soft delete |
@@ -234,14 +245,14 @@ Hasil uji disimpan di `docs/bukti/`. Skrip verifikasi membutuhkan API hidup.
 | Dokumen | Isi |
 | :--- | :--- |
 | `docs/prd/bakul-v0.2.md` | Sumber kebenaran produk |
-| `docs/rencana-sprint.md` | Status 12 sprint dan definisi selesai |
+| `docs/rencana-sprint.md` | Status sprint dan definisi selesai |
 | `docs/desain/design.md` | Token, komponen, layar |
 | `docs/arsitektur.md` | Diagram sistem dan alur data |
 | `docs/model-data.md` | ERD, tabel, constraint, ledger |
 | `docs/state-machine.md` | Semua transisi status |
 | `docs/demo.md` | Skrip demo 10 menit |
 | `docs/adr/` | Alasan keputusan teknis |
-| `docs/bukti/` | Output uji T-01â€¦T-14 |
+| `docs/bukti/` | Output uji T-01…T-14 |
 | `docs/bukti/demo-bakul.gif` | GIF ringkas 30 detik dari alur demo |
 | `docs/desain/ekspor/implementasi-m8-*.png` | Tangkapan layar implementasi 390 px |
 
@@ -262,8 +273,7 @@ apps/
   api/        NestJS + Prisma
 packages/
   shared/     tipe, Zod, biaya, format Rupiah, kontrak adapter
-e2e/          Playwright
-scripts/      bantu start/stop PostgreSQL
+scripts/      start/stop PostgreSQL, Cloudflare share
 storage/      foto/bukti/logo lokal (gitignored)
 docs/         PRD, desain, ADR, bukti, demo
 ```

@@ -4,7 +4,7 @@
 | :--- | :--- |
 | Versi dokumen | 1.0 |
 | Tanggal | 3 November 2026 |
-| Status | Sprint 0–11 selesai · M8 selesai |
+| Status | Sprint 0–13 selesai · M10 selesai |
 | Sumber kebenaran produk | `docs/prd/bakul-v0.2.md` |
 | Sumber kebenaran visual | `docs/desain/design.md` + `docs/desain/referensi/referensiStyleDesign.jpg` |
 | Berkas lokal (tidak di Git) | `AGENTS.md`, `bakul.figcraft` |
@@ -665,3 +665,4 @@ git push
 | 3 Nov 2026 | Sprint 12 selesai: audit 20 kelemahan UI/UX, token turunan, 14 komponen interaksi baru, dialog in-app menggantikan `window.confirm`/`window.prompt`, validasi inline, empty state, tombol lengket; tag `m9-selesai` |
 | 4 Nov 2026 | Sprint 13 selesai: 32 foto katalog dari Wikimedia Commons, 8 toko satu kategori, 10 akun demo, seed tanpa riwayat transaksi, blok janji di Beranda dihapus; tag `m10-selesai` |
 | 4 Nov 2026 | Beranda dan header dirombak mengikuti `referensiRedesign.webp`: palet hijau tua/kuning/krem, header dua baris, bento hero, band katalog hijau, footer hijau tua; tanpa elemen promo |
+| 4 Nov 2026 | Pasca-M10: daftar pembeli tanpa toko, OTP WhatsApp opsional via Fonnte, section Toko pilihan/Baru di Bakul/Jelajahi kota, dan `npm run share` Cloudflare; Playwright dan axe-core dihapus dari repo |

@@ -38,9 +38,7 @@ yarn-error.log*
 .turbo/
 
 # Pengujian
-playwright-report/
 test-results/
-blob-report/
 
 # Editor & OS
 .vscode/*

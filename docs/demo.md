@@ -70,12 +70,9 @@ npm run verify:m6   # T-10, pencairan
 npm run verify:m7   # T-08, T-09, T-12
 npm run verify:m8   # T-14, demo console, seed
 npm run ledger:check
-npm run test:e2e
 ```
 
-Hasil tersimpan di `docs/bukti/`. `test:e2e` memakai Chrome yang sudah
-terpasang dan menjalankan alur pembeli, penjual, dan admin pada viewport
-390 × 844.
+Hasil tersimpan di `docs/bukti/`.
 
 ## Jika ada yang gagal
 

@@ -1,7 +1,7 @@
 # ADR 0007 — Audit aksesibilitas otomatis dengan axe-core
 
 - Tanggal: 3 November 2026
-- Status: diterima
+- Status: digantikan — Playwright dan axe-core dihapus dari repo pada 4 November 2026
 - Konteks: Sprint 12 (M9) — Poles UI/UX dan Interaction Design
 
 ## Konteks

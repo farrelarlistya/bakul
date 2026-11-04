@@ -1272,8 +1272,7 @@ npm run db:migrate       # migrasi Prisma
 npm run db:seed          # isi data demo
 npm run db:reset         # reset + seed ulang
 npm run ledger:check     # verifikasi invariant ledger
-npm run test             # unit + integrasi
-npm run test:e2e         # Playwright
+npm run test             # unit test Vitest
 npm run demo:reset       # kembalikan data ke kondisi awal demo
 ```
 

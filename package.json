@@ -16,9 +16,6 @@
     "share": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/share.ps1",
     "build": "npm run build --workspace @bakul/shared && npm run build --workspace @bakul/api && npm run build --workspace @bakul/web",
     "test": "npm run test --workspaces --if-present",
-    "test:e2e": "playwright test",
-    "audit:a11y": "playwright test e2e/audit-a11y.spec.ts",
-    "bukti:ui": "playwright test e2e/bukti-polish.spec.ts",
     "demo:gif": "node scripts/make-demo-gif.mjs",
     "db:generate": "npm run db:generate --workspace @bakul/api",
     "db:migrate": "npm run db:migrate --workspace @bakul/api",
@@ -41,8 +38,6 @@
     "postinstall": "npm run db:generate && npm run build --workspace @bakul/shared"
   },
   "devDependencies": {
-    "@playwright/test": "1.64.1",
-    "axe-core": "4.10.3",
     "concurrently": "10.0.6",
     "gifenc": "1.0.3",
     "prettier": "3.9.10",

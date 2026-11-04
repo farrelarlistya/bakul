@@ -597,28 +597,16 @@ dan sudah tidak lagi dipakai sejak halaman status internal M0 diganti Beranda.
 | :--- | :--- | :--- |
 | Build dan tipe | `npm run build --workspace @bakul/web` | Lulus, 26 rute |
 | Uji logika | `npm run test` | 24 uji lulus |
-| Alur ujung ke ujung | `npm run test:e2e` | 5 skenario lulus |
-| Aksesibilitas | axe-core 4.10.3, WCAG 2.1/2.2 AA + best practice | 0 pelanggaran di 20 tampilan (10 pembeli tanpa sesi, 5 pembeli dengan sesi, 5 admin/demo) |
-| Error konsol | 13 halaman dipotret Playwright | 0 error JavaScript |
-| Bukti visual | `docs/desain/ekspor/polish-*.png` | 12 tangkapan layar |
+| Bukti visual | `docs/desain/ekspor/polish-*.png` | Arsip tangkapan layar sebelum pembersihan |
 
-Audit aksesibilitas berjalan otomatis pada `npm run test:e2e` dan harus tetap
-lulus 0 pelanggaran. Keputusan memakai `axe-core` sebagai dev dependency
-dicatat di `docs/adr/0007-audit-aksesibilitas-otomatis.md`.
-
-Skrip bukti visual dapat dijalankan ulang dengan:
-
-```bash
-npm run bukti:ui                          # menulis ke test-results/bukti/
-BAKUL_BUKTI_DIR=docs/desain/ekspor npm run bukti:ui
-```
+Pengujian browser Playwright dan `axe-core` sudah dihapus dari repo agar
+dependensi dan artefak pengujian tidak ikut dipublikasikan. Hasil terakhir
+sebelum penghapusan: 8 skenario Playwright lulus dan audit WCAG 0 pelanggaran.
 
 ### 19.8 Catatan operasional
 
 - Kode OTP berlaku 10 menit pada jam demo. Dengan `DEMO_SPEED=60`, itu hanya
-  sekitar 10 detik waktu nyata. Jalankan E2E setelah server sudah hangat,
-  karena kompilasi halaman di `next dev` bisa memakan waktu tersebut.
-- `npm run test:e2e` butuh PostgreSQL dan API yang hidup.
+  sekitar 10 detik waktu nyata.
 
 ---
 
