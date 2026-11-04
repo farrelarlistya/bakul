@@ -46,7 +46,7 @@ export default function MasukPage() {
                 mode="login"
                 onSuccess={(session) => {
                   login(session);
-                  router.push("/akun");
+                  router.push("/");
                 }}
               />
             </div>

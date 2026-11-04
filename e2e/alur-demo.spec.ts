@@ -10,7 +10,7 @@ async function login(page: Page, phone: string): Promise<void> {
     await boxes.nth(index).fill("123456"[index] ?? "");
   }
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page).toHaveURL(/\/akun$/);
+  await expect(page).toHaveURL(/\/$/);
 }
 
 test.describe.configure({ mode: "serial" });

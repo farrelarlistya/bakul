@@ -26,7 +26,7 @@ async function masuk(page: Page, phone: string): Promise<void> {
     await boxes.nth(index).fill("123456"[index] ?? "");
   }
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await page.waitForURL(/\/akun$/);
+  await page.waitForURL(/\/$/);
 }
 
 async function audit(page: Page, nama: string): Promise<void> {

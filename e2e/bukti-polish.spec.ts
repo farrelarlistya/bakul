@@ -19,7 +19,7 @@ async function login(page: Page, phone: string): Promise<void> {
     await boxes.nth(index).fill("123456"[index] ?? "");
   }
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
-  await expect(page).toHaveURL(/\/akun$/);
+  await expect(page).toHaveURL(/\/$/);
 }
 
 test.describe.configure({ mode: "serial" });
@@ -76,6 +76,7 @@ test("bukti tangkapan layar polish UI/UX", async ({ page }) => {
 
   // 7. Akun pembeli
   await login(page, "081200000021");
+  await page.goto("/akun");
   await page.waitForTimeout(900);
   await page.screenshot({ path: `${OUT}/polish-07-akun.png`, fullPage: true });
 
