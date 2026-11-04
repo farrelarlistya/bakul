@@ -664,3 +664,4 @@ git push
 | 3 Nov 2026 | Sprint 11 selesai: seed 30 pesanan, demo console, Playwright E2E, docs arsitektur/state machine, bukti; tag `m8-selesai` |
 | 3 Nov 2026 | Sprint 12 selesai: audit 20 kelemahan UI/UX, token turunan, 14 komponen interaksi baru, dialog in-app menggantikan `window.confirm`/`window.prompt`, validasi inline, empty state, tombol lengket; tag `m9-selesai` |
 | 4 Nov 2026 | Sprint 13 selesai: 32 foto katalog dari Wikimedia Commons, 8 toko satu kategori, 10 akun demo, seed tanpa riwayat transaksi, blok janji di Beranda dihapus; tag `m10-selesai` |
+| 4 Nov 2026 | Beranda dan header dirombak mengikuti `referensiRedesign.webp`: palet hijau tua/kuning/krem, header dua baris, bento hero, band katalog hijau, footer hijau tua; tanpa elemen promo |

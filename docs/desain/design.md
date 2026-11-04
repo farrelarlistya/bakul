@@ -5,7 +5,7 @@
 | Versi | 0.1 |
 | Status | Desain selesai (D1–D3) — menunggu review |
 | Sumber produk | `docs/prd/bakul-v0.2.md` |
-| Sumber gaya | `docs/desain/referensi/referensiStyleDesign.jpg` |
+| Sumber gaya | `docs/desain/referensi/referensiStyleDesign.jpg` (dasar) dan `docs/desain/referensi/referensiRedesign.webp` (Beranda dan header) |
 | Berkas desain | `bakul.figcraft` |
 | Rencana sprint | `docs/rencana-sprint.md` |
 | Ekspor tinjauan | `docs/desain/ekspor/` |
@@ -28,6 +28,11 @@ Gaya itu dipakai untuk Bakul dengan tiga penyesuaian:
 Sifat visual: datar, lapang, ramah, tanpa bayangan dan gradien. Warna hangat (krem)
 menyeimbangkan mint/teal agar tidak terasa seperti toko sayur.
 
+Sejak 4 November 2026, **Beranda dan header** memakai arah baru dari
+`referensiRedesign.webp`: hijau tua, kuning, krem hangat, dan kartu pastel.
+Halaman lain belum dirombak; token teal lama tetap tersedia supaya tidak ada
+regresi. Palet baru tidak memakai gradien, bayangan, atau elemen promo.
+
 ---
 
 ## 2. Token warna
@@ -41,18 +46,28 @@ menyeimbangkan mint/teal agar tidak terasa seperti toko sayur.
 | `teal-tua` | `#0B5A54` | Teks di atas latar mint (kontras 5,6:1) |
 | `krem` | `#F1EADA` | Kartu kategori, blok ajakan buka toko |
 | `abu-kartu` | `#F5F5F5` | Kartu produk, kolom pencarian |
-| `putih` | `#FFFFFF` | Halaman, header, kartu |
+| `putih` | `#FFFFFF` | Halaman lama, kartu, kolom pencarian |
 | `tinta` | `#14201B` | Teks utama |
 | `tinta-lembut` | `#5C6B64` | Teks sekunder (kontras 5,7:1 di putih) |
 | `garis` | `#E6E6E6` | Pembatas, border |
 | `perhatian` | `#B45309` | Stok hampir habis, ikon peringatan |
 | `perhatian-tua` | `#94420A` | Teks peringatan di atas krem (kontras 5,8:1) |
 | `bahaya` | `#B42318` | Error, komplain |
+| `hutan` | `#1F5C4A` | Header, panel hijau, tombol utama Beranda (kontras 7,8:1 dengan putih) |
+| `hutan-tua` | `#17473A` | Baris nav header, footer |
+| `kuning` | `#F4D24B` | Tombol cari, chip aktif, badge (kontras 11,3:1 dengan `tinta`) |
+| `kuning-tua` | `#E6BE2F` | Hover tombol kuning |
+| `krem-halaman` | `#F7F4EC` | Latar Beranda |
+| `lavender` | `#E9E5FB` | Kartu hero Beranda |
+| `mint-pastel` | `#E3F2E5` | Kartu unggulan Beranda |
+| `kuning-pastel` | `#FAF3C8` | Kartu kategori dan ajakan buka toko |
+| `biru-pastel` | `#DCEFF6` | Kartu lacak pesanan |
+| `garis-hangat` | `#E7E0D2` | Border kartu di latar krem |
 
 Catatan kontras: `#198B81` dengan teks putih hanya ±4,1:1, sehingga **tidak dipakai
-sebagai latar teks**. Latar tombol selalu `#0F6E66`. Teks di atas `mint` memakai
-`teal-tua`, bukan `teal-aksi`; teks peringatan di atas `krem` memakai
-`perhatian-tua`, bukan `perhatian`.
+sebagai latar teks**. Latar tombol selalu `#0F6E66` atau `#1F5C4A`. Teks di atas
+`mint` memakai `teal-tua`, bukan `teal-aksi`; teks peringatan di atas `krem`
+memakai `perhatian-tua`, bukan `perhatian`.
 
 ---
 
@@ -77,7 +92,8 @@ bila anggaran halaman terlampaui, judul turun ke system font tanpa mengubah tata
 ## 4. Spasi, radius, dan ukuran sentuh
 
 - Skala spasi: 4, 8, 12, 16, 24, 32, 48.
-- Radius: 8 (tombol, input), 12 (kartu produk), 16 (kartu kategori, hero, sheet), 999 (pil).
+- Radius: 8 (tombol, input), 12 (kartu produk), 16 (kartu kategori, hero, sheet),
+  18 (kartu produk Beranda), 24 (panel Beranda), 999 (pil).
 - Target sentuh minimum 44×44 px.
 - Margin layar mobile: 16 px. Jarak antar kartu: 12 px.
 - Lebar konten desktop: 1200 px (margin 120 px pada kanvas 1440).
@@ -692,5 +708,38 @@ navigasi bawah sudah memuat Pesanan.
 
 "Lihat semua" pada Lagi laris tetap ada karena mengarah ke katalog lengkap
 dengan urutan terlaris, bukan ke bagian lain halaman ini.
+
+### 20.6 Redesign Beranda dan header (referensiRedesign.webp)
+
+Berkas referensi dipindahkan ke `docs/desain/referensi/referensiRedesign.webp`.
+Arah baru mengikuti referensi tersebut, dengan batasan yang sudah dikunci:
+tanpa diskon, tanpa harga coret, tanpa hitung mundur, tanpa gradien, dan tanpa
+bayangan.
+
+**Header global**
+
+| Sebelum | Sesudah |
+| :--- | :--- |
+| Putih, teks tinta, kolom cari abu, tombol masuk teal | Hijau tua `hutan`, teks putih, kolom cari pil putih dengan tombol **Cari** kuning |
+| Satu baris | Dua baris: pencarian + ikon di atas, tautan katalog di bawah (desktop) |
+| Tanpa tautan katalog | `Semua barang`, `Terlaris`, `Termurah`, `Buka toko`, `Lacak pesanan` — semuanya tujuan nyata, bukan anchor halaman |
+| Navigasi peran putih | Navigasi peran di atas `hutan-tua`, item aktif putih |
+
+Font logo **tetap Poppins** (`font-display`). Di mobile baris tautan disembunyikan
+karena navigasi bawah sudah memuat tujuan utama; ikon cari tetap ada.
+
+**Beranda**
+
+1. Bento hero: kartu lavender berisi sapaan, judul, dan CTA; kartu mint berisi
+   satu barang unggulan; dua kartu kecil kuning dan biru untuk kategori serta lacak.
+2. Kategori: delapan kartu putih dengan piring ikon pastel; horizontal scroll di
+   mobile, grid delapan kolom di desktop.
+3. Lagi laris: band hijau tua penuh dengan 16 barang, chip urutan
+   Terlaris/Terbaru/Termurah/Termahal, dan kartu putih berating.
+4. Ajakan buka toko: panel kuning pastel dengan foto anyaman.
+5. Footer memakai `hutan-tua`, bukan hitam.
+
+Semua tautan filter mengarah ke `/cari` dengan parameter nyata. Tidak ada elemen
+promo atau angka penjualan palsu; rating berasal dari ulasan seed.
 
 
