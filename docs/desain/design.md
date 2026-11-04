@@ -728,6 +728,10 @@ bayangan.
 Font logo **tetap Poppins** (`font-display`). Di mobile baris tautan disembunyikan
 karena navigasi bawah sudah memuat tujuan utama; ikon cari tetap ada.
 
+Fokus kolom cari ditandai oleh **border pil** — kuning di header, hijau di
+beranda — bukan outline persegi pada input. Aturan `.pencarian-pil input:focus-visible`
+mematikan outline bawaan input agar tidak muncul kotak di dalam pil.
+
 **Beranda**
 
 1. Bento hero: kartu lavender berisi sapaan, judul, dan CTA; kartu mint berisi

@@ -130,6 +130,14 @@ footer button:focus-visible {
 }
 
 /*
+ * Kolom pencarian berbentuk pil: cincin fokus digambar oleh pembungkus pil,
+ * bukan oleh input persegi di dalamnya.
+ */
+.pencarian-pil input:focus-visible {
+  outline: none;
+}
+
+/*
  * Aturan di luar layer Tailwind agar menang atas utility biasa.
  * 1. Kolom pilihan (select) memakai chevron sendiri supaya setrika dengan token.
  * 2. Field yang bermasalah ditandai merah oleh aria-invalid, bukan oleh kelas tambahan.

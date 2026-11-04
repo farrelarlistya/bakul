@@ -154,7 +154,7 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
           action="/cari"
           method="get"
           role="search"
-          className="ml-2 hidden min-h-12 flex-1 items-center gap-1 rounded-pil bg-putih p-0.5 pl-4 md:flex md:max-w-[560px]"
+          className="pencarian-pil ml-2 hidden min-h-12 flex-1 items-center gap-1 rounded-pil border-2 border-transparent bg-putih p-0.5 pl-4 focus-within:border-kuning md:flex md:max-w-[560px]"
         >
           <Icon
             name="search"

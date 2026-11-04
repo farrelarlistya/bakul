@@ -66,7 +66,7 @@ export default async function Page() {
           aria-label="Cari barang"
           className="flex gap-2 md:hidden"
         >
-          <div className="flex min-h-12 flex-1 items-center gap-2 rounded-pil border border-garis-hangat bg-putih px-4 transition duration-cepat ease-standar focus-within:border-hutan">
+          <div className="pencarian-pil flex min-h-12 flex-1 items-center gap-2 rounded-pil border-2 border-garis-hangat bg-putih px-4 transition duration-cepat ease-standar focus-within:border-hutan">
             <Icon
               name="search"
               size={20}
