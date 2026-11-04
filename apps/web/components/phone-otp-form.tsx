@@ -175,7 +175,7 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
           <p id="phone-hint" className="mt-2 text-base text-tinta-lembut">
             {phoneTooShort
               ? "Nomor HP belum lengkap. Masukkan minimal 8 angka."
-              : "Kami kirim kode 6 angka lewat SMS. Tidak perlu email."}
+              : "Kode 6 angka dikirim ke nomor ini. Tidak perlu email."}
           </p>
           <button
             type="button"
@@ -211,9 +211,17 @@ export function PhoneOtpForm({ mode, onSuccess }: Props) {
             Ubah nomor
           </button>
 
-          <p className="text-base text-tinta-lembut">
-            Kode 6 angka dikirim ke <strong className="text-tinta">{phone}</strong>.
-          </p>
+          {result?.delivery === "whatsapp" ? (
+            <p className="text-base text-tinta-lembut">
+              Kode 6 angka dikirim ke WhatsApp{" "}
+              <strong className="text-tinta">{phone}</strong>. Buka WhatsApp, lalu masukkan
+              kodenya.
+            </p>
+          ) : (
+            <p className="text-base text-tinta-lembut">
+              Kode 6 angka dikirim ke <strong className="text-tinta">{phone}</strong>.
+            </p>
+          )}
 
           {result?.demoCode ? (
             <div className="mt-3 rounded-kartu border border-teal bg-mint-muda p-3 text-base text-tinta">

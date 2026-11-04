@@ -159,6 +159,41 @@ Yang perlu diketahui:
 - Tidak ada deploy ke Cloudflare Pages: API NestJS dan PostgreSQL tetap lokal,
   sesuai ADR 0002 dan ADR 0008.
 
+## 6. OTP WhatsApp (opsional)
+
+Untuk demo internal dengan kode OTP sungguhan, Bakul bisa mengirim 6 angka lewat
+WhatsApp memakai Fonnte. Default repo tetap mode demo (`123456`).
+
+1. Buat akun di <https://fonnte.com>, hubungkan nomor WhatsApp yang dipakai
+   sebagai pengirim, lalu salin token perangkat.
+2. Isi `.env`:
+
+   ```env
+   OTP_DELIVERY=whatsapp
+   NOTIFIER_PROVIDER=fonnte
+   FONNTE_TOKEN="token_dari_fonnte"
+   ```
+
+3. Jalankan ulang `npm run dev` supaya API membaca env baru.
+4. Uji pengiriman ke nomor sendiri:
+
+   ```bash
+   npm run otp:test -- 08xxxxxxxxxx
+   ```
+
+5. Login atau daftar memakai nomor itu. Kode dikirim ke WhatsApp, bukan
+   ditampilkan di layar. `DEMO_MODE=true` boleh tetap menyala untuk Demo Console
+   dan time machine.
+
+Catatan:
+
+- `FONNTE_TOKEN` adalah rahasia. Jangan commit `.env`.
+- Fonnte adalah gateway WhatsApp, bukan WhatsApp Business API resmi. Kualitas
+  dan kuota pengiriman mengikuti layanan mereka.
+- Untuk kembali ke mode demo: `OTP_DELIVERY=demo` dan `NOTIFIER_PROVIDER=mock`.
+- Halaman Masuk hanya untuk nomor yang sudah terdaftar. Nomor baru harus lewat
+  alur "Buka toko" di `/jualan`.
+
 ## Perintah penting
 
 | Perintah | Fungsi |
@@ -177,6 +212,7 @@ Yang perlu diketahui:
 | `npm run db:studio` | Prisma Studio |
 | `npm run ledger:check` | Periksa invariant ledger |
 | `npm run demo:reset` | Kosongkan transaksi lalu isi ulang riwayat demo |
+| `npm run otp:test -- 08xxx` | Kirim pesan uji WhatsApp lewat Fonnte |
 | `npm run verify:m1` | T-12/T-13 auth dan onboarding |
 | `npm run verify:m2` | Katalog, foto, etalase, soft delete |
 | `npm run verify:m3` | T-01, T-02 keranjang/checkout |

@@ -251,7 +251,8 @@ Portofolio dinilai dari bukti, bukan klaim. Artefak berikut wajib tersedia di re
 
 - Integrasi Payment Gateway nyata dan pencairan dana nyata.
 - Integrasi agregator logistik nyata dan pelacakan kurir sungguhan.
-- Pengiriman OTP/notifikasi nyata via WhatsApp atau email.
+- Pengiriman OTP/notifikasi nyata via WhatsApp atau email. *(Pengecualian demo
+  internal: OTP WhatsApp lewat Fonnte, lihat ADR 0009.)*
 - KYC penjual, unggah KTP, verifikasi identitas berlapis.
 - Aplikasi mobile native (iOS/Android).
 - Live streaming shopping, iklan CPC, loyalty/koin, PayLater.

@@ -37,6 +37,7 @@
     "verify:m8": "npm run verify:m8 --workspace @bakul/api",
     "ledger:check": "npm run ledger:check --workspace @bakul/api",
     "demo:reset": "npm run build --workspace @bakul/shared && npm run demo:reset --workspace @bakul/api",
+    "otp:test": "npm run otp:test --workspace @bakul/api --",
     "postinstall": "npm run db:generate && npm run build --workspace @bakul/shared"
   },
   "devDependencies": {

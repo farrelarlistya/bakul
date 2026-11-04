@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -9,7 +10,13 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import type { AuthSession, AuthUser, OtpRequestResult, UserRole } from "@bakul/shared";
+import type {
+  AuthSession,
+  AuthUser,
+  Notifier,
+  OtpRequestResult,
+  UserRole,
+} from "@bakul/shared";
 import { createHmac, randomInt } from "node:crypto";
 import type { Request, Response } from "express";
 import { ClockService } from "../common/clock/clock.service";
@@ -21,6 +28,8 @@ import {
   REFRESH_COOKIE,
   setRefreshCookie,
 } from "../common/http/cookies";
+import { NOTIFIER } from "../notifications/notifier.token";
+import { maskPhone } from "../notifications/notifier.utils";
 import { PrismaService } from "../prisma/prisma.service";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
@@ -67,6 +76,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly clock: ClockService,
+    @Inject(NOTIFIER) private readonly notifier: Notifier,
   ) {}
 
   async requestOtp(phone: string, purpose: "REGISTER" | "LOGIN"): Promise<OtpRequestResult> {
@@ -99,11 +109,16 @@ export class AuthService {
       data: { consumedAt: now },
     });
 
-    const demoMode = this.config.get<string>("DEMO_MODE") === "true";
-    const code = demoMode ? "123456" : randomInt(0, 1_000_000).toString().padStart(6, "0");
+    const otpDelivery =
+      this.config.get<string>("OTP_DELIVERY") ??
+      (this.config.get<string>("DEMO_MODE") === "true" ? "demo" : "whatsapp");
+    const realDelivery = otpDelivery === "whatsapp";
+    const code = realDelivery
+      ? randomInt(0, 1_000_000).toString().padStart(6, "0")
+      : "123456";
     const expiresAt = new Date(now.getTime() + OTP_TTL_MS);
 
-    await this.prisma.otpCode.create({
+    const otp = await this.prisma.otpCode.create({
       data: {
         phone,
         purpose,
@@ -112,6 +127,34 @@ export class AuthService {
       },
     });
 
+    if (realDelivery) {
+      try {
+        await this.notifier.send({
+          channel: "WHATSAPP",
+          to: phone,
+          template: "OTP",
+          data: { code, ttlMinutes: OTP_TTL_MS / 60_000 },
+        });
+      } catch (error) {
+        await this.prisma.otpCode.delete({ where: { id: otp.id } }).catch((deleteError: unknown) => {
+          this.logger.warn(
+            `OTP ${maskPhone(phone)} gagal dihapus setelah pengiriman gagal: ${
+              deleteError instanceof Error ? deleteError.message : String(deleteError)
+            }`,
+          );
+        });
+        this.logger.warn(
+          `[NOTIF] WHATSAPP ${maskPhone(phone)} OTP gagal: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+        throw new BadRequestException({
+          code: "OTP_DELIVERY_FAILED",
+          message: "Kode belum terkirim ke WhatsApp. Periksa koneksi internet lalu coba lagi.",
+        });
+      }
+    }
+
     if (user) {
       await this.prisma.notification.create({
         data: {
@@ -119,20 +162,22 @@ export class AuthService {
           template: "OTP",
           payload: {
             phone,
-            ...(demoMode ? { code } : {}),
-            message: "Kode masuk Bakul kamu sudah dibuat. Jangan bagikan kodenya.",
+            ...(realDelivery ? {} : { code }),
+            message: realDelivery
+              ? "Kode masuk sudah dikirim ke WhatsApp kamu. Jangan bagikan kodenya."
+              : "Kode masuk Bakul kamu sudah dibuat. Jangan bagikan kodenya.",
           },
         },
       });
+      this.logger.log(`[NOTIF] IN_APP ${maskPhone(phone)} OTP`);
     }
-
-    this.logger.log(`[NOTIF] IN_APP ${phone} OTP`);
 
     return {
       phone,
       expiresAt: expiresAt.toISOString(),
       existing: Boolean(user),
-      ...(demoMode ? { demoCode: code } : {}),
+      delivery: realDelivery ? "whatsapp" : "demo",
+      ...(realDelivery ? {} : { demoCode: code }),
     };
   }
 

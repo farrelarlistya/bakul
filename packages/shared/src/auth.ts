@@ -26,10 +26,13 @@ export type AuthSession = {
   user: AuthUser;
 };
 
+export type OtpDelivery = "demo" | "whatsapp";
+
 export type OtpRequestResult = {
   phone: string;
   expiresAt: string;
   existing: boolean;
+  delivery: OtpDelivery;
   demoCode?: string;
 };
 

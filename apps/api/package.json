@@ -20,6 +20,7 @@
     "verify:m6": "tsx scripts/verify-m6.ts",
     "verify:m7": "tsx scripts/verify-m7.ts",
     "verify:m8": "tsx scripts/verify-m8.ts",
+    "otp:test": "tsx scripts/otp-test.ts",
     "ledger:check": "tsx scripts/ledger-check.ts",
     "demo:reset": "tsx scripts/demo-reset.ts"
   },

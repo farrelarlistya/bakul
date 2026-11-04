@@ -168,6 +168,7 @@ export {
   type AuthSession,
   type AuthUser,
   type NotificationItem,
+  type OtpDelivery,
   type OtpRequestResult,
   type RequestOtpInput,
   type ShopSummary,
