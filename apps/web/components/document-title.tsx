@@ -8,6 +8,7 @@ const TITLES: Record<string, string> = {
   "/cari": "Cari barang",
   "/keranjang": "Keranjang",
   "/pesanan": "Pesanan",
+  "/lacak": "Lacak paket",
   "/inbox": "Inbox",
   "/akun": "Akun",
   "/masuk": "Masuk",

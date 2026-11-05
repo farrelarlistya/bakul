@@ -1,0 +1,8 @@
+PASS nav header hanya berisi Semua barang, Terlaris, Termurah dan rata tengah
+PASS klik Terlaris mengubah sort menjadi terlaris dan menandai tautan aktif
+PASS klik Termurah mengubah sort menjadi harga-asc dan menandai tautan aktif
+PASS /lacak membalas 200 dan menyediakan kolom nomor resi
+PASS OTP akun seed admin 081200000001 = 123456 (delivery demo)
+PASS OTP akun seed penjual 081200000011 = 123456 (delivery demo)
+PASS npm run build
+PASS npm test (24 uji)

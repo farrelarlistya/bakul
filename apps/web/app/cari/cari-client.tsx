@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   PRODUCT_SORTS,
   WILAYAH,
@@ -33,6 +33,7 @@ const SORT_LABEL: Record<ProductSort, string> = {
 };
 
 export function CariClient() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [category, setCategory] = useState(searchParams.get("category") ?? "");
@@ -52,11 +53,17 @@ export function CariClient() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
+    const nextSort = searchParams.get("sort");
     setQuery(searchParams.get("q") ?? "");
     setCategory(searchParams.get("category") ?? "");
     setCity(searchParams.get("city") ?? "");
     setMaxPrice(searchParams.get("maxPrice") ?? "");
     setRating(searchParams.get("rating") ?? "");
+    setSort(
+      nextSort && (PRODUCT_SORTS as readonly string[]).includes(nextSort)
+        ? (nextSort as ProductSort)
+        : "terbaru",
+    );
     setPage(1);
   }, [searchParams]);
 
@@ -119,6 +126,24 @@ export function CariClient() {
     return () => controller.abort();
   }, [query, category, city, maxPrice, rating, sort, page]);
 
+  function catalogHref(nextSort: ProductSort): string {
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("q", query.trim());
+    if (category) params.set("category", category);
+    if (city) params.set("city", city);
+    if (maxPrice) params.set("maxPrice", maxPrice);
+    if (rating) params.set("rating", rating);
+    if (nextSort !== "terbaru") params.set("sort", nextSort);
+    const queryString = params.toString();
+    return queryString ? `/cari?${queryString}` : "/cari";
+  }
+
+  function changeSort(nextSort: ProductSort): void {
+    setSort(nextSort);
+    setPage(1);
+    router.replace(catalogHref(nextSort), { scroll: false });
+  }
+
   function reset(): void {
     setQuery("");
     setCategory("");
@@ -128,6 +153,7 @@ export function CariClient() {
     setSort("terbaru");
     setPage(1);
     setFiltersOpen(false);
+    router.replace("/cari", { scroll: false });
   }
 
   const advancedFilterCount =
@@ -276,8 +302,7 @@ export function CariClient() {
                   className={selectClass}
                   value={sort}
                   onChange={(event) => {
-                    setSort(event.target.value as ProductSort);
-                    setPage(1);
+                    changeSort(event.target.value as ProductSort);
                   }}
                 >
                   {PRODUCT_SORTS.map((value) => (

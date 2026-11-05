@@ -124,6 +124,13 @@ export default function PesananPage() {
           Setiap pesanan menunjukkan di mana uangmu berada.
         </p>
 
+        <div className="mt-3">
+          <Link href="/lacak" className={secondaryButtonClass}>
+            <Icon name="truck" size={18} />
+            Lacak paket dengan nomor resi
+          </Link>
+        </div>
+
         {status === "tamu" ? (
           <EmptyState
             icon="user"

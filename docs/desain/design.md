@@ -386,7 +386,9 @@ Tambahan di luar S1–S4:
 
 - `/akun` — profil, alamat, dan kartu toko.
 - `/inbox` — daftar pesan dan kode masuk.
-- Header bersama dengan tautan Buka toko, Inbox, dan nama pengguna.
+- Header bersama dengan kolom cari, Inbox, keranjang, dan menu akun. Buka toko
+  ada di Beranda, Akun, dan footer; Lacak pesanan ada di halaman Pesanan dan
+  `/lacak`.
 
 Perbedaan kecil dari mockup: pilihan kota memakai lima wilayah seed; foto produk
 disimpan lokal (bukan kamera langsung) dan bersifat opsional. Semua tetap memakai
@@ -427,7 +429,7 @@ Alur transaksi memakai token dan komponen yang sama dengan M2.
 | Pesanan | `/pesanan` | Filter status, "uang saya di mana" |
 | Detail pesanan | `/pesanan/:id` | Rincian, lacak, selesai, ulasan + foto |
 | Komplain | `/pesanan/:id/komplain` | Bukti, diskusi, eskalasi |
-| Lacak | `/lacak/:awb` | Timeline publik |
+| Lacak | `/lacak` dan `/lacak/:awb` | Masukkan nomor resi, lalu timeline publik |
 | Pesanan penjual | `/jualan/pesanan` | Terima/tolak, resi, label |
 | Dompet | `/jualan/dompet` | Saldo, mutasi, tarik saldo |
 | Pengaturan toko | `/jualan/toko` | Logo, bank, kurir |
@@ -711,7 +713,7 @@ bayangan.
 | :--- | :--- |
 | Putih, teks tinta, kolom cari abu, tombol masuk teal | Hijau tua `hutan`, teks putih, kolom cari pil putih dengan tombol **Cari** kuning |
 | Satu baris | Dua baris: pencarian + ikon di atas, tautan katalog di bawah (desktop) |
-| Tanpa tautan katalog | `Semua barang`, `Terlaris`, `Termurah`, `Buka toko`, `Lacak pesanan` — semuanya tujuan nyata, bukan anchor halaman |
+| Tanpa tautan katalog | Tiga tautan urutan di tengah: `Semua barang`, `Terlaris`, `Termurah`. `Buka toko` ada di Beranda, Akun, dan footer; `Lacak pesanan` ada di halaman Pesanan dan `/lacak` |
 | Navigasi peran putih | Navigasi peran di atas `hutan-tua`, item aktif putih |
 
 Font logo **tetap Poppins** (`font-display`). Di mobile baris tautan disembunyikan

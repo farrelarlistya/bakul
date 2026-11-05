@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import type { UserRole } from "@bakul/shared";
 import { useAppBadges } from "@/components/app-badges";
+import { CatalogNav, CatalogNavFallback } from "@/components/catalog-nav";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Icon } from "@/components/icon";
 import { useAuth } from "@/lib/auth";
@@ -18,9 +19,6 @@ const ROLE_LABEL: Record<UserRole, string> = {
 
 const iconLinkClass =
   "relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-pil text-putih transition duration-cepat ease-standar hover:bg-putih/10 aria-[current=page]:bg-putih/15 aria-[current=page]:text-kuning active:scale-95 focus-visible:outline-putih";
-
-const navLinkClass =
-  "inline-flex min-h-11 shrink-0 items-center rounded-pil px-3 text-base font-semibold text-putih/90 transition duration-cepat ease-standar hover:bg-putih/10 hover:text-putih aria-[current=page]:bg-putih/15 aria-[current=page]:text-kuning focus-visible:outline-putih";
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) {
@@ -294,40 +292,9 @@ export function AppHeader({ defaultQuery = "" }: { defaultQuery?: string }) {
 
       {!roleNav ? (
         <div className="hidden border-t border-putih/10 bg-hutan-tua md:block">
-          <nav
-            aria-label="Jelajahi katalog"
-            className="mx-auto flex max-w-[1200px] items-center gap-1 px-4 py-1"
-          >
-            <Link
-              href="/cari"
-              aria-current={isCari ? "page" : undefined}
-              className={navLinkClass}
-            >
-              Semua barang
-            </Link>
-            <Link href="/cari?sort=terlaris" className={navLinkClass}>
-              Terlaris
-            </Link>
-            <Link href="/cari?sort=harga-asc" className={navLinkClass}>
-              Termurah
-            </Link>
-            <Link
-              href="/jualan"
-              aria-current={
-                pathname.startsWith("/jualan") ? "page" : undefined
-              }
-              className={navLinkClass}
-            >
-              Buka toko
-            </Link>
-            <Link
-              href="/lacak"
-              aria-current={isPesanan ? "page" : undefined}
-              className={navLinkClass}
-            >
-              Lacak pesanan
-            </Link>
-          </nav>
+          <Suspense fallback={<CatalogNavFallback />}>
+            <CatalogNav />
+          </Suspense>
         </div>
       ) : null}
 

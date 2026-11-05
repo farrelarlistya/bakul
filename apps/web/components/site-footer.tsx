@@ -40,6 +40,11 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/lacak" className={linkClass}>
+                  Lacak paket
+                </Link>
+              </li>
+              <li>
                 <Link href="/inbox" className={linkClass}>
                   Inbox
                 </Link>
