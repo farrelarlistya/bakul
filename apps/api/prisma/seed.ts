@@ -1177,6 +1177,9 @@ async function seed(): Promise<void> {
   console.log(
     `Transaksi: ${orderCount} pesanan, ${ledgerCount} jurnal. Riwayat transaksi memang kosong.`,
   );
+  console.log(
+    "Akun seed memakai OTP 123456 selama DEMO_MODE=true, termasuk saat OTP_DELIVERY=whatsapp.",
+  );
 
   if (
     userCount !== 10 ||

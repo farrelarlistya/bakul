@@ -666,3 +666,4 @@ git push
 | 4 Nov 2026 | Sprint 13 selesai: 32 foto katalog dari Wikimedia Commons, 8 toko satu kategori, 10 akun demo, seed tanpa riwayat transaksi, blok janji di Beranda dihapus; tag `m10-selesai` |
 | 4 Nov 2026 | Beranda dan header dirombak mengikuti `referensiRedesign.webp`: palet hijau tua/kuning/krem, header dua baris, bento hero, band katalog hijau, footer hijau tua; tanpa elemen promo |
 | 4 Nov 2026 | Pasca-M10: daftar pembeli tanpa toko, OTP WhatsApp opsional via Fonnte, section Toko pilihan/Baru di Bakul/Jelajahi kota, dan `npm run share` Cloudflare; Playwright dan axe-core dihapus dari repo |
+| 5 Nov 2026 | Perbaikan pasca-M10: urutan Terlaris/Termurah di halaman Cari berfungsi, nav katalog ditengahkan tanpa Buka toko/Lacak pesanan, halaman `/lacak` untuk memasukkan resi, dan OTP akun seed selalu `123456` saat `DEMO_MODE=true` |

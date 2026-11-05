@@ -14,7 +14,8 @@ Buka `http://localhost:3000`. Jika data transaksi sudah penuh, jalankan
 `npm run demo:reset` lalu mulai ulang `npm run dev` agar jam simulasi dimulai
 dari waktu sekarang.
 
-Akun demo:
+Akun seed memakai kode **123456** selama `DEMO_MODE=true`, termasuk bila
+`OTP_DELIVERY=whatsapp`. Nomor seed tidak dikirim ke WhatsApp.
 
 | Peran | Nomor HP | Kode |
 | :--- | :--- | :--- |

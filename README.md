@@ -10,8 +10,8 @@ Repo ini sudah mencapai **M10 — aplikasi lengkap untuk demo**. Versi paket
 ## Apa yang sudah jalan
 
 - Login nomor HP + OTP, tanpa email/KTP; sesi aman dengan refresh cookie.
-- OTP WhatsApp asli sebagai opsi demo internal lewat Fonnte; default tetap kode
-  demo `123456`.
+- OTP WhatsApp asli sebagai opsi demo internal lewat Fonnte; akun seed tetap
+  memakai kode demo `123456` selama `DEMO_MODE=true`.
 - Daftar akun pembeli tanpa diminta membuka toko; buka toko terpisah di
   `/jualan`.
 - Beranda dengan hero, kategori, toko pilihan, barang baru, jelajahi kota, dan
@@ -54,7 +54,7 @@ Repo ini sudah mencapai **M10 — aplikasi lengkap untuk demo**. Versi paket
 | Daftar pesanan | `/pesanan` |
 | Detail pesanan | `/pesanan/:id` |
 | Pusat komplain | `/pesanan/:id/komplain` |
-| Lacak paket | `/lacak/:awb` |
+| Lacak paket | `/lacak` dan `/lacak/:awb` |
 | Buka toko 3 langkah | `/jualan` |
 | Kelola barang | `/jualan/barang` |
 | Pesanan masuk penjual | `/jualan/pesanan` |
@@ -68,8 +68,9 @@ Repo ini sudah mencapai **M10 — aplikasi lengkap untuk demo**. Versi paket
 
 ## Akun demo
 
-Kode OTP selalu **123456** saat `OTP_DELIVERY=demo` (nilai default bila
-`DEMO_MODE=true`).
+Akun seed di bawah selalu memakai kode **123456** selama `DEMO_MODE=true`,
+termasuk saat `OTP_DELIVERY=whatsapp`. Nomor seed memakai awalan `0812000000`
+dan tidak dikirim ke WhatsApp. Nomor lain mengikuti `OTP_DELIVERY`.
 
 Pembeli baru bisa mendaftar lewat `/masuk` → **Daftar**. Registrasi ini hanya
 membuat akun pembeli tanpa toko; untuk berjualan, buka `/jualan` setelah punya

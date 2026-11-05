@@ -31,6 +31,7 @@ import {
 import { NOTIFIER } from "../notifications/notifier.token";
 import { maskPhone } from "../notifications/notifier.utils";
 import { PrismaService } from "../prisma/prisma.service";
+import { DEMO_OTP_CODE, isSeedDemoPhone } from "./demo-accounts";
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 const OTP_WINDOW_MS = 10 * 60 * 1000;
@@ -109,13 +110,15 @@ export class AuthService {
       data: { consumedAt: now },
     });
 
-    const otpDelivery =
-      this.config.get<string>("OTP_DELIVERY") ??
-      (this.config.get<string>("DEMO_MODE") === "true" ? "demo" : "whatsapp");
+    const demoMode = this.config.get<string>("DEMO_MODE") === "true";
+    const seedDemoAccount = demoMode && isSeedDemoPhone(phone);
+    const otpDelivery = seedDemoAccount
+      ? "demo"
+      : (this.config.get<string>("OTP_DELIVERY") ?? (demoMode ? "demo" : "whatsapp"));
     const realDelivery = otpDelivery === "whatsapp";
     const code = realDelivery
       ? randomInt(0, 1_000_000).toString().padStart(6, "0")
-      : "123456";
+      : DEMO_OTP_CODE;
     const expiresAt = new Date(now.getTime() + OTP_TTL_MS);
 
     const otp = await this.prisma.otpCode.create({
